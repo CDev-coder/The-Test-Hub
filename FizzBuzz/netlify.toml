@@ -1,0 +1,4 @@
+[build]
+  base = "The-Hub/FizzBuzz"
+  publish = "The-Hub/FizzBuzz/build"
+  command = "npm run build"
