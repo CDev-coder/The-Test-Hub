@@ -1,4 +1,4 @@
 [build]
-  base = "The-Hub/FizzBuzz"
-  publish = "The-Hub/FizzBuzz/build"
-  command = "npm run build"
+  base = "The-Hub/FizzBuzz"       # Path to where package.json is located
+  publish = "The-Hub/FizzBuzz/dist"  # Folder created by npm run build (dist in your case)
+  command = "npm run build"       # Build command to generate production files
