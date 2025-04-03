@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 #root {
   text-align: center;
   width: 100%;
@@ -9,18 +13,16 @@
     height: 100vh;
 }
 
-.shellTitle {
+.titleArea {
   margin: 20px auto 0;
   padding: 20px;
   border: 1px solid #ccc;
   border-radius: 8px;
-  text-align: center;
   width: fit-content;
-}
-
-.inputFields {
-  display: block;
-  margin-bottom: '8px';
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
 }
 
 .imageElement{

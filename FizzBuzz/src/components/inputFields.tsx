@@ -47,7 +47,7 @@ const TextInput: React.FC = () => {
   };
 
   return (
-    <div className="inputFields">
+    <div className="inputFields pt-6">
       <label htmlFor={textId}>Enter Total Number: </label>
       <input
         className="textInput"

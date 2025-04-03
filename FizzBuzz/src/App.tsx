@@ -8,7 +8,7 @@ function App() {
     <>
       <Provider store={store}>
         <div className="container">
-          <Shell title={"Let's Fizz or Buzz "} />
+          <Shell />
         </div>
       </Provider>
     </>
