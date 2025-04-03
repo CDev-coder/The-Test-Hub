@@ -7,3 +7,6 @@
 # If you're using functions
 [functions]
   directory = "FizzBuzz/functions"  # if you have Netlify functions
+  
+[dev]
+  framework = "#none"  # Disable framework detection
