@@ -1,4 +1,8 @@
 [build]
-  base = "The-Test-Hub/FizzBuzz"         # Correct path to where package.json is located
-  publish = "The-Test-Hub/FizzBuzz/dist"  # Folder to publish after npm run build
-  command = "npm run build"         # Build command to generate dist/
+  base = "FizzBuzz"
+  publish = "dist"  # or whatever your build output directory is
+  command = "npm run build"  # or your build command
+
+# If you're using functions
+[functions]
+  directory = "FizzBuzz/functions"  # if you have Netlify functions
