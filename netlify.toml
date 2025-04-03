@@ -2,7 +2,8 @@
   base = "FizzBuzz"
   publish = "dist"  # or whatever your build output directory is
   command = "npm run build"  # or your build command
-
+  environment = { NETLIFY_VERBOSE = "true" }
+ 
 # If you're using functions
 [functions]
   directory = "FizzBuzz/functions"  # if you have Netlify functions
