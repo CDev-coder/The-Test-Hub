@@ -12,7 +12,7 @@ const Shell: React.FC<ShellProps> = () => {
           Fizz
         </h1>
         <h1 className="text-4xl font-bold">or</h1>
-        <h1 className="text-4xl font-bold text-blue-400">Buzz</h1>
+        <h1 className="text-4xl font-bold text-red-600">Buzz</h1>
       </div>
       <TextInput />
       <div className="displayArea">

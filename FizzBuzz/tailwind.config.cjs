@@ -2,6 +2,7 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
+    "./index.html",
     './src/**/*.{js,jsx,ts,tsx}', // Ensure this is correct based on your file structure
   ],
   theme: {
@@ -9,7 +10,7 @@ module.exports = {
       keyframes: {
         fizz: {
           '0%, 100%': { opacity: 1, transform: 'translateY(0) scale(1)' },
-          '50%': { opacity: 0.5, transform: 'translateY(-5px) scale(1.05)' },
+          '50%': { opacity: 0.5, transform: 'translateY(-10px) scale(1.05)' },
         },
       },
       animation: {
