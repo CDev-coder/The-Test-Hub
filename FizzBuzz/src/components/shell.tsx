@@ -8,9 +8,9 @@ const Shell: React.FC<ShellProps> = () => {
   return (
     <>
       <div className="titleArea">
-        <h1 className="text-4xl font-bold text-red-600 animate-pulse">Fizz</h1>
+        <h1 className="text-4xl font-bold text-red-600 animate-wiggle">Fizz</h1>
         <h1 className="text-4xl font-bold">or</h1>
-        <h1 className="text-4xl font-bold text-yellow-600 animate-bounce">
+        <h1 className="text-4xl font-bold text-yellow-600 animate-pulse">
           Buzz
         </h1>
       </div>
