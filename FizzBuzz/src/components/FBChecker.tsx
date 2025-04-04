@@ -15,7 +15,7 @@ const FBChecker: React.FC = () => {
   ): JSX.Element | null => {
     if (copyNumValue > 0) {
       return (
-        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+        <div className="displayArea pt-4">
           {Array.from({ length: copyNumValue }, (_, index) => {
             const adjustedIndex = index + 1; // Start from 1 instead of 0
             const FizzingOrBuzzing = adjustedIndex % copyFBValue;
@@ -24,7 +24,7 @@ const FBChecker: React.FC = () => {
               return (
                 <img
                   key={index}
-                  className="imageElement animate-pulse"
+                  className="imageElement animate-bounce"
                   src={buzzImage}
                   alt={`Buzz Image ${index + 1}`}
                 />
@@ -33,7 +33,7 @@ const FBChecker: React.FC = () => {
               return (
                 <img
                   key={index}
-                  className="imageElement animate-bounce"
+                  className="imageElement animate-pulse"
                   src={fizzImage}
                   alt={`Fizz Image ${index + 1}`}
                 />
