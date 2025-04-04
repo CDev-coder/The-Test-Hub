@@ -24,7 +24,7 @@ const FBChecker: React.FC = () => {
               return (
                 <img
                   key={index}
-                  className="imageElement"
+                  className="imageElement animate-pulse"
                   src={buzzImage}
                   alt={`Buzz Image ${index + 1}`}
                 />
@@ -33,7 +33,7 @@ const FBChecker: React.FC = () => {
               return (
                 <img
                   key={index}
-                  className="imageElement"
+                  className="imageElement animate-bounce"
                   src={fizzImage}
                   alt={`Fizz Image ${index + 1}`}
                 />

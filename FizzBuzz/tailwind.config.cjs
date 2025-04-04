@@ -9,12 +9,33 @@ module.exports = {
     extend: {
       keyframes: {
         fizz: {
-          '0%, 100%': { opacity: 1, transform: 'translateY(0) scale(1)' },
-          '50%': { opacity: 0.5, transform: 'translateY(-10px) scale(1.05)' },
+          '0%, 100%': { 
+            transform: 'translateY(0) rotate(0deg)', 
+            opacity: 1 
+          },
+          '25%': { 
+            transform: 'translateY(-5px) rotate(2deg)', 
+            opacity: 0.8 
+          },
+          '50%': { 
+            transform: 'translateY(0) rotate(0deg)', 
+            opacity: 1 
+          },
+          '75%': { 
+            transform: 'translateY(3px) rotate(-2deg)', 
+            opacity: 0.9 
+          },
+        },
+        buzz: {
+          '0%, 100%': { transform: 'translateX(0)' },
+          '25%': { transform: 'translateX(-5px)' },
+          '50%': { transform: 'translateX(5px)' },
+          '75%': { transform: 'translateX(-5px)' },
         },
       },
       animation: {
-        fizz: 'fizz 0.5s infinite alternate ease-in-out',
+        fizz: 'fizz 0.5s infinite alternate',
+        buzz: 'buzz 2.0s ease-in-out infinite',
       },
     },
   },
