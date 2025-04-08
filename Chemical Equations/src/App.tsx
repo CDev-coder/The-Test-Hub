@@ -7,11 +7,13 @@ import { MoleculeItem, ReactionZoneItem } from "./types";
 
 const SNAP_DISTANCE = 30;
 const MOLECULE_SIZE = 60;
+const startingY = 15;
+
 const SPAWN_POINTS = {
-  H: { x: 50, y: 50 },
-  O: { x: 150, y: 50 },
-  C: { x: 250, y: 50 },
-  N: { x: 350, y: 50 },
+  H: { x: 50, y: startingY, name: "hydrogen" },
+  O: { x: 150, y: startingY, name: "oxygen" },
+  C: { x: 250, y: startingY, name: "carbon" },
+  N: { x: 350, y: startingY, name: "nitrogen" },
 };
 
 const combinationRules = [
@@ -200,12 +202,11 @@ export default function App() {
         id="parentDiv"
         ref={containerRef}
         style={{
-          padding: "20px",
+          padding: "2px",
           fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
           position: "relative",
           height: "100vh",
           backgroundColor: "#f8f9fa",
-          overflow: "hidden",
         }}
       >
         <h1 style={{ color: "#2c3e50", marginBottom: "24px" }}>
@@ -216,7 +217,7 @@ export default function App() {
         </h1>
 
         <div id="workSpaceAreaDiv">
-          <div style={{ flex: 1 }}>
+          <div id="draggableAreaDiv">
             <h3 style={{ color: "#34495e", marginBottom: "12px" }}>
               Molecule Section
             </h3>
@@ -224,11 +225,11 @@ export default function App() {
               id="moleculeSectionDiv"
               style={{
                 position: "relative",
-                height: "150px",
+                minHeight: "85px",
                 backgroundColor: "white",
                 borderRadius: "8px",
                 boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
-                padding: "20px",
+                padding: "15px",
               }}
             >
               {molecules.map((molecule) => (
@@ -253,16 +254,16 @@ export default function App() {
                   key={formula}
                   style={{
                     position: "absolute",
-                    left: `${point.x - 20}px`,
-                    top: `${point.y + MOLECULE_SIZE + 5}px`,
+                    left: `${point.x + 8}px`,
+                    top: `${point.y + MOLECULE_SIZE + 14}px`,
                     fontSize: "12px",
                     color: "#7f8c8d",
                     backgroundColor: "#ecf0f1",
-                    padding: "2px 6px",
+                    padding: "0px 3px",
                     borderRadius: "4px",
                   }}
                 >
-                  {formula} Spawn
+                  {point.name}
                 </div>
               ))}
             </div>

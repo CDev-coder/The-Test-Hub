@@ -9,8 +9,8 @@ interface ReactionZoneProps {
 }
 
 const GRID_CELL_SIZE = 70; // Size of each grid cell
-const GRID_COLUMNS = 4; // Number of columns
-const GRID_ROWS = 3; // Number of rows
+const GRID_COLUMNS = 15; // Number of columns
+const GRID_ROWS = 10; // Number of rows
 
 export const ReactionZone = ({
   reaction,
@@ -44,6 +44,33 @@ export const ReactionZone = ({
 
   drop(gridRef);
 
+  const handleOnEnter = (e: { currentTarget: any }) => {
+    // Access the button DOM node
+    const button = e.currentTarget;
+    console.log("handleOnEnter button ", button);
+
+    const lastChild = button.lastElementChild as HTMLElement;
+    if (lastChild) {
+      lastChild.style.visibility = "visible";
+    }
+
+    // Read a custom attribute
+    //const customAttr = button.getAttribute("data-something");
+    //console.log("Hovered button attribute:", customAttr);
+
+    // Read computed or inline styles
+    //console.log("Background color:", button.style.backgroundColor);
+  };
+
+  const handleOnLeave = (e: { currentTarget: any }) => {
+    const button = e.currentTarget;
+    //console.log("handleOnLeave:", button);
+    const lastChild = button.lastElementChild as HTMLElement;
+    if (lastChild) {
+      lastChild.style.visibility = "hidden";
+    }
+  };
+
   return (
     <div
       style={{
@@ -56,15 +83,14 @@ export const ReactionZone = ({
       <h3 style={{ marginTop: 0, marginBottom: "12px", color: "#333" }}>
         Reaction Workspace
       </h3>
-
-      {/* Grid Container */}
       <div
+        className="Grid Container"
         ref={gridRef}
         style={{
           display: "grid",
           gridTemplateColumns: `repeat(${GRID_COLUMNS}, ${GRID_CELL_SIZE}px)`,
           gridTemplateRows: `repeat(${GRID_ROWS}, ${GRID_CELL_SIZE}px)`,
-          gap: "8px",
+          gap: "2px",
           marginBottom: "16px",
         }}
       >
@@ -80,7 +106,7 @@ export const ReactionZone = ({
               style={{
                 width: GRID_CELL_SIZE,
                 height: GRID_CELL_SIZE,
-                border: "1px solid #ddd",
+                border: "1px solid #000000",
                 borderRadius: "4px",
                 display: "flex",
                 alignItems: "center",
@@ -89,6 +115,8 @@ export const ReactionZone = ({
                 backgroundColor: item ? "#e6f7ff" : "white",
                 transition: "all 0.2s ease",
               }}
+              onMouseEnter={handleOnEnter}
+              onMouseLeave={handleOnLeave}
             >
               {item && (
                 <>
@@ -96,8 +124,8 @@ export const ReactionZone = ({
                   <button
                     style={{
                       position: "absolute",
-                      top: "-8px",
-                      right: "-8px",
+                      top: "0px",
+                      right: "3px",
                       background: "#ff4d4f",
                       color: "white",
                       border: "none",
@@ -110,6 +138,7 @@ export const ReactionZone = ({
                       alignItems: "center",
                       justifyContent: "center",
                       boxShadow: "0 1px 2px rgba(0,0,0,0.2)",
+                      visibility: "visible",
                     }}
                     onClick={(e) => {
                       e.stopPropagation();
