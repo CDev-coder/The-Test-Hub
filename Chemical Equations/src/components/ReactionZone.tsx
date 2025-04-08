@@ -1,139 +1,154 @@
 import { useDrop } from "react-dnd";
 import { useRef } from "react";
-import { MoleculeItem } from "../types";
+import { MoleculeItem, ReactionZoneItem } from "../types";
 
 interface ReactionZoneProps {
-  reaction: string[];
-  onDrop: (item: MoleculeItem) => void;
-  onReturnToSpawn: (item: MoleculeItem) => void;
+  reaction: ReactionZoneItem[];
+  onDrop: (item: MoleculeItem, col: number, row: number) => void;
+  onRemove: (col: number, row: number) => void;
 }
+
+const GRID_CELL_SIZE = 70; // Size of each grid cell
+const GRID_COLUMNS = 4; // Number of columns
+const GRID_ROWS = 3; // Number of rows
 
 export const ReactionZone = ({
   reaction,
   onDrop,
-  onReturnToSpawn,
+  onRemove,
 }: ReactionZoneProps) => {
-  const divRef = useRef<HTMLDivElement>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
 
-  const [{ isOver, canDrop }, drop] = useDrop(() => ({
+  const [, drop] = useDrop(() => ({
     accept: "MOLECULE",
-    drop: (item: MoleculeItem) => {
-      onDrop(item);
+    drop: (item: MoleculeItem, monitor) => {
+      const dropOffset = monitor.getClientOffset();
+      if (!dropOffset || !gridRef.current) return;
+
+      const gridRect = gridRef.current.getBoundingClientRect();
+
+      // Calculate position relative to grid's top-left corner
+      const relativeX = dropOffset.x - gridRect.left;
+      const relativeY = dropOffset.y - gridRect.top;
+
+      // Calculate grid position (0-based index)
+      const col = Math.floor(relativeX / GRID_CELL_SIZE);
+      const row = Math.floor(relativeY / GRID_CELL_SIZE);
+
+      // Ensure position is within bounds
+      if (col >= 0 && col < GRID_COLUMNS && row >= 0 && row < GRID_ROWS) {
+        onDrop(item, col, row);
+      }
     },
-    hover: (item: MoleculeItem) => {
-      console.log("hover: " + item);
-      // Optional: Add visual feedback while hovering
-    },
-    collect: (monitor) => ({
-      isOver: !!monitor.isOver(),
-      canDrop: !!monitor.canDrop(),
-    }),
   }));
 
-  drop(divRef);
-
-  const handleDoubleClick = () => {
-    // Return all molecules to spawn on double click
-    reaction.forEach((formula, index) => {
-      onReturnToSpawn({
-        id: `return-${index}-${Date.now()}`,
-        formula,
-        x: 0,
-        y: 0,
-        spawnPoint: getSpawnPointForFormula(formula),
-      });
-    });
-  };
-
-  // Helper to determine spawn point by formula
-  const getSpawnPointForFormula = (formula: string) => {
-    const baseFormula = formula.replace(/[₀₁₂₃₄₅₆₇₈₉]/g, "");
-    return (
-      Object.entries(SPAWN_POINTS).find(([f]) => f === baseFormula)?.[1] || {
-        x: 50,
-        y: 50,
-      } // Default spawn
-    );
-  };
+  drop(gridRef);
 
   return (
     <div
-      ref={divRef}
-      onDoubleClick={handleDoubleClick}
       style={{
-        position: "absolute",
-        right: "20px",
-        bottom: "20px",
-        minHeight: "150px",
-        minWidth: "250px",
-        border: `2px dashed ${
-          isOver ? "#4CAF50" : canDrop ? "#FFC107" : "#666"
-        }`,
-        backgroundColor: isOver
-          ? "rgba(76, 175, 80, 0.1)"
-          : "rgba(255, 255, 255, 0.9)",
-        padding: "15px",
+        padding: "16px",
+        backgroundColor: "#f8f9fa",
         borderRadius: "8px",
-        transition: "all 0.3s ease",
-        cursor: "pointer",
+        boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
       }}
-      title="Double click to clear"
     >
-      <h3 style={{ marginTop: 0 }}>Reaction Zone</h3>
-      <p>Drag molecules here or double-click to reset</p>
+      <h3 style={{ marginTop: 0, marginBottom: "12px", color: "#333" }}>
+        Reaction Workspace
+      </h3>
 
+      {/* Grid Container */}
       <div
+        ref={gridRef}
         style={{
-          marginTop: "10px",
-          minHeight: "50px",
-          padding: "10px",
-          backgroundColor: "#f9f9f9",
-          borderRadius: "4px",
+          display: "grid",
+          gridTemplateColumns: `repeat(${GRID_COLUMNS}, ${GRID_CELL_SIZE}px)`,
+          gridTemplateRows: `repeat(${GRID_ROWS}, ${GRID_CELL_SIZE}px)`,
+          gap: "8px",
+          marginBottom: "16px",
         }}
       >
-        {reaction.length > 0 ? (
-          <>
-            <div style={{ fontSize: "1.2em", marginBottom: "5px" }}>
-              {reaction.join(" + ")} → ?
-            </div>
-            <button
-              onClick={() => {
-                reaction.forEach((formula, index) => {
-                  onReturnToSpawn({
-                    id: `return-${index}-${Date.now()}`,
-                    formula,
-                    x: 0,
-                    y: 0,
-                    spawnPoint: getSpawnPointForFormula(formula),
-                  });
-                });
-              }}
+        {/* Render all grid cells */}
+        {Array.from({ length: GRID_ROWS * GRID_COLUMNS }).map((_, index) => {
+          const col = index % GRID_COLUMNS;
+          const row = Math.floor(index / GRID_COLUMNS);
+          const item = reaction.find((i) => i.col === col && i.row === row);
+
+          return (
+            <div
+              key={`${row}-${col}`}
               style={{
-                padding: "5px 10px",
-                fontSize: "0.8em",
-                backgroundColor: "#f44336",
-                color: "white",
-                border: "none",
+                width: GRID_CELL_SIZE,
+                height: GRID_CELL_SIZE,
+                border: "1px solid #ddd",
                 borderRadius: "4px",
-                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                position: "relative",
+                backgroundColor: item ? "#e6f7ff" : "white",
+                transition: "all 0.2s ease",
               }}
             >
-              Clear Reaction
-            </button>
-          </>
-        ) : (
-          <div style={{ color: "#999", fontStyle: "italic" }}>
-            No molecules added yet
-          </div>
-        )}
+              {item && (
+                <>
+                  <span style={{ fontSize: "1.1em" }}>{item.formula}</span>
+                  <button
+                    style={{
+                      position: "absolute",
+                      top: "-8px",
+                      right: "-8px",
+                      background: "#ff4d4f",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "50%",
+                      width: "20px",
+                      height: "20px",
+                      fontSize: "12px",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      boxShadow: "0 1px 2px rgba(0,0,0,0.2)",
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onRemove(col, row);
+                    }}
+                    aria-label={`Remove ${item.formula}`}
+                  >
+                    ×
+                  </button>
+                </>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Equation Preview */}
+      <div
+        style={{
+          padding: "12px",
+          backgroundColor: "#f0f0f0",
+          borderRadius: "4px",
+          textAlign: "center",
+        }}
+      >
+        <div style={{ fontSize: "0.9em", color: "#666", marginBottom: "4px" }}>
+          Current Equation:
+        </div>
+        <div style={{ fontSize: "1.2em", fontWeight: 500 }}>
+          {reaction.length > 0 ? (
+            <>
+              {reaction.map((item) => item.formula).join(" + ")}
+              <span style={{ margin: "0 8px", color: "#999" }}>→</span>?
+            </>
+          ) : (
+            <span style={{ color: "#999" }}>Empty</span>
+          )}
+        </div>
       </div>
     </div>
   );
-};
-
-// Define spawn points (should match your App.tsx)
-const SPAWN_POINTS = {
-  H: { x: 50, y: 50 },
-  O: { x: 150, y: 50 },
-  C: { x: 250, y: 50 },
 };
