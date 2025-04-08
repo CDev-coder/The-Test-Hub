@@ -197,6 +197,7 @@ export default function App() {
   return (
     <DndProvider backend={HTML5Backend}>
       <div
+        id="parentDiv"
         ref={containerRef}
         style={{
           padding: "20px",
@@ -208,26 +209,28 @@ export default function App() {
         }}
       >
         <h1 style={{ color: "#2c3e50", marginBottom: "24px" }}>
+          <a href="">
+            <img className="chemLogo" src="./chemical-formula.svg" />
+          </a>
           Chemical Equation Builder
         </h1>
 
-        <div style={{ display: "flex", gap: "24px" }}>
-          {/* Workspace Area */}
+        <div id="workSpaceAreaDiv">
           <div style={{ flex: 1 }}>
             <h3 style={{ color: "#34495e", marginBottom: "12px" }}>
-              Workspace
+              Molecule Section
             </h3>
             <div
+              id="moleculeSectionDiv"
               style={{
                 position: "relative",
-                height: "400px",
+                height: "150px",
                 backgroundColor: "white",
                 borderRadius: "8px",
                 boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
                 padding: "20px",
               }}
             >
-              {/* Render all molecules */}
               {molecules.map((molecule) => (
                 <Molecule
                   key={molecule.id}
@@ -245,8 +248,6 @@ export default function App() {
                   }}
                 />
               ))}
-
-              {/* Spawn point labels */}
               {Object.entries(SPAWN_POINTS).map(([formula, point]) => (
                 <div
                   key={formula}
@@ -266,9 +267,7 @@ export default function App() {
               ))}
             </div>
           </div>
-
-          {/* Reaction Zone */}
-          <div style={{ width: "350px" }}>
+          <div id="reactionZoneDiv" style={{ width: "auto" }}>
             <ReactionZone
               reaction={reactionGrid}
               onDrop={handleReactionZoneDrop}
