@@ -210,7 +210,7 @@ export default function App() {
         }}
       >
         <h1 style={{ color: "#2c3e50", marginBottom: "24px" }}>
-          <a href="">
+          <a href="" style={{ marginRight: "5px" }}>
             <img className="chemLogo" src="./chemical-formula.svg" />
           </a>
           Chemical Equation Builder

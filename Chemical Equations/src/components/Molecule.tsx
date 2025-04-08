@@ -45,6 +45,7 @@ export const Molecule = ({
 
   return (
     <div
+      className="moleculeDiv"
       ref={divRef}
       style={{
         position: "absolute",
@@ -70,10 +71,12 @@ export const Molecule = ({
         justifyContent: "center",
         fontSize: parentId ? "0.8em" : "1em",
         boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+        color: formula + "_Image" == "C_Image" ? "white" : "",
         ...style,
       }}
       data-testid={`molecule-${formula}`}
     >
+      <div className={"moleculeImage " + formula + "_Image"} />
       {formula}
     </div>
   );

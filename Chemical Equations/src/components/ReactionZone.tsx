@@ -120,7 +120,10 @@ export const ReactionZone = ({
             >
               {item && (
                 <>
-                  <span style={{ fontSize: "1.1em" }}>{item.formula}</span>
+                  <div className={"dropImage " + item.formula + "_Image"} />
+                  <span className={"dropSpan " + item.formula + "_Text"}>
+                    {item.formula}
+                  </span>
                   <button
                     style={{
                       position: "absolute",
