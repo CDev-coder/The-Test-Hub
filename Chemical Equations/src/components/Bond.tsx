@@ -1,10 +1,11 @@
 import { useDrag, useDrop } from "react-dnd";
 import { useRef } from "react";
-import { MoleculeProps, MoleculeItem } from "../types";
+import { BondProps, BondItem } from "../types";
+import SingleLine from "./SingleLine";
 
-export const Molecule = ({
+export const Bond = ({
   id,
-  formula,
+  bondType,
   x,
   y,
   width = 60,
@@ -15,12 +16,12 @@ export const Molecule = ({
   onDetach,
   onReturnToSpawn,
   style,
-}: MoleculeProps) => {
+}: BondProps) => {
   const divRef = useRef<HTMLDivElement>(null);
 
   const [{ isDragging }, drag] = useDrag(() => ({
-    type: "MOLECULE",
-    item: { id, formula, x, y, width, height, parentId, spawnPoint },
+    type: "BOND",
+    item: { id, bondType, x, y, width, height, parentId, spawnPoint },
     end: (item, monitor) => {
       const didDrop = monitor.didDrop();
       if (!didDrop) {
@@ -37,8 +38,8 @@ export const Molecule = ({
   }));
 
   const [, drop] = useDrop(() => ({
-    accept: "MOLECULE",
-    drop: (item: MoleculeItem, monitor) => onDrop(item, monitor),
+    accept: "BOND",
+    drop: (item: BondItem, monitor) => onDrop(item, monitor),
   }));
 
   drag(drop(divRef));
@@ -46,8 +47,8 @@ export const Molecule = ({
   return (
     <>
       <div
-        className="moleculeDiv"
-        id={"moleculeDiv_" + formula}
+        className="bondDiv"
+        id={"bondDiv_" + bondType}
         ref={divRef}
         style={{
           width: `${width}px`,
@@ -63,28 +64,16 @@ export const Molecule = ({
           transform: isDragging ? "scale(1.1)" : "scale(1)",
           transition: "all 0.2s ease",
           fontSize: parentId ? "0.8em" : "1em",
-          color: formula + "_Image" == "C_Image" ? "white" : "",
+          color: bondType + "_Image" == "C_Image" ? "white" : "",
           ...style,
         }}
-        data-testid={`molecule-${formula}`}
+        data-testid={`bond-${bondType}`}
       >
-        <div className={"moleculeImage " + formula + "_Image"} />
-        <div className="moleculeLabel">{formula}</div>
-        <div
-          key={formula}
-          style={{
-            position: "absolute",
-            left: `${width / 6}px`,
-            top: `${height + 14}px`,
-            fontSize: "12px",
-            color: "#7f8c8d",
-            backgroundColor: "#ecf0f1",
-            padding: "0px 3px",
-            borderRadius: "4px",
-          }}
-        >
-          {spawnPoint && spawnPoint.name}
-        </div>
+        <SingleLine
+          lineType={bondType}
+          parentWidth={width}
+          parentHeight={height}
+        />
       </div>
     </>
   );

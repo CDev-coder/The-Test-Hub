@@ -1,17 +1,21 @@
 #root{
     -webkit-touch-callout: none;
-        /* iOS Safari */
-        -webkit-user-select: none;
-        /* Safari */
-        -khtml-user-select: none;
-        /* Konqueror HTML */
-        -moz-user-select: none;
-        /* Old versions of Firefox */
-        -ms-user-select: none;
-        /* Internet Explorer/Edge */
-        user-select: none;
-        /* Non-prefixed version, currently
-                                            supported by Chrome, Edge, Opera and Firefox */
+    /* iOS Safari */
+    -webkit-user-select: none;
+    /* Safari */
+    -khtml-user-select: none;
+    /* Konqueror HTML */
+    -moz-user-select: none;
+    /* Old versions of Firefox */
+    -ms-user-select: none;
+    /* Internet Explorer/Edge */
+    user-select: none;
+}
+
+.parentDiv{
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    position: relative;
+    height: 100vh;
 }
 
 .chemLogo {
@@ -39,6 +43,54 @@
         -webkit-transform: rotate(360deg);
         transform: rotate(360deg);
     }
+}
+
+.draggableAreaDiv{
+    display: flex;
+    padding: 16px;
+    gap: 50px;
+    justify-content: center;
+}
+
+
+.moleculeSectionDiv{
+    display: inline-block;
+    /* So it only grows to fit its children */
+    position: relative;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 2px 10px;
+    padding: 15px;
+    min-height: 90px;
+    /* enough space for molecules + labels */
+}
+
+.moleculeWrapper{
+    display: flex;
+    gap: 40px;
+}
+
+.moleculeDiv {
+    padding: 4px;
+    border-radius: 4px;
+    cursor: move;
+    opacity: 1;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 2px 4px;
+    position: relative;
+    /* not absolute */
+    flex-shrink: 0;
+}
+
+.moleculeLabel {
+    font-size: 12px;
+    padding: 0px 3px;
+    border-radius: 4px;
+    text-align: center;
+    margin-top: 4px;
 }
 
 .moleculeImage{
@@ -82,4 +134,39 @@
 
 .C_Text{
     color: white;
+}
+
+.bondSectionDiv {
+    display: inline-block;
+    /* So it only grows to fit its children */
+    position: relative;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 2px 10px;
+    padding: 15px;
+    min-height: 90px;
+    /* enough space for molecules + labels */
+}
+
+.bondWrapper {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    /* 3 columns */
+    gap: 16px;
+    /* spacing between items */
+    justify-items: center;
+    /* center each item horizontally */
+    align-items: center;
+    /* center each item vertically */
+}
+
+.SingleLine {
+    position: absolute;
+    transform-origin: center center;
+}
+
+.reactionZoneDiv{
+    justify-content: center;
+    display: grid;
+    width: auto;
 }

@@ -20,7 +20,7 @@ export const ReactionZone = ({
   const gridRef = useRef<HTMLDivElement>(null);
 
   const [, drop] = useDrop(() => ({
-    accept: "MOLECULE",
+    accept: ["MOLECULE", "BOND"],
     drop: (item: MoleculeItem, monitor) => {
       const dropOffset = monitor.getClientOffset();
       if (!dropOffset || !gridRef.current) return;
@@ -47,7 +47,7 @@ export const ReactionZone = ({
   const handleOnEnter = (e: { currentTarget: any }) => {
     // Access the button DOM node
     const button = e.currentTarget;
-    console.log("handleOnEnter button ", button);
+    //console.log("handleOnEnter button ", button);
 
     const lastChild = button.lastElementChild as HTMLElement;
     if (lastChild) {
@@ -84,7 +84,7 @@ export const ReactionZone = ({
         Reaction Workspace
       </h3>
       <div
-        className="Grid Container"
+        className="GridContainer"
         ref={gridRef}
         style={{
           display: "grid",

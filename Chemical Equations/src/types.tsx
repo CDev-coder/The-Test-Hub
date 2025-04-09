@@ -1,4 +1,5 @@
 export interface MoleculeItem {
+  mapIndex?: number;
   id: string;
   formula: string;
   x: number;
@@ -7,7 +8,21 @@ export interface MoleculeItem {
   height?: number;
   parentId?: string | null;
   attachedMolecules?: MoleculeItem[];
-  spawnPoint?: { x: number; y: number };
+  spawnPoint?: { x: number; y: number; name: string };
+  snappedToGrid?: { col: number; row: number }; // Track grid position
+}
+
+export interface BondItem {
+  mapIndex?: number;
+  id: string;
+  bondType: string;
+  x: number;
+  y: number;
+  width?: number;
+  height?: number;
+  parentId?: string | null;
+  attachedMolecules?: BondItem[];
+  spawnPoint?: { x: number; y: number; name: string };
   snappedToGrid?: { col: number; row: number }; // Track grid position
 }
 
@@ -27,5 +42,12 @@ export interface MoleculeProps extends MoleculeItem {
   onDrop: (item: MoleculeItem, monitor: any) => void;
   onDetach: (item: MoleculeItem) => void;
   onReturnToSpawn: (item: MoleculeItem) => void;
+  style?: React.CSSProperties;
+}
+
+export interface BondProps extends BondItem {
+  onDrop: (item: BondItem, monitor: any) => void;
+  onDetach: (item: BondItem) => void;
+  onReturnToSpawn: (item: BondItem) => void;
   style?: React.CSSProperties;
 }
