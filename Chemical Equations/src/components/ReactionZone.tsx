@@ -1,11 +1,13 @@
 import { useDrop } from "react-dnd";
 import { useRef } from "react";
 import { MoleculeItem, ReactionZoneItem } from "../types";
+import BondLine from "./BondLine";
 
 interface ReactionZoneProps {
   reaction: ReactionZoneItem[];
   onDrop: (item: MoleculeItem, col: number, row: number) => void;
   onRemove: (col: number, row: number) => void;
+  onClear: () => void;
 }
 
 const GRID_CELL_SIZE = 70; // Size of each grid cell
@@ -16,6 +18,7 @@ export const ReactionZone = ({
   reaction,
   onDrop,
   onRemove,
+  onClear,
 }: ReactionZoneProps) => {
   const gridRef = useRef<HTMLDivElement>(null);
 
@@ -72,17 +75,23 @@ export const ReactionZone = ({
   };
 
   return (
-    <div
-      style={{
-        padding: "16px",
-        backgroundColor: "#f8f9fa",
-        borderRadius: "8px",
-        boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-      }}
-    >
-      <h3 style={{ marginTop: 0, marginBottom: "12px", color: "#333" }}>
-        Reaction Workspace
-      </h3>
+    <div className="reactionSpace">
+      <div className="reactionHeader">
+        <h3 style={{ marginTop: 0, marginBottom: "12px", color: "#333" }}>
+          Reaction Workspace
+        </h3>
+        <div className="reactionHeaderButtonDiv">
+          <button
+            className="reactionHeaderButton"
+            onClick={(e) => {
+              e.stopPropagation();
+              onClear();
+            }}
+          >
+            Clear
+          </button>
+        </div>
+      </div>
       <div
         className="GridContainer"
         ref={gridRef}
@@ -99,7 +108,7 @@ export const ReactionZone = ({
           const col = index % GRID_COLUMNS;
           const row = Math.floor(index / GRID_COLUMNS);
           const item = reaction.find((i) => i.col === col && i.row === row);
-
+          console.log("item is: ", item);
           return (
             <div
               key={`${row}-${col}`}
@@ -120,10 +129,22 @@ export const ReactionZone = ({
             >
               {item && (
                 <>
-                  <div className={"dropImage " + item.formula + "_Image"} />
-                  <span className={"dropSpan " + item.formula + "_Text"}>
-                    {item.formula}
-                  </span>
+                  {item.formula && (
+                    <>
+                      <div className={"dropImage " + item.formula + "_Image"} />
+                      <span className={"dropSpan " + item.formula + "_Text"}>
+                        {item.formula}
+                      </span>
+                    </>
+                  )}
+                  {item.bondType && (
+                    <BondLine
+                      parentType="Grid"
+                      lineType={item.bondType}
+                      parentWidth={GRID_CELL_SIZE}
+                      parentHeight={GRID_CELL_SIZE}
+                    />
+                  )}
                   <button
                     style={{
                       position: "absolute",

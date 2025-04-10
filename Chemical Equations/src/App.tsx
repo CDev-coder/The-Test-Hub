@@ -8,22 +8,21 @@ import { Bond } from "./components/Bond";
 
 const SNAP_DISTANCE = 30;
 const MOLECULE_SIZE = 60;
-const startingY = 15;
 
 const MOD_OBJ = {
-  H: { x: 50, y: startingY, name: "hydrogen" },
-  O: { x: 150, y: startingY, name: "oxygen" },
-  C: { x: 250, y: startingY, name: "carbon" },
-  N: { x: 350, y: startingY, name: "nitrogen" },
+  H: { name: "hydrogen" },
+  O: { name: "oxygen" },
+  C: { name: "carbon" },
+  N: { name: "nitrogen" },
 };
 
 const BON_OBJ = {
-  V1: { x: 50, y: startingY, name: "Single Bond" },
-  V1D1: { x: 150, y: startingY, name: "Single Bond" },
-  V1D2: { x: 150, y: startingY, name: "Single Bond" },
-  V2: { x: 150, y: startingY, name: "Double Bond" },
-  V2D1: { x: 150, y: startingY, name: "Double Bond" },
-  V2D2: { x: 150, y: startingY, name: "Double Bond" },
+  V1: { name: "Single Bond" },
+  V1D1: { name: "Single Bond L" },
+  V1D2: { name: "Single Bond R" },
+  V2: { name: "Double Bond" },
+  V2D1: { name: "Double Bond L" },
+  V2D2: { name: "Double Bond R" },
 };
 
 const combinationRules = [
@@ -65,21 +64,37 @@ export default function App() {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const handleReactionZoneDrop = (
-    item: MoleculeItem,
+    item: MoleculeItem | BondItem,
     col: number,
     row: number
   ) => {
     // Create a clone for the reaction grid
-    const cloneId = `clone-${Date.now()}-${item.formula}`;
+    if ("formula" in item) {
+      const cloneId = `clone-${Date.now()}-${item.formula}`;
 
-    setReactionGrid((prev) => {
-      const filtered = prev.filter((i) => !(i.col === col && i.row === row));
-      return [...filtered, { formula: item.formula, col, row, id: cloneId }];
-    });
+      setReactionGrid((prev) => {
+        const filtered = prev.filter((i) => !(i.col === col && i.row === row));
+        return [...filtered, { formula: item.formula, col, row, id: cloneId }];
+      });
+      // Return original to spawn (only if it's not already a clone)
+      if (!item.id.startsWith("clone-")) {
+        handleReturnToSpawn(item);
+      }
+    } else {
+      console.log("Its a Bond");
+      const cloneId = `clone-${Date.now()}-${item.bondType}`;
 
-    // Return original to spawn (only if it's not already a clone)
-    if (!item.id.startsWith("clone-")) {
-      handleReturnToSpawn(item);
+      setReactionGrid((prev) => {
+        const filtered = prev.filter((i) => !(i.col === col && i.row === row));
+        return [
+          ...filtered,
+          { bondType: item.bondType, col, row, id: cloneId },
+        ];
+      });
+      // Return original to spawn (only if it's not already a clone)
+      if (!item.id.startsWith("clone-")) {
+        handleReturnToSpawn(item);
+      }
     }
   };
 
@@ -91,17 +106,19 @@ export default function App() {
     );
   };
 
+  const handleClearGrid = () => {
+    setReactionGrid([]);
+  };
+
   // Return molecule to its spawn point
-  const handleReturnToSpawn = (item: MoleculeItem) => {
+  const handleReturnToSpawn = (item: MoleculeItem | BondItem) => {
     // Only return original molecules (not clones) to spawn
-    if (item.spawnPoint && !item.id.includes("clone-")) {
+    if (!item.id.includes("clone-")) {
       setMolecules((prev) =>
         prev.map((mol) =>
           mol.id === item.id
             ? {
                 ...mol,
-                x: item.spawnPoint!.x,
-                y: item.spawnPoint!.y,
                 parentId: undefined,
               }
             : mol
@@ -112,14 +129,12 @@ export default function App() {
 
   const handleReturnBondToSpawn = (item: BondItem) => {
     // Only return original molecules (not clones) to spawn
-    if (item.spawnPoint && !item.id.includes("clone-")) {
+    if (!item.id.includes("clone-")) {
       setBonds((prev) =>
         prev.map((bon) =>
           bon.id === item.id
             ? {
                 ...bon,
-                x: item.spawnPoint!.x,
-                y: item.spawnPoint!.y,
                 parentId: undefined,
               }
             : bon
@@ -161,7 +176,7 @@ export default function App() {
     const didSnap = trySnapBonds(item, x, y);
 
     if (!didSnap) {
-      setMolecules((prev) =>
+      setBonds((prev) =>
         prev.map((mol) => (mol.id === item.id ? { ...mol, x, y } : mol))
       );
     }
@@ -180,7 +195,7 @@ export default function App() {
         (m) =>
           m.id !== draggedItem.id &&
           !m.parentId &&
-          distance(x, y, m.x + (m.width || 0) / 2, m.y + (m.height || 0) / 2) <
+          distance(x, y, (m.width || 0) / 2, (m.height || 0) / 2) <
             SNAP_DISTANCE
       );
 
@@ -210,8 +225,6 @@ export default function App() {
             if (mol.id === draggedItem.id) {
               return {
                 ...mol,
-                x: parent.x,
-                y: parent.y,
                 parentId: parent.id,
                 width: (mol.width || 0) * 0.8,
                 height: (mol.height || 0) * 0.8,
@@ -238,7 +251,7 @@ export default function App() {
         (m) =>
           m.id !== draggedItem.id &&
           !m.parentId &&
-          distance(x, y, m.x + (m.width || 0) / 2, m.y + (m.height || 0) / 2) <
+          distance(x, y, (m.width || 0) / 2, (m.height || 0) / 2) <
             SNAP_DISTANCE
       );
 
@@ -268,8 +281,6 @@ export default function App() {
             if (mol.id === draggedItem.id) {
               return {
                 ...mol,
-                x: parent.x,
-                y: parent.y,
                 parentId: parent.id,
                 width: (mol.width || 0) * 0.8,
                 height: (mol.height || 0) * 0.8,
@@ -323,6 +334,7 @@ export default function App() {
                         onDetach={handleDetech}
                         onDrop={handleDrop}
                         onReturnToSpawn={handleReturnToSpawn}
+                        spawnPoint={molecule.spawnPoint}
                         style={{
                           ...(molecule.parentId && {
                             transform: "scale(0.8)",
@@ -376,6 +388,7 @@ export default function App() {
               reaction={reactionGrid}
               onDrop={handleReactionZoneDrop}
               onRemove={handleRemoveFromGrid}
+              onClear={handleClearGrid}
             />
           </div>
         </div>

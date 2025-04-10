@@ -1,14 +1,12 @@
 import { useDrag, useDrop } from "react-dnd";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { MoleculeProps, MoleculeItem } from "../types";
 
 export const Molecule = ({
   id,
   formula,
-  x,
-  y,
-  width = 60,
-  height = 60,
+  width = 55,
+  height = 55,
   parentId,
   spawnPoint,
   onDrop,
@@ -17,10 +15,12 @@ export const Molecule = ({
   style,
 }: MoleculeProps) => {
   const divRef = useRef<HTMLDivElement>(null);
+  const [hovered, setHovered] = useState(false);
+  const scaleSize = hovered ? width + 5 : width;
 
   const [{ isDragging }, drag] = useDrag(() => ({
     type: "MOLECULE",
-    item: { id, formula, x, y, width, height, parentId, spawnPoint },
+    item: { id, formula, width, height, parentId, spawnPoint },
     end: (item, monitor) => {
       const didDrop = monitor.didDrop();
       if (!didDrop) {
@@ -50,8 +50,8 @@ export const Molecule = ({
         id={"moleculeDiv_" + formula}
         ref={divRef}
         style={{
-          width: `${width}px`,
-          height: `${height}px`,
+          width: `${scaleSize}px`,
+          height: `${scaleSize}px`,
           border: parentId ? "1px dashed #666" : "2px solid #333",
           backgroundColor: spawnPoint
             ? "#e3f2fd"
@@ -66,6 +66,8 @@ export const Molecule = ({
           color: formula + "_Image" == "C_Image" ? "white" : "",
           ...style,
         }}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
         data-testid={`molecule-${formula}`}
       >
         <div className={"moleculeImage " + formula + "_Image"} />

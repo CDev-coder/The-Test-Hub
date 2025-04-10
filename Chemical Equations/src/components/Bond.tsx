@@ -1,34 +1,31 @@
 import { useDrag, useDrop } from "react-dnd";
 import { useRef } from "react";
 import { BondProps, BondItem } from "../types";
-import SingleLine from "./SingleLine";
+import BondLine from "./BondLine";
 
 export const Bond = ({
   id,
   bondType,
-  x,
-  y,
   width = 60,
   height = 60,
   parentId,
   spawnPoint,
   onDrop,
   onDetach,
-  onReturnToSpawn,
   style,
 }: BondProps) => {
   const divRef = useRef<HTMLDivElement>(null);
 
   const [{ isDragging }, drag] = useDrag(() => ({
     type: "BOND",
-    item: { id, bondType, x, y, width, height, parentId, spawnPoint },
+    item: { id, bondType, width, height, parentId },
     end: (item, monitor) => {
       const didDrop = monitor.didDrop();
       if (!didDrop) {
         if (parentId) {
           onDetach(item);
         } else if (spawnPoint) {
-          onReturnToSpawn(item);
+          // onReturnToSpawn(item);
         }
       }
     },
@@ -69,11 +66,7 @@ export const Bond = ({
         }}
         data-testid={`bond-${bondType}`}
       >
-        <SingleLine
-          lineType={bondType}
-          parentWidth={width}
-          parentHeight={height}
-        />
+        <BondLine parentType="Bond" lineType={bondType} parentHeight={height} />
       </div>
     </>
   );

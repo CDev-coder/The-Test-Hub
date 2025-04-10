@@ -160,13 +160,64 @@
     /* center each item vertically */
 }
 
+.bondDiv{
+    cursor: move;
+}
+
 .SingleLine {
-    position: absolute;
     transform-origin: center center;
+    justify-content: center;
+    display: grid;
+    position: relative;
+    transform: translateY(50%);
+  
 }
 
 .reactionZoneDiv{
     justify-content: center;
     display: grid;
     width: auto;
+}
+
+.reactionSpace{
+    padding: 16px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.reactionHeader{
+    display: flex;
+    align-items: center;
+}
+
+.reactionHeaderButtonDiv{
+    margin-left: auto;
+}
+.reactionHeaderButton {
+    background-color: #e0f7fa;
+    /* light cyan-blue */
+    color: #006064;
+    /* deep teal */
+    border: 1px solid #4dd0e1;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-family: 'Segoe UI',
+    Tahoma,
+    Geneva,
+    Verdana,
+    sans-serif;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.2s,
+    transform 0.1s;
+}
+
+.reactionHeaderButton:hover {
+    background-color: #b2ebf2;
+}
+
+.reactionHeaderButton:active {
+    transform: scale(0.98);
 }

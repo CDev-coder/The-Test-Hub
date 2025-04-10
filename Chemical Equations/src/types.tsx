@@ -2,13 +2,11 @@ export interface MoleculeItem {
   mapIndex?: number;
   id: string;
   formula: string;
-  x: number;
-  y: number;
   width?: number;
   height?: number;
   parentId?: string | null;
+  spawnPoint?: { name: string };
   attachedMolecules?: MoleculeItem[];
-  spawnPoint?: { x: number; y: number; name: string };
   snappedToGrid?: { col: number; row: number }; // Track grid position
 }
 
@@ -16,18 +14,17 @@ export interface BondItem {
   mapIndex?: number;
   id: string;
   bondType: string;
-  x: number;
-  y: number;
   width?: number;
   height?: number;
   parentId?: string | null;
   attachedMolecules?: BondItem[];
-  spawnPoint?: { x: number; y: number; name: string };
+  spawnPoint?: { name: string };
   snappedToGrid?: { col: number; row: number }; // Track grid position
 }
 
 export interface ReactionZoneItem {
-  formula: string;
+  formula?: string;
+  bondType?: string;
   col: number;
   row: number;
 }
