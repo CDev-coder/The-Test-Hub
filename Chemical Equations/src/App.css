@@ -193,6 +193,7 @@
 
 .reactionHeaderButtonDiv{
     margin-left: auto;
+    margin-bottom: 5px;
 }
 .reactionHeaderButton {
     background-color: #e0f7fa;

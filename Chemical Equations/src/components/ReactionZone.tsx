@@ -29,20 +29,19 @@ export const ReactionZone = ({
       if (!dropOffset || !gridRef.current) return;
 
       const gridRect = gridRef.current.getBoundingClientRect();
-
-      // Calculate position relative to grid's top-left corner
       const relativeX = dropOffset.x - gridRect.left;
       const relativeY = dropOffset.y - gridRect.top;
 
-      // Calculate grid position (0-based index)
       const col = Math.floor(relativeX / GRID_CELL_SIZE);
       const row = Math.floor(relativeY / GRID_CELL_SIZE);
 
-      // Ensure position is within bounds
       if (col >= 0 && col < GRID_COLUMNS && row >= 0 && row < GRID_ROWS) {
         onDrop(item, col, row);
       }
     },
+    collect: (monitor) => ({
+      isOver: !!monitor.isOver(),
+    }),
   }));
 
   drop(gridRef);

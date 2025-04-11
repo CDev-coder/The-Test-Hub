@@ -1,39 +1,34 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo, useCallback } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { Molecule } from "./components/Molecule";
 import { ReactionZone } from "./components/ReactionZone";
 import { BondItem, MoleculeItem, ReactionZoneItem } from "./types";
 import { Bond } from "./components/Bond";
-
-const SNAP_DISTANCE = 30;
-const MOLECULE_SIZE = 60;
-
-const MOD_OBJ = {
-  H: { name: "hydrogen" },
-  O: { name: "oxygen" },
-  C: { name: "carbon" },
-  N: { name: "nitrogen" },
-};
-
-const BON_OBJ = {
-  V1: { name: "Single Bond" },
-  V1D1: { name: "Single Bond L" },
-  V1D2: { name: "Single Bond R" },
-  V2: { name: "Double Bond" },
-  V2D1: { name: "Double Bond L" },
-  V2D2: { name: "Double Bond R" },
-};
-
-const combinationRules = [
-  { reactants: ["H", "H"], product: "H₂" },
-  { reactants: ["H", "O"], product: "OH" },
-  { reactants: ["H₂", "O"], product: "H₂O" },
-  { reactants: ["C", "O"], product: "CO" },
-  { reactants: ["CO", "O"], product: "CO₂" },
-];
+import { useLanguage } from "./components/translator";
 
 export default function App() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { toggleLanguage, getText, language } = useLanguage();
+
+  const SNAP_DISTANCE = 30;
+  const MOLECULE_SIZE = 60;
+  const MOD_OBJ = {
+    H: { name: getText("hydrogenOption") },
+    O: { name: getText("oxygenOption") },
+    C: { name: getText("carbonOption") },
+    N: { name: getText("nitrogenOption") },
+  };
+  const BON_OBJ = {
+    V1: { name: getText("singleBondOption") },
+    V1D1: { name: getText("singleBondOption") },
+    V1D2: { name: getText("singleBondOption") },
+    V2: { name: getText("doubleBondOption") },
+    V2D1: { name: getText("doubleBondOption") },
+    V2D2: { name: getText("doubleBondOption") },
+  };
+
+  const [reactionGrid, setReactionGrid] = useState<ReactionZoneItem[]>([]);
   const [molecules, setMolecules] = useState<MoleculeItem[]>(() => {
     return Object.entries(MOD_OBJ).flatMap(([formula, point], i) => [
       {
@@ -60,54 +55,70 @@ export default function App() {
     ]);
   });
 
-  const [reactionGrid, setReactionGrid] = useState<ReactionZoneItem[]>([]);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const combinationRules = [
+    { reactants: ["H", "H"], product: "H₂" },
+    { reactants: ["H", "O"], product: "OH" },
+    { reactants: ["H₂", "O"], product: "H₂O" },
+    { reactants: ["C", "O"], product: "CO" },
+    { reactants: ["CO", "O"], product: "CO₂" },
+  ];
 
-  const handleReactionZoneDrop = (
-    item: MoleculeItem | BondItem,
-    col: number,
-    row: number
-  ) => {
-    // Create a clone for the reaction grid
-    if ("formula" in item) {
-      const cloneId = `clone-${Date.now()}-${item.formula}`;
+  const handleReactionZoneDrop = useCallback(
+    (item: MoleculeItem | BondItem, col: number, row: number) => {
+      // Create a clone for the reaction grid
+      if ("formula" in item) {
+        const cloneId = `clone-${Date.now()}-${item.formula}`;
 
-      setReactionGrid((prev) => {
-        const filtered = prev.filter((i) => !(i.col === col && i.row === row));
-        return [...filtered, { formula: item.formula, col, row, id: cloneId }];
-      });
-      // Return original to spawn (only if it's not already a clone)
-      if (!item.id.startsWith("clone-")) {
-        handleReturnToSpawn(item);
+        setReactionGrid((prev) => {
+          const filtered = prev.filter(
+            (i) => !(i.col === col && i.row === row)
+          );
+          return [
+            ...filtered,
+            { formula: item.formula, col, row, id: cloneId },
+          ];
+        });
+        // Return original to spawn (only if it's not already a clone)
+        if (!item.id.startsWith("clone-")) {
+          handleReturnToSpawn(item);
+        }
+      } else {
+        console.log("Its a Bond");
+        const cloneId = `clone-${Date.now()}-${item.bondType}`;
+
+        setReactionGrid((prev) => {
+          const filtered = prev.filter(
+            (i) => !(i.col === col && i.row === row)
+          );
+          return [
+            ...filtered,
+            { bondType: item.bondType, col, row, id: cloneId },
+          ];
+        });
+        // Return original to spawn (only if it's not already a clone)
+        if (!item.id.startsWith("clone-")) {
+          handleReturnToSpawn(item);
+        }
       }
-    } else {
-      console.log("Its a Bond");
-      const cloneId = `clone-${Date.now()}-${item.bondType}`;
-
-      setReactionGrid((prev) => {
-        const filtered = prev.filter((i) => !(i.col === col && i.row === row));
-        return [
-          ...filtered,
-          { bondType: item.bondType, col, row, id: cloneId },
-        ];
-      });
-      // Return original to spawn (only if it's not already a clone)
-      if (!item.id.startsWith("clone-")) {
-        handleReturnToSpawn(item);
-      }
-    }
-  };
+    },
+    []
+  );
 
   // Remove molecule from grid and return to spawn
-  const handleRemoveFromGrid = (col: number, row: number) => {
+  const handleRemoveFromGrid = useCallback((col: number, row: number) => {
     // Simply remove from grid without creating new molecules
     setReactionGrid((prev) =>
       prev.filter((i) => !(i.col === col && i.row === row))
     );
-  };
+  }, []);
 
   const handleClearGrid = () => {
     setReactionGrid([]);
+  };
+
+  const handleLangaugeChange = () => {
+    toggleLanguage();
+    console.log("CHANGING TO: ", language);
   };
 
   // Return molecule to its spawn point
@@ -301,6 +312,22 @@ export default function App() {
     return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
   };
 
+  //////USE MEMO
+  const reactionZoneProps = useMemo(
+    () => ({
+      reaction: reactionGrid,
+      onDrop: handleReactionZoneDrop,
+      onRemove: handleRemoveFromGrid,
+      onClear: handleClearGrid,
+    }),
+    [
+      reactionGrid,
+      handleReactionZoneDrop,
+      handleRemoveFromGrid,
+      handleClearGrid,
+    ]
+  );
+
   return (
     <DndProvider backend={HTML5Backend}>
       <div className="parentDiv" ref={containerRef}>
@@ -308,10 +335,21 @@ export default function App() {
           <a href="" style={{ marginRight: "5px" }}>
             <img className="chemLogo" src="./chemical-formula.svg" />
           </a>
-          Chemical Equation Builder
+          {getText("titleText")}
         </h1>
 
         <div className="workSpaceAreaDiv">
+          <div className="langDiv">
+            <button
+              className="langButton"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleLangaugeChange();
+              }}
+            >
+              {getText("langButton")}
+            </button>
+          </div>
           <div className="draggableAreaDiv">
             <div className="moleculeSectionContainer">
               <h3
@@ -321,7 +359,7 @@ export default function App() {
                   textAlign: "center",
                 }}
               >
-                Molecule Section
+                {getText("moleculeSection")}
               </h3>
               <div className="moleculeSectionDiv">
                 <div className="moleculeWrapper">
@@ -356,7 +394,7 @@ export default function App() {
                   textAlign: "center",
                 }}
               >
-                Bond Section
+                {getText("bondSection")}
               </h3>
               <div className="bondSectionDiv">
                 <div className="bondWrapper">
@@ -384,12 +422,7 @@ export default function App() {
             </div>
           </div>
           <div className="reactionZoneDiv">
-            <ReactionZone
-              reaction={reactionGrid}
-              onDrop={handleReactionZoneDrop}
-              onRemove={handleRemoveFromGrid}
-              onClear={handleClearGrid}
-            />
+            <ReactionZone {...reactionZoneProps} />
           </div>
         </div>
       </div>

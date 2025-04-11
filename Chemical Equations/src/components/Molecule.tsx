@@ -77,7 +77,7 @@ export const Molecule = ({
           style={{
             position: "absolute",
             left: `${width / 6}px`,
-            top: `${height + 14}px`,
+            top: `${scaleSize + 16}px`,
             fontSize: "12px",
             color: "#7f8c8d",
             backgroundColor: "#ecf0f1",

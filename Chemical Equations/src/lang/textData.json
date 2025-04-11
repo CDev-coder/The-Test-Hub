@@ -1,0 +1,33 @@
+{
+  "en": {
+    "titleText": "Chemical Equation Builder",
+    "langButton": "Change Langauge",
+    "moleculeSection": "Molecule Section",
+    "hydrogenOption": "Hydrogen",
+    "oxygenOption": "Oxygen",
+    "carbonOption": "Carbon",
+    "nitrogenOption": "Nitrogen",
+    "bondSection": "Bond Section",
+    "singleBondOption": "Single Bond",
+    "singleBondROption": "Single Bond R",
+    "singleBondLOption": "Single Bond L",
+    "doubleBondOption": "Double Bond",
+    "clearButton": "Clear",
+    "reactionTitle": "Reaction Workspace"
+
+  },
+  "es": {
+    "titleText": "Constructor de Ecuaciones Químicas",
+    "langButton": "Cambiar Idioma",
+    "moleculeSection": "Molecule Section",
+    "hydrogenOption": "Hydrogen",
+    "oxygenOption": "Oxygen",
+    "carbonOption": "Carbon",
+    "nitrogenOption": "Nitrogen",
+    "bondSection": "Bond Section",
+    "singleBondOption": "Single Bond",
+    "doubleBondOption": "Double Bond",
+    "clearButton": "Clear",
+    "reactionTitle": "Reaction Workspace"
+  }
+}
