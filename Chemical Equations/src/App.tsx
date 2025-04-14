@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo, useCallback } from "react";
+import { useState, useRef, useMemo, useCallback, useEffect } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { Molecule } from "./components/Molecule";
@@ -13,37 +13,61 @@ export default function App() {
 
   const SNAP_DISTANCE = 30;
   const MOLECULE_SIZE = 60;
-  const MOD_OBJ = {
-    H: { name: getText("hydrogenOption") },
-    O: { name: getText("oxygenOption") },
-    C: { name: getText("carbonOption") },
-    N: { name: getText("nitrogenOption") },
-  };
-  const BON_OBJ = {
-    V1: { name: getText("singleBondOption") },
-    V1D1: { name: getText("singleBondOption") },
-    V1D2: { name: getText("singleBondOption") },
-    V2: { name: getText("doubleBondOption") },
-    V2D1: { name: getText("doubleBondOption") },
-    V2D2: { name: getText("doubleBondOption") },
-  };
+
+  const MOD_OBJ = useMemo(
+    () => ({
+      H: { name: getText("hydrogenOption") },
+      O: { name: getText("oxygenOption") },
+      C: { name: getText("carbonOption") },
+      N: { name: getText("nitrogenOption") },
+    }),
+    [language]
+  );
+
+  const BON_OBJ = useMemo(
+    () => ({
+      V1: { name: getText("singleBondOption") },
+      V1S: { name: getText("singleBondOption") },
+      V1D1: { name: getText("singleBondOption") },
+      V1D2: { name: getText("singleBondOption") },
+      V2: { name: getText("doubleBondOption") },
+      V2S: { name: getText("doubleBondOption") },
+      V2D1: { name: getText("doubleBondOption") },
+      V2D2: { name: getText("doubleBondOption") },
+    }),
+    [language]
+  );
 
   const [reactionGrid, setReactionGrid] = useState<ReactionZoneItem[]>([]);
-  const [molecules, setMolecules] = useState<MoleculeItem[]>(() => {
-    return Object.entries(MOD_OBJ).flatMap(([formula, point], i) => [
-      {
-        id: `${formula.toLowerCase()}-${i}`,
-        formula,
-        ...point,
-        width: MOLECULE_SIZE,
-        height: MOLECULE_SIZE,
-        spawnPoint: point,
-      },
-    ]);
-  });
+  const [molecules, setMolecules] = useState<MoleculeItem[]>([]);
+
+  // Call this function whenever language or MOD_OBJ changes
+  const updateMolecules = useCallback(() => {
+    const newMolecules = Object.entries(MOD_OBJ).flatMap(
+      ([formula, point], i) => [
+        {
+          id: `${formula.toLowerCase()}-${i}`,
+          formula,
+          ...point,
+          width: MOLECULE_SIZE,
+          height: MOLECULE_SIZE,
+          spawnPoint: point,
+        },
+      ]
+    );
+    setMolecules(newMolecules);
+  }, [MOD_OBJ]);
+
+  // Update when language or MOD_OBJ changes
+  useEffect(() => {
+    updateMolecules();
+  }, [language, updateMolecules]);
+
   ////////setBonds has to be mimicd like the setMole to handle the snapping.
-  const [bonds, setBonds] = useState<BondItem[]>(() => {
-    return Object.entries(BON_OBJ).flatMap(([bondType, point], i) => [
+  const [bonds, setBonds] = useState<BondItem[]>([]);
+
+  const updateBonds = useCallback(() => {
+    const newBonds = Object.entries(BON_OBJ).flatMap(([bondType, point], i) => [
       {
         id: `${bondType.toLowerCase()}-${i}`,
         bondType,
@@ -53,7 +77,12 @@ export default function App() {
         spawnPoint: point,
       },
     ]);
-  });
+    setBonds(newBonds);
+  }, [BON_OBJ]);
+
+  useEffect(() => {
+    updateBonds();
+  }, [language, updateBonds]);
 
   const combinationRules = [
     { reactants: ["H", "H"], product: "H₂" },
@@ -387,15 +416,7 @@ export default function App() {
               </div>
             </div>
             <div className="bondSectionContainer">
-              <h3
-                style={{
-                  color: "#34495e",
-                  marginBottom: "12px",
-                  textAlign: "center",
-                }}
-              >
-                {getText("bondSection")}
-              </h3>
+              <h3 className="bondSectionHeader">{getText("bondSection")}</h3>
               <div className="bondSectionDiv">
                 <div className="bondWrapper">
                   {bonds

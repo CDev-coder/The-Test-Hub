@@ -2,6 +2,7 @@ import { useDrop } from "react-dnd";
 import { useRef } from "react";
 import { MoleculeItem, ReactionZoneItem } from "../types";
 import BondLine from "./BondLine";
+import { useLanguage } from "./translator";
 
 interface ReactionZoneProps {
   reaction: ReactionZoneItem[];
@@ -12,7 +13,7 @@ interface ReactionZoneProps {
 
 const GRID_CELL_SIZE = 70; // Size of each grid cell
 const GRID_COLUMNS = 15; // Number of columns
-const GRID_ROWS = 10; // Number of rows
+const GRID_ROWS = 6; // Number of rows
 
 export const ReactionZone = ({
   reaction,
@@ -20,6 +21,7 @@ export const ReactionZone = ({
   onRemove,
   onClear,
 }: ReactionZoneProps) => {
+  const { getText } = useLanguage();
   const gridRef = useRef<HTMLDivElement>(null);
 
   const [, drop] = useDrop(() => ({
@@ -73,11 +75,19 @@ export const ReactionZone = ({
     }
   };
 
+  const buildEquation = () => {
+    const currentFormula = reaction
+      .map((item) => (item.formula ? item.formula : ""))
+      .filter((formula) => formula !== "");
+
+    return <>{currentFormula.join(" + ")}</>;
+  };
+
   return (
     <div className="reactionSpace">
       <div className="reactionHeader">
         <h3 style={{ marginTop: 0, marginBottom: "12px", color: "#333" }}>
-          Reaction Workspace
+          {getText("reactionTitle")}
         </h3>
         <div className="reactionHeaderButtonDiv">
           <button
@@ -87,7 +97,7 @@ export const ReactionZone = ({
               onClear();
             }}
           >
-            Clear
+            {getText("clearButton")}
           </button>
         </div>
       </div>
@@ -107,7 +117,7 @@ export const ReactionZone = ({
           const col = index % GRID_COLUMNS;
           const row = Math.floor(index / GRID_COLUMNS);
           const item = reaction.find((i) => i.col === col && i.row === row);
-          console.log("item is: ", item);
+          //console.log("SEE item is: ", item);
           return (
             <div
               key={`${row}-${col}`}
@@ -177,8 +187,6 @@ export const ReactionZone = ({
           );
         })}
       </div>
-
-      {/* Equation Preview */}
       <div
         style={{
           padding: "12px",
@@ -187,18 +195,11 @@ export const ReactionZone = ({
           textAlign: "center",
         }}
       >
-        <div style={{ fontSize: "0.9em", color: "#666", marginBottom: "4px" }}>
-          Current Equation:
+        <div style={{ fontSize: "0.9em", marginBottom: "4px" }}>
+          {getText("equationTitle")}
         </div>
         <div style={{ fontSize: "1.2em", fontWeight: 500 }}>
-          {reaction.length > 0 ? (
-            <>
-              {reaction.map((item) => item.formula).join(" + ")}
-              <span style={{ margin: "0 8px", color: "#999" }}>→</span>?
-            </>
-          ) : (
-            <span style={{ color: "#999" }}>Empty</span>
-          )}
+          {reaction.length > 0 ? buildEquation() : <span>Empty</span>}
         </div>
       </div>
     </div>

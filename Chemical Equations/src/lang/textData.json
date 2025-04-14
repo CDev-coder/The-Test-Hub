@@ -13,21 +13,41 @@
     "singleBondLOption": "Single Bond L",
     "doubleBondOption": "Double Bond",
     "clearButton": "Clear",
-    "reactionTitle": "Reaction Workspace"
-
+    "reactionTitle": "Reaction Workspace",
+    "equationTitle": "Current Equation"
   },
   "es": {
-    "titleText": "Constructor de Ecuaciones Químicas",
+   "titleText": "Constructor de Ecuaciones Químicas",
     "langButton": "Cambiar Idioma",
-    "moleculeSection": "Molecule Section",
-    "hydrogenOption": "Hydrogen",
-    "oxygenOption": "Oxygen",
-    "carbonOption": "Carbon",
-    "nitrogenOption": "Nitrogen",
-    "bondSection": "Bond Section",
-    "singleBondOption": "Single Bond",
-    "doubleBondOption": "Double Bond",
-    "clearButton": "Clear",
-    "reactionTitle": "Reaction Workspace"
+    "moleculeSection": "Sección de Moléculas",
+    "hydrogenOption": "Hidrógeno",
+    "oxygenOption": "Oxígeno",
+    "carbonOption": "Carbono",
+    "nitrogenOption": "Nitrógeno",
+    "bondSection": "Sección de Enlaces",
+    "singleBondOption": "Enlace Simple",
+    "singleBondROption": "Enlace Simple R",
+    "singleBondLOption": "Enlace Simple L",
+    "doubleBondOption": "Enlace Doble",
+    "clearButton": "Limpiar",
+    "reactionTitle": "Espacio de Reacción",
+    "equationTitle": "Ecuación Actual"
+  },
+   "fr":{
+    "titleText": "Constructeur d'équations chimiques",
+    "langButton": "Changer de langue",
+    "moleculeSection": "Section des molécules",
+    "hydrogenOption": "Hydrogène",
+    "oxygenOption": "Oxygène",
+    "carbonOption": "Carbone",
+    "nitrogenOption": "Azote",
+    "bondSection": "Section des liaisons",
+    "singleBondOption": "Liaison simple",
+    "singleBondROption": "Liaison simple R",
+    "singleBondLOption": "Liaison simple L",
+    "doubleBondOption": "Liaison double",
+    "clearButton": "Effacer",
+    "reactionTitle": "Espace de réaction",
+    "equationTitle": "Équation actuelle"
   }
 }

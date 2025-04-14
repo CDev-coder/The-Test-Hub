@@ -2,7 +2,7 @@ import { createContext, useContext, useState, ReactNode } from "react";
 import translationsData from "../lang/textData.json";
 
 ///////Lets make some d.ts data
-type Language = "en" | "es";
+type Language = "en" | "es" | "fr";
 type TranslationKeys = keyof (typeof translationsData)[Language];
 type Translations = {
   [key in Language]: Record<TranslationKeys, string>;
@@ -22,6 +22,7 @@ const LanguageContext = createContext<LanguageContextProps | undefined>(
 );
 
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
+  const totalLanguages: Language[] = ["en", "es", "fr"]; // Add more as needed
   const [language, setLanguage] = useState<Language>("en");
 
   const getText = (key: TranslationKeys): string => {
@@ -29,7 +30,11 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const toggleLanguage = () => {
-    setLanguage((prev) => (prev === "en" ? "es" : "en"));
+    setLanguage((prev) => {
+      const currentIndex = totalLanguages.indexOf(prev);
+      const nextIndex = (currentIndex + 1) % totalLanguages.length;
+      return totalLanguages[nextIndex];
+    });
   };
 
   return (

@@ -1,5 +1,5 @@
 import { useDrag, useDrop } from "react-dnd";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { BondProps, BondItem } from "../types";
 import BondLine from "./BondLine";
 
@@ -15,6 +15,7 @@ export const Bond = ({
   style,
 }: BondProps) => {
   const divRef = useRef<HTMLDivElement>(null);
+  const [hovered, setHovered] = useState(false);
 
   const [{ isDragging }, drag] = useDrag(() => ({
     type: "BOND",
@@ -44,29 +45,48 @@ export const Bond = ({
   return (
     <>
       <div
-        className="bondDiv"
-        id={"bondDiv_" + bondType}
-        ref={divRef}
+        className="bondMaster"
+        id={"bondMaster_" + bondType}
         style={{
           width: `${width}px`,
-          height: `${height}px`,
-          border: parentId ? "1px dashed #666" : "2px solid #333",
-          backgroundColor: spawnPoint
-            ? "#e3f2fd"
-            : isDragging
-            ? "rgba(100, 200, 255, 0.7)"
-            : "rgba(255, 255, 255, 0.9)",
-          opacity: isDragging ? 0.7 : 1,
-          zIndex: parentId ? 1 : 2,
-          transform: isDragging ? "scale(1.1)" : "scale(1)",
-          transition: "all 0.2s ease",
-          fontSize: parentId ? "0.8em" : "1em",
-          color: bondType + "_Image" == "C_Image" ? "white" : "",
-          ...style,
+          height: `${height + 45}px`,
         }}
-        data-testid={`bond-${bondType}`}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
       >
-        <BondLine parentType="Bond" lineType={bondType} parentHeight={height} />
+        <div
+          className="bondDiv"
+          id={"bondDiv_" + bondType}
+          ref={divRef}
+          style={{
+            width: `${width}px`,
+            height: `${height}px`,
+            border: parentId ? "1px dashed #666" : "2px solid #333",
+            backgroundColor: hovered
+              ? "	rgb(129, 212, 250)"
+              : spawnPoint
+              ? "#e3f2fd"
+              : isDragging
+              ? "rgba(100, 200, 255, 0.7)"
+              : "rgba(255, 255, 255, 0.9)",
+            opacity: isDragging ? 0.7 : 1,
+            zIndex: parentId ? 1 : 2,
+            transform: isDragging ? "scale(1.1)" : "scale(1)",
+            transition: "all 0.2s ease",
+            fontSize: parentId ? "0.8em" : "1em",
+            ...style,
+          }}
+          onMouseEnter={() => setHovered(true)}
+          onMouseLeave={() => setHovered(false)}
+          data-testid={`bond-${bondType}`}
+        >
+          <BondLine
+            parentType="Bond"
+            lineType={bondType}
+            parentHeight={height}
+          />
+        </div>
+        <div className="obj_Label">{spawnPoint && spawnPoint.name}</div>
       </div>
     </>
   );

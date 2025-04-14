@@ -37,6 +37,17 @@ const BondLine: React.FC<SvgLineProps> = ({
             strokeWidth={4}
           />
         );
+      case "V2S":
+        return (
+          <line
+            x1="0"
+            y1={y + 10}
+            x2={width}
+            y2={y + 10}
+            stroke={color}
+            strokeWidth={4}
+          />
+        );
       default:
         return null;
     }
@@ -44,6 +55,30 @@ const BondLine: React.FC<SvgLineProps> = ({
 
   const getLinePosition = (lineType: string) => {
     switch (lineType) {
+      case "V1S":
+        if (parentType == "Bond") {
+          return {
+            transform: "rotate(-90deg)",
+            left: parentHeight / 3 + 8 + "px",
+          };
+        } else {
+          return {
+            transform: "rotate(-90deg)",
+            left: parentHeight / 3 + 3 + "px",
+          };
+        }
+      case "V2S":
+        if (parentType == "Bond") {
+          return {
+            transform: "rotate(-90deg)",
+            left: parentHeight / 3 + 4 + "px",
+          };
+        } else {
+          return {
+            transform: "rotate(-90deg)",
+            left: parentHeight / 4 + 3 + "px",
+          };
+        }
       case "V1D1":
         if (parentType == "Bond") {
           return {
@@ -100,12 +135,15 @@ const BondLine: React.FC<SvgLineProps> = ({
             transform: "rotate(45deg)",
           };
         }
+      default:
+        return {};
     }
   };
 
   return (
     <div
-      className={"SingleLine SingleLine_" + lineType}
+      className={"bondLine"}
+      id={"bondLine_" + lineType}
       style={getLinePosition(lineType)}
     >
       <svg
@@ -116,7 +154,16 @@ const BondLine: React.FC<SvgLineProps> = ({
         role="img"
         aria-label="Line"
       >
-        <line x1="0" y1={y} x2={width} y2={y} stroke={color} strokeWidth={4} />
+        {
+          <line
+            x1="0"
+            y1={y}
+            x2={width}
+            y2={y}
+            stroke={color}
+            strokeWidth={4}
+          />
+        }
         {renderExtraLine(lineType)}
       </svg>
     </div>

@@ -14,16 +14,14 @@
 
 .parentDiv{
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    position: relative;
-    height: 100vh;
 }
 
 .chemLogo {
     width: 40px;
     height: 40px;
     -webkit-animation: spin 12s linear infinite;
-        -moz-animation: spin 12s linear infinite;
-        animation: spin 12s linear infinite;
+    -moz-animation: spin 12s linear infinite;
+    animation: spin 12s linear infinite;
 }
 
 @-moz-keyframes spin {
@@ -47,7 +45,9 @@
 
 .draggableAreaDiv{
     display: flex;
-    padding: 16px;
+    padding-right: 16px;
+    padding-bottom: 16px;
+    padding-left: 16px;
     gap: 50px;
     justify-content: center;
 }
@@ -55,19 +55,19 @@
 
 .moleculeSectionDiv{
     display: inline-block;
-    /* So it only grows to fit its children */
     position: relative;
     background-color: white;
     border-radius: 8px;
     box-shadow: rgba(0, 0, 0, 0.1) 0px 2px 10px;
     padding: 15px;
-    min-height: 90px;
-    /* enough space for molecules + labels */
 }
 
 .moleculeWrapper{
-    display: flex;
-    gap: 40px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 30px;
+    justify-items: center;
+    align-items: center;
 }
 
 .moleculeDiv {
@@ -136,41 +136,41 @@
     color: white;
 }
 
+.bondSectionHeader{
+    margin-bottom: 12px;
+    text-align: center;
+}
+
 .bondSectionDiv {
     display: inline-block;
-    /* So it only grows to fit its children */
     position: relative;
     background-color: white;
     border-radius: 8px;
     box-shadow: rgba(0, 0, 0, 0.1) 0px 2px 10px;
     padding: 15px;
-    min-height: 90px;
-    /* enough space for molecules + labels */
 }
 
 .bondWrapper {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    /* 3 columns */
-    gap: 16px;
-    /* spacing between items */
+    grid-template-columns: repeat(4, 1fr);
+    row-gap: 30px;
+    column-gap: 30px;
     justify-items: center;
-    /* center each item horizontally */
     align-items: center;
-    /* center each item vertically */
 }
 
 .bondDiv{
     cursor: move;
+    justify-content: center;
+    display: grid;
 }
 
-.SingleLine {
+.bondLine {
     transform-origin: center center;
     justify-content: center;
     display: grid;
     position: relative;
     transform: translateY(50%);
-  
 }
 
 .reactionZoneDiv{
@@ -197,9 +197,7 @@
 }
 .reactionHeaderButton {
     background-color: #e0f7fa;
-    /* light cyan-blue */
     color: #006064;
-    /* deep teal */
     border: 1px solid #4dd0e1;
     padding: 8px 16px;
     border-radius: 8px;
@@ -221,4 +219,16 @@
 
 .reactionHeaderButton:active {
     transform: scale(0.98);
+}
+
+.obj_Label{
+    display: flex;
+    margin-top: 4px;
+    font-size: 12px;
+    background-color: rgb(236, 240, 241);
+    padding: 0px 3px;
+    border-radius: 4px;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
 }
