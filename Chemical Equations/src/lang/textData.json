@@ -1,6 +1,6 @@
 {
   "en": {
-    "titleText": "Chemical Equation Builder",
+    "titleText": "Chemical Molecule Builder",
     "langButton": "Change Langauge",
     "moleculeSection": "Molecule Section",
     "hydrogenOption": "Hydrogen",
@@ -17,7 +17,7 @@
     "equationTitle": "Current Equation"
   },
   "es": {
-   "titleText": "Constructor de Ecuaciones Químicas",
+   "titleText": "Constructor de Moléculas Químicas",
     "langButton": "Cambiar Idioma",
     "moleculeSection": "Sección de Moléculas",
     "hydrogenOption": "Hidrógeno",
@@ -34,7 +34,7 @@
     "equationTitle": "Ecuación Actual"
   },
    "fr":{
-    "titleText": "Constructeur d'équations chimiques",
+    "titleText": "Constructeur des molécules chimiques",
     "langButton": "Changer de langue",
     "moleculeSection": "Section des molécules",
     "hydrogenOption": "Hydrogène",
