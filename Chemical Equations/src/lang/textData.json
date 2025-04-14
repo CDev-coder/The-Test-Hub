@@ -13,7 +13,7 @@
     "singleBondLOption": "Single Bond L",
     "doubleBondOption": "Double Bond",
     "clearButton": "Clear",
-    "reactionTitle": "Reaction Workspace",
+    "reactionTitle": "Workspace",
     "equationTitle": "Current Equation"
   },
   "es": {
@@ -30,7 +30,7 @@
     "singleBondLOption": "Enlace Simple L",
     "doubleBondOption": "Enlace Doble",
     "clearButton": "Limpiar",
-    "reactionTitle": "Espacio de Reacción",
+    "reactionTitle": "Reacción",
     "equationTitle": "Ecuación Actual"
   },
    "fr":{
@@ -47,7 +47,7 @@
     "singleBondLOption": "Liaison simple L",
     "doubleBondOption": "Liaison double",
     "clearButton": "Effacer",
-    "reactionTitle": "Espace de réaction",
+    "reactionTitle": "Réaction",
     "equationTitle": "Équation actuelle"
   }
 }
