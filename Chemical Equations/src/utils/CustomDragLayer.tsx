@@ -15,8 +15,6 @@ export const CustomDragLayer = () => {
     return null;
   }
 
-  console.log("item ", item);
-
   return (
     <div
       style={{
@@ -24,7 +22,7 @@ export const CustomDragLayer = () => {
         pointerEvents: "none",
         left: currentOffset.x,
         top: currentOffset.y,
-        transform: "translate(-50%, -50%)",
+        transform: "translate(0, -30%)",
         zIndex: 10000,
       }}
     >
