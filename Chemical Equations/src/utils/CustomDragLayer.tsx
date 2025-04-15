@@ -1,7 +1,7 @@
 // src/components/DragLayer.tsx
 import { useDragLayer } from "react-dnd";
 import { Molecule } from "../components/Molecule";
-//import { Bond } from "../components/Bond";
+import { Bond } from "../components/Bond";
 
 export const CustomDragLayer = () => {
   const { item, isDragging, currentOffset } = useDragLayer((monitor) => ({
@@ -28,7 +28,8 @@ export const CustomDragLayer = () => {
         zIndex: 10000,
       }}
     >
-      <Molecule {...item} style={{ opacity: 0.8 }} />
+      {item.formula && <Molecule {...item} style={{ opacity: 0.8 }} />}
+      {item.bondType && <Bond {...item} style={{ opacity: 0.8 }} />}
     </div>
   );
 };

@@ -73,6 +73,7 @@ export const Molecule = ({
           <div className="moleculeLabel">{formula}</div>
         </div>
       </div>
+
       <div
         className="moleculeMaster"
         id={"moleculeMaster_" + formula}

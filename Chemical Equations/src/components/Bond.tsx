@@ -15,9 +15,10 @@ export const Bond = ({
   style,
 }: BondProps) => {
   const divRef = useRef<HTMLDivElement>(null);
+  const previewRef = useRef<HTMLDivElement>(null);
   const [hovered, setHovered] = useState(false);
 
-  const [{ isDragging }, drag] = useDrag(() => ({
+  const [{ isDragging }, drag, preview] = useDrag(() => ({
     type: "BOND",
     item: { id, bondType, width, height, parentId },
     end: (item, monitor) => {
@@ -41,9 +42,40 @@ export const Bond = ({
   }));
 
   drag(drop(divRef));
+  preview(previewRef);
 
   return (
     <>
+      <div
+        ref={previewRef}
+        style={{
+          position: "absolute",
+          opacity: 0,
+          pointerEvents: "none",
+          width: `${width}px`,
+          height: `${height}px`,
+        }}
+      >
+        <div
+          style={{
+            width: "100%",
+            height: "100%",
+            border: parentId ? "1px dashed #666" : "2px solid #333",
+            backgroundColor: "rgba(255, 255, 255, 0.9)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <BondLine
+            parentType="Bond"
+            lineType={bondType}
+            parentHeight={height}
+          />
+          <div className="obj_Label">{spawnPoint && spawnPoint.name}</div>
+        </div>
+      </div>
+
       <div
         className="bondMaster"
         id={"bondMaster_" + bondType}
