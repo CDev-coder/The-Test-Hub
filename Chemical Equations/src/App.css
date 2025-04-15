@@ -21,6 +21,24 @@ body {
     user-select: none;
 }
 
+h1 {
+    font-size: 1.5rem;
+}
+
+h3 {
+    font-size: 1.1rem;
+}
+
+@media (min-width: 768px) {
+    h1 {
+        font-size: 2rem;
+    }
+
+    h3 {
+        font-size: 1.3rem;
+    }
+}
+
 .parentDiv{
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
@@ -52,13 +70,60 @@ body {
     }
 }
 
-.draggableAreaDiv{
+/*
+.GridContainer {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+    gap: 2px;
+    margin-bottom: 16px;
+}
+
+.GridContainer>div {
+    aspect-ratio: 1/1;
+    width: 100%;
+    border: 1px solid #000;
+    border-radius: 4px;
     display: flex;
-    padding-right: 16px;
-    padding-bottom: 16px;
-    padding-left: 16px;
-    gap: 50px;
+    align-items: center;
     justify-content: center;
+    position: relative;
+    background-color: white;
+    transition: 0.2s;
+}
+*/
+
+/*
+.workSpaceAreaDiv {
+    display: flex;
+    flex-direction: column;
+}
+*/
+@media (min-width: 768px) {
+    .workSpaceAreaDiv {
+        flex-direction: row;
+    }
+
+    .draggableAreaDiv {
+        /*width: 50%;*/
+        min-width: 250px;
+    }
+
+    .reactionZoneDiv {
+        flex: 1;
+    }
+}
+
+.moleculeMaster,
+.bondMaster {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.draggableAreaDiv {
+    display: block;
+    padding: 0 16px 16px 16px;
+    gap: 0;
+    /* Reset gap for mobile */
 }
 
 
@@ -71,13 +136,15 @@ body {
     padding: 15px;
 }
 
-.moleculeWrapper{
+
+.moleculeWrapper {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 30px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2px;
     justify-items: center;
     align-items: center;
 }
+
 
 .moleculeDiv {
     padding: 4px;
@@ -93,8 +160,16 @@ body {
     /* not absolute */
     flex-shrink: 0;
     touch-action: none;
-        user-select: none;
-        -webkit-user-drag: none;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+.moleculeDiv,
+.bondDiv {
+    width: 10vmin;
+    /* 10% of the smaller viewport dimension */
+    height: 10vmin;
+    font-size: 3vmin;
 }
 
 .moleculeLabel {
@@ -165,7 +240,7 @@ body {
 .bondWrapper {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    row-gap: 30px;
+    row-gap: 15px;
     column-gap: 30px;
     justify-items: center;
     align-items: center;
@@ -207,6 +282,7 @@ body {
     margin-left: auto;
     margin-bottom: 5px;
 }
+
 .reactionHeaderButton {
     background-color: #e0f7fa;
     color: #006064;
@@ -223,6 +299,8 @@ body {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     transition: background-color 0.2s,
     transform 0.1s;
+        min-width: 35px;
+            min-height: 35px;
 }
 
 .reactionHeaderButton:hover {
@@ -249,4 +327,98 @@ body {
     position: fixed;
     pointer-events: none;
     z-index: 100;
+}
+
+.moleculeDiv,
+.bondDiv,
+button {
+    min-width: 44px;
+    min-height: 44px;
+    /* Recommended minimum touch target size */
+}
+
+.removeButton{
+    min-width:25px;
+    min-height: 25px;
+}
+
+.langButton,
+.reactionHeaderButton {
+    padding: 10px 15px;
+    font-size: 1rem;
+}
+
+._SVG {
+    width: 100%;
+    height: auto;
+    max-width: 50px;
+}
+
+
+.workSpaceAreaDiv {
+    /* Mobile-first sizing */
+    width: 100vw;
+    /* Viewport width */
+    height: 100vh;
+    /* Viewport height */
+
+    /* iOS specific fixes */
+    -webkit-overflow-scrolling: touch;
+    /* Smooth scrolling on iOS */
+    position: fixed;
+    /* Or 'absolute' if you need scrolling */
+}
+
+/* For the draggable area specifically */
+.draggableAreaDiv {
+    max-width: 100%;
+    /* iOS momentum scrolling */
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+@media screen and (max-width: 767px) {
+    .workSpaceAreaDiv {
+        text-size-adjust: 100%;
+        -webkit-text-size-adjust: 100%;
+    }
+}
+
+.workSpaceAreaDiv {
+    contain: strict;
+    /* Or 'content' if you need scrolling */
+    will-change: transform;
+    /* Helps with GPU acceleration */
+}
+
+@media (min-width: 480px) {
+    .moleculeMaster,
+    .bondMaster {
+        width: auto;
+        height: auto;
+    }
+}
+
+/* Desktop styles (flex) */
+@media (min-width: 768px) {
+    .draggableAreaDiv {
+        display: flex;
+        gap: 50px;
+        justify-content: center;
+    }
+    .moleculeWrapper {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 30px;
+        justify-items: center;
+        align-items: center;
+    }
+ .bondWrapper {
+     display: grid;
+     grid-template-columns: repeat(4, 1fr);
+     row-gap: 30px;
+     column-gap: 30px;
+     justify-items: center;
+     align-items: center;
+ }
 }

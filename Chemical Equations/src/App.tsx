@@ -56,7 +56,7 @@ export default function App() {
       ]
     );
     setMolecules(newMolecules);
-  }, [MOD_OBJ]);
+  }, [MOD_OBJ, MOLECULE_SIZE]);
 
   // Update when language or MOD_OBJ changes
   useEffect(() => {
@@ -78,7 +78,7 @@ export default function App() {
       },
     ]);
     setBonds(newBonds);
-  }, [BON_OBJ]);
+  }, [BON_OBJ, MOLECULE_SIZE]);
 
   useEffect(() => {
     updateBonds();
@@ -345,6 +345,7 @@ export default function App() {
   const reactionZoneProps = useMemo(
     () => ({
       reaction: reactionGrid,
+      GRID_CELL_SIZE: MOLECULE_SIZE,
       onDrop: handleReactionZoneDrop,
       onRemove: handleRemoveFromGrid,
       onClear: handleClearGrid,

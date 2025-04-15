@@ -6,17 +6,19 @@ import { useLanguage } from "./translator";
 
 interface ReactionZoneProps {
   reaction: ReactionZoneItem[];
+  GRID_CELL_SIZE: number;
   onDrop: (item: MoleculeItem, col: number, row: number) => void;
   onRemove: (col: number, row: number) => void;
   onClear: () => void;
 }
 
-const GRID_CELL_SIZE = 70; // Size of each grid cell
+//const GRID_CELL_SIZE = 70; // Size of each grid cell
 const GRID_COLUMNS = 15; // Number of columns
 const GRID_ROWS = 6; // Number of rows
 
 export const ReactionZone = ({
   reaction,
+  GRID_CELL_SIZE,
   onDrop,
   onRemove,
   onClear,
@@ -155,6 +157,7 @@ export const ReactionZone = ({
                     />
                   )}
                   <button
+                    className="removeButton"
                     style={{
                       position: "absolute",
                       top: "0px",
