@@ -4,6 +4,8 @@ import { ReactionZone } from "./components/ReactionZone";
 import { BondItem, MoleculeItem, ReactionZoneItem } from "./types";
 import { Bond } from "./components/Bond";
 import { useLanguage } from "./components/translator";
+import { DndProviderWrapper } from "./utils/DndProviderWrapper";
+import { CustomDragLayer } from "./utils/CustomDragLayer";
 
 export default function App() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -356,93 +358,96 @@ export default function App() {
   );
 
   return (
-    <div className="parentDiv" ref={containerRef}>
-      <h1 style={{ color: "#2c3e50", marginBottom: "24px" }}>
-        <a href="" style={{ marginRight: "5px" }}>
-          <img className="chemLogo" src="./chemical-formula.svg" />
-        </a>
-        {getText("titleText")}
-      </h1>
+    <DndProviderWrapper>
+      <CustomDragLayer />
+      <div className="parentDiv" ref={containerRef}>
+        <h1 style={{ color: "#2c3e50", marginBottom: "24px" }}>
+          <a href="" style={{ marginRight: "5px" }}>
+            <img className="chemLogo" src="./chemical-formula.svg" />
+          </a>
+          {getText("titleText")}
+        </h1>
 
-      <div className="workSpaceAreaDiv">
-        <div className="langDiv">
-          <button
-            className="langButton"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleLangaugeChange();
-            }}
-          >
-            {getText("langButton")}
-          </button>
-        </div>
-        <div className="draggableAreaDiv">
-          <div className="moleculeSectionContainer">
-            <h3
-              style={{
-                color: "#34495e",
-                marginBottom: "12px",
-                textAlign: "center",
+        <div className="workSpaceAreaDiv">
+          <div className="langDiv">
+            <button
+              className="langButton"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleLangaugeChange();
               }}
             >
-              {getText("moleculeSection")}
-            </h3>
-            <div className="moleculeSectionDiv">
-              <div className="moleculeWrapper">
-                {molecules
-                  .filter((mol) => !mol.id.startsWith("clone-")) // Only render original
-                  .map((molecule) => (
-                    <Molecule
-                      key={molecule.id}
-                      {...molecule}
-                      onDetach={handleDetech}
-                      onDrop={handleDrop}
-                      onReturnToSpawn={handleReturnToSpawn}
-                      spawnPoint={molecule.spawnPoint}
-                      style={{
-                        ...(molecule.parentId && {
-                          transform: "scale(0.8)",
-                          opacity: 0.8,
-                          borderStyle: "dashed",
-                          zIndex: 1,
-                        }),
-                      }}
-                    />
-                  ))}
+              {getText("langButton")}
+            </button>
+          </div>
+          <div className="draggableAreaDiv">
+            <div className="moleculeSectionContainer">
+              <h3
+                style={{
+                  color: "#34495e",
+                  marginBottom: "12px",
+                  textAlign: "center",
+                }}
+              >
+                {getText("moleculeSection")}
+              </h3>
+              <div className="moleculeSectionDiv">
+                <div className="moleculeWrapper">
+                  {molecules
+                    .filter((mol) => !mol.id.startsWith("clone-")) // Only render original
+                    .map((molecule) => (
+                      <Molecule
+                        key={molecule.id}
+                        {...molecule}
+                        onDetach={handleDetech}
+                        onDrop={handleDrop}
+                        onReturnToSpawn={handleReturnToSpawn}
+                        spawnPoint={molecule.spawnPoint}
+                        style={{
+                          ...(molecule.parentId && {
+                            transform: "scale(0.8)",
+                            opacity: 0.8,
+                            borderStyle: "dashed",
+                            zIndex: 1,
+                          }),
+                        }}
+                      />
+                    ))}
+                </div>
+              </div>
+            </div>
+            <div className="bondSectionContainer">
+              <h3 className="bondSectionHeader">{getText("bondSection")}</h3>
+              <div className="bondSectionDiv">
+                <div className="bondWrapper">
+                  {bonds
+                    .filter((bon) => !bon.id.startsWith("clone-")) // Only render original
+                    .map((bond) => (
+                      <Bond
+                        key={bond.id}
+                        {...bond}
+                        onDetach={handleDetech}
+                        onDrop={handleBondDrop}
+                        onReturnToSpawn={handleReturnBondToSpawn}
+                        style={{
+                          ...(bond.parentId && {
+                            transform: "scale(0.8)",
+                            opacity: 0.8,
+                            borderStyle: "dashed",
+                            zIndex: 1,
+                          }),
+                        }}
+                      />
+                    ))}
+                </div>
               </div>
             </div>
           </div>
-          <div className="bondSectionContainer">
-            <h3 className="bondSectionHeader">{getText("bondSection")}</h3>
-            <div className="bondSectionDiv">
-              <div className="bondWrapper">
-                {bonds
-                  .filter((bon) => !bon.id.startsWith("clone-")) // Only render original
-                  .map((bond) => (
-                    <Bond
-                      key={bond.id}
-                      {...bond}
-                      onDetach={handleDetech}
-                      onDrop={handleBondDrop}
-                      onReturnToSpawn={handleReturnBondToSpawn}
-                      style={{
-                        ...(bond.parentId && {
-                          transform: "scale(0.8)",
-                          opacity: 0.8,
-                          borderStyle: "dashed",
-                          zIndex: 1,
-                        }),
-                      }}
-                    />
-                  ))}
-              </div>
-            </div>
+          <div className="reactionZoneDiv">
+            <ReactionZone {...reactionZoneProps} />
           </div>
-        </div>
-        <div className="reactionZoneDiv">
-          <ReactionZone {...reactionZoneProps} />
         </div>
       </div>
-    </div>
+    </DndProviderWrapper>
   );
 }

@@ -15,9 +15,11 @@ export const Molecule = ({
   style,
 }: MoleculeProps) => {
   const divRef = useRef<HTMLDivElement>(null);
+  const previewRef = useRef<HTMLDivElement>(null);
   const [hovered, setHovered] = useState(false);
 
-  const [{ isDragging }, drag] = useDrag(() => ({
+  // Custom drag preview hook per molecule
+  const [{ isDragging }, drag, preview] = useDrag(() => ({
     type: "MOLECULE",
     item: { id, formula, width, height, parentId, spawnPoint },
     end: (item, monitor) => {
@@ -40,11 +42,37 @@ export const Molecule = ({
     drop: (item: MoleculeItem, monitor) => onDrop(item, monitor),
   }));
 
+  // Connect both drag source and preview
   drag(drop(divRef));
+  preview(previewRef);
 
   return (
     <>
-      {" "}
+      <div
+        ref={previewRef}
+        style={{
+          position: "absolute",
+          opacity: 0,
+          pointerEvents: "none",
+          width: `${width}px`,
+          height: `${height}px`,
+        }}
+      >
+        <div
+          style={{
+            width: "100%",
+            height: "100%",
+            border: parentId ? "1px dashed #666" : "2px solid #333",
+            backgroundColor: "rgba(255, 255, 255, 0.9)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <div className={"moleculeImage " + formula + "_Image"} />
+          <div className="moleculeLabel">{formula}</div>
+        </div>
+      </div>
       <div
         className="moleculeMaster"
         id={"moleculeMaster_" + formula}
@@ -60,7 +88,7 @@ export const Molecule = ({
             height: `${height}px`,
             border: parentId ? "1px dashed #666" : "2px solid #333",
             backgroundColor: hovered
-              ? "	rgb(129, 212, 250)"
+              ? "rgb(129, 212, 250)"
               : spawnPoint
               ? "#e3f2fd"
               : isDragging
@@ -74,8 +102,6 @@ export const Molecule = ({
             color: formula + "_Image" == "C_Image" ? "white" : "",
             ...style,
           }}
-          onMouseEnter={() => setHovered(true)}
-          onMouseLeave={() => setHovered(false)}
           data-testid={`molecule-${formula}`}
         >
           <div className={"moleculeImage " + formula + "_Image"} />
