@@ -23,7 +23,7 @@ export default function App() {
       window.removeEventListener("resize", checkIsMobile);
     };
   }, []);
-  console.log("isMobile: ", isMobile);
+
   const SNAP_DISTANCE = isMobile ? 3 : 30;
   const MOLECULE_SIZE = isMobile ? 44 : 60;
   const GRID_COLUMNS = isMobile ? 6 : 12;
@@ -112,7 +112,6 @@ export default function App() {
       // Create a clone for the reaction grid
       if ("formula" in item) {
         const cloneId = `clone-${Date.now()}-${item.formula}`;
-
         setReactionGrid((prev) => {
           const filtered = prev.filter(
             (i) => !(i.col === col && i.row === row)
@@ -127,9 +126,7 @@ export default function App() {
           handleReturnToSpawn(item);
         }
       } else {
-        console.log("Its a Bond");
         const cloneId = `clone-${Date.now()}-${item.bondType}`;
-
         setReactionGrid((prev) => {
           const filtered = prev.filter(
             (i) => !(i.col === col && i.row === row)
@@ -162,7 +159,6 @@ export default function App() {
 
   const handleLangaugeChange = () => {
     toggleLanguage();
-    console.log("CHANGING TO: ", language);
   };
 
   // Return molecule to its spawn point
@@ -203,37 +199,27 @@ export default function App() {
   };
 
   // Handle molecule snapping in the workspace
-  const handleDrop = (item: MoleculeItem, monitor: any) => {
+  const handleDrop = (item: MoleculeItem | BondItem, monitor: any) => {
     const offset = monitor.getClientOffset();
     if (!offset || !containerRef.current) return;
 
     const containerRect = containerRef.current.getBoundingClientRect();
     const x = offset.x - containerRect.left;
     const y = offset.y - containerRect.top;
-
-    const didSnap = trySnapMolecules(item, x, y);
-
-    if (!didSnap) {
-      setMolecules((prev) =>
-        prev.map((mol) => (mol.id === item.id ? { ...mol, x, y } : mol))
-      );
-    }
-  };
-
-  const handleBondDrop = (item: BondItem, monitor: any) => {
-    const offset = monitor.getClientOffset();
-    if (!offset || !containerRef.current) return;
-
-    const containerRect = containerRef.current.getBoundingClientRect();
-    const x = offset.x - containerRect.left;
-    const y = offset.y - containerRect.top;
-
-    const didSnap = trySnapBonds(item, x, y);
-
-    if (!didSnap) {
-      setBonds((prev) =>
-        prev.map((mol) => (mol.id === item.id ? { ...mol, x, y } : mol))
-      );
+    if ("formula" in item) {
+      const didSnap = trySnapMolecules(item, x, y);
+      if (!didSnap) {
+        setMolecules((prev) =>
+          prev.map((mol) => (mol.id === item.id ? { ...mol, x, y } : mol))
+        );
+      }
+    } else {
+      const didSnap = trySnapBonds(item, x, y);
+      if (!didSnap) {
+        setBonds((prev) =>
+          prev.map((mol) => (mol.id === item.id ? { ...mol, x, y } : mol))
+        );
+      }
     }
   };
 
@@ -447,7 +433,7 @@ export default function App() {
                       key={bond.id}
                       {...bond}
                       onDetach={handleDetech}
-                      onDrop={handleBondDrop}
+                      onDrop={handleDrop}
                       onReturnToSpawn={handleReturnBondToSpawn}
                       style={{
                         ...(bond.parentId && {
