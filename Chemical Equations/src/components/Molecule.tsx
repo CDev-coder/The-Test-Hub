@@ -105,7 +105,13 @@ export const Molecule = ({
           }}
           data-testid={`molecule-${formula}`}
         >
-          <div className={"moleculeImage " + formula + "_Image"} />
+          <div
+            className={"moleculeImage " + formula + "_Image"}
+            style={{
+              width: `${width}px`,
+              height: `${height}px`,
+            }}
+          />
           <div className="moleculeLabel">{formula}</div>
         </div>
         <div className="obj_Label">{spawnPoint && spawnPoint.name}</div>

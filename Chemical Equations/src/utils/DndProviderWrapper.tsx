@@ -27,6 +27,10 @@ const HTML5toTouch = {
       },
       preview: true,
       transition: TouchTransition,
+      scrollAngleRanges: [
+        { start: 30, end: 150 }, // Allows scrolling in these angle ranges
+        { start: 210, end: 330 },
+      ],
     },
   ],
 };

@@ -28,7 +28,7 @@ export const ReactionZone = ({
 
   const [, drop] = useDrop(() => ({
     accept: ["MOLECULE", "BOND"],
-    drop: (item: MoleculeItem, monitor) => {
+    drop: (item: MoleculeItem & { snapDistance?: number }, monitor) => {
       const dropOffset = monitor.getClientOffset();
       if (!dropOffset || !gridRef.current) return;
 
@@ -36,8 +36,20 @@ export const ReactionZone = ({
       const relativeX = dropOffset.x - gridRect.left;
       const relativeY = dropOffset.y - gridRect.top;
 
-      const col = Math.floor(relativeX / GRID_CELL_SIZE);
-      const row = Math.floor(relativeY / GRID_CELL_SIZE);
+      const snapDistance =
+        item.snapDistance || (window.innerWidth <= 768 ? 18 : 22); // Mobile vs desktop default
+
+      // Snap to grid function
+      const snapToGrid = (value: number) => {
+        return Math.round(value / snapDistance) * snapDistance;
+      };
+
+      const snappedX = snapToGrid(relativeX);
+      const snappedY = snapToGrid(relativeY);
+
+      // Convert to grid coordinates
+      const col = Math.floor(snappedX / GRID_CELL_SIZE);
+      const row = Math.floor(snappedY / GRID_CELL_SIZE);
 
       if (col >= 0 && col < GRID_COLUMNS && row >= 0 && row < GRID_ROWS) {
         onDrop(item, col, row);
@@ -51,21 +63,11 @@ export const ReactionZone = ({
   drop(gridRef);
 
   const handleOnEnter = (e: { currentTarget: any }) => {
-    // Access the button DOM node
     const button = e.currentTarget;
-    //console.log("handleOnEnter button ", button);
-
     const lastChild = button.lastElementChild as HTMLElement;
     if (lastChild) {
       lastChild.style.visibility = "visible";
     }
-
-    // Read a custom attribute
-    //const customAttr = button.getAttribute("data-something");
-    //console.log("Hovered button attribute:", customAttr);
-
-    // Read computed or inline styles
-    //console.log("Background color:", button.style.backgroundColor);
   };
 
   const handleOnLeave = (e: { currentTarget: any }) => {
@@ -81,7 +83,6 @@ export const ReactionZone = ({
     const currentFormula = reaction
       .map((item) => (item.formula ? item.formula : ""))
       .filter((formula) => formula !== "");
-
     return <>{currentFormula.join(" + ")}</>;
   };
 
@@ -114,12 +115,10 @@ export const ReactionZone = ({
           marginBottom: "16px",
         }}
       >
-        {/* Render all grid cells */}
         {Array.from({ length: GRID_ROWS * GRID_COLUMNS }).map((_, index) => {
           const col = index % GRID_COLUMNS;
           const row = Math.floor(index / GRID_COLUMNS);
           const item = reaction.find((i) => i.col === col && i.row === row);
-          //console.log("SEE item is: ", item);
           return (
             <div
               key={`${row}-${col}`}
@@ -142,7 +141,13 @@ export const ReactionZone = ({
                 <>
                   {item.formula && (
                     <>
-                      <div className={"dropImage " + item.formula + "_Image"} />
+                      <div
+                        className={"dropImage " + item.formula + "_Image"}
+                        style={{
+                          width: `${GRID_CELL_SIZE}px`,
+                          height: `${GRID_CELL_SIZE}px`,
+                        }}
+                      />
                       <span className={"dropSpan " + item.formula + "_Text"}>
                         {item.formula}
                       </span>
