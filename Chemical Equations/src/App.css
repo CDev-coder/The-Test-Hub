@@ -175,6 +175,10 @@ h3 {
     color: white;
 }
 
+.bondSectionContainer{
+    justify-content: center;
+        display: grid;
+}
 .bondSectionHeader {
     margin-bottom: 12px;
     text-align: center;
@@ -192,6 +196,7 @@ h3 {
 .bondWrapper {
     display: grid;
     grid-template-columns: repeat(8, 1fr);
+    column-gap: 10px;
     justify-items: center;
     align-items: center;
 }
@@ -262,15 +267,18 @@ h3 {
 }
 
 .obj_Label {
-    display: flex;
+display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
     margin-top: 4px;
     font-size: 12px;
     background-color: rgb(236, 240, 241);
-    padding: 0px 3px;
     border-radius: 4px;
-    text-align: center;
-    justify-content: center;
-    align-items: center;
+    word-break: break-word;
+    width: auto;
+    /* Allow wrapping mid-word if needed */
 }
 
 .dnd-multi-backend-preview {
