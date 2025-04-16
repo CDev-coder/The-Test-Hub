@@ -9,8 +9,25 @@ export default function App() {
   const containerRef = useRef<HTMLDivElement>(null);
   const { toggleLanguage, getText, language } = useLanguage();
 
-  const SNAP_DISTANCE = 30;
-  const MOLECULE_SIZE = 60;
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth <= 768); // You can tweak the breakpoint
+    };
+
+    checkIsMobile(); // Initial check
+    window.addEventListener("resize", checkIsMobile);
+
+    return () => {
+      window.removeEventListener("resize", checkIsMobile);
+    };
+  }, []);
+  console.log("isMobile: ", isMobile);
+  const SNAP_DISTANCE = isMobile ? 3 : 30;
+  const MOLECULE_SIZE = isMobile ? 44 : 60;
+  const GRID_COLUMNS = isMobile ? 6 : 12;
+  const GRID_ROWS = isMobile ? 6 : 6;
 
   const MOD_OBJ = useMemo(
     () => ({
@@ -54,7 +71,7 @@ export default function App() {
       ]
     );
     setMolecules(newMolecules);
-  }, [MOD_OBJ]);
+  }, [MOD_OBJ, MOLECULE_SIZE]);
 
   // Update when language or MOD_OBJ changes
   useEffect(() => {
@@ -76,7 +93,7 @@ export default function App() {
       },
     ]);
     setBonds(newBonds);
-  }, [BON_OBJ]);
+  }, [BON_OBJ, MOLECULE_SIZE]);
 
   useEffect(() => {
     updateBonds();
@@ -343,12 +360,18 @@ export default function App() {
   const reactionZoneProps = useMemo(
     () => ({
       reaction: reactionGrid,
+      grid_size: MOLECULE_SIZE + 10,
+      grid_columns: GRID_COLUMNS,
+      grid_rows: GRID_ROWS,
       onDrop: handleReactionZoneDrop,
       onRemove: handleRemoveFromGrid,
       onClear: handleClearGrid,
     }),
     [
       reactionGrid,
+      MOLECULE_SIZE,
+      GRID_COLUMNS,
+      GRID_ROWS,
       handleReactionZoneDrop,
       handleRemoveFromGrid,
       handleClearGrid,
@@ -357,13 +380,14 @@ export default function App() {
 
   return (
     <div className="parentDiv" ref={containerRef}>
-      <h1 style={{ color: "#2c3e50", marginBottom: "24px" }}>
-        <a href="" style={{ marginRight: "5px" }}>
-          <img className="chemLogo" src="./chemical-formula.svg" />
-        </a>
-        {getText("titleText")}
-      </h1>
-
+      <div className="titleDiv">
+        <h1 style={{ color: "#2c3e50", marginBottom: "24px" }}>
+          <a href="" style={{ marginRight: "5px" }}>
+            <img className="chemLogo" src="./chemical-formula.svg" />
+          </a>
+          {getText("titleText")}
+        </h1>
+      </div>
       <div className="workSpaceAreaDiv">
         <div className="langDiv">
           <button

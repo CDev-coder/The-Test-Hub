@@ -6,17 +6,19 @@ import { useLanguage } from "./translator";
 
 interface ReactionZoneProps {
   reaction: ReactionZoneItem[];
+  grid_size: number;
+  grid_columns: number;
+  grid_rows: number;
   onDrop: (item: MoleculeItem, col: number, row: number) => void;
   onRemove: (col: number, row: number) => void;
   onClear: () => void;
 }
 
-const GRID_CELL_SIZE = 70; // Size of each grid cell
-const GRID_COLUMNS = 15; // Number of columns
-const GRID_ROWS = 6; // Number of rows
-
 export const ReactionZone = ({
   reaction,
+  grid_size,
+  grid_columns,
+  grid_rows,
   onDrop,
   onRemove,
   onClear,
@@ -34,10 +36,10 @@ export const ReactionZone = ({
       const relativeX = dropOffset.x - gridRect.left;
       const relativeY = dropOffset.y - gridRect.top;
 
-      const col = Math.floor(relativeX / GRID_CELL_SIZE);
-      const row = Math.floor(relativeY / GRID_CELL_SIZE);
+      const col = Math.floor(relativeX / grid_size);
+      const row = Math.floor(relativeY / grid_size);
 
-      if (col >= 0 && col < GRID_COLUMNS && row >= 0 && row < GRID_ROWS) {
+      if (col >= 0 && col < grid_columns && row >= 0 && row < grid_rows) {
         onDrop(item, col, row);
       }
     },
@@ -51,7 +53,7 @@ export const ReactionZone = ({
   const handleOnEnter = (e: { currentTarget: any }) => {
     // Access the button DOM node
     const button = e.currentTarget;
-    //console.log("handleOnEnter button ", button);
+    console.log("handleOnEnter button ", button);
 
     const lastChild = button.lastElementChild as HTMLElement;
     if (lastChild) {
@@ -106,24 +108,26 @@ export const ReactionZone = ({
         ref={gridRef}
         style={{
           display: "grid",
-          gridTemplateColumns: `repeat(${GRID_COLUMNS}, ${GRID_CELL_SIZE}px)`,
-          gridTemplateRows: `repeat(${GRID_ROWS}, ${GRID_CELL_SIZE}px)`,
+          gridTemplateColumns: `repeat(${grid_columns}, ${grid_size}px)`,
+          gridTemplateRows: `repeat(${grid_rows}, ${grid_size}px)`,
           gap: "2px",
           marginBottom: "16px",
         }}
       >
         {/* Render all grid cells */}
-        {Array.from({ length: GRID_ROWS * GRID_COLUMNS }).map((_, index) => {
-          const col = index % GRID_COLUMNS;
-          const row = Math.floor(index / GRID_COLUMNS);
+        {Array.from({ length: grid_rows * grid_columns }).map((_, index) => {
+          const col = index % grid_columns;
+          const row = Math.floor(index / grid_columns);
           const item = reaction.find((i) => i.col === col && i.row === row);
           //console.log("SEE item is: ", item);
           return (
             <div
+              className="reactionZoneDiv"
+              id={"reactionZone_" + index}
               key={`${row}-${col}`}
               style={{
-                width: GRID_CELL_SIZE,
-                height: GRID_CELL_SIZE,
+                width: grid_size,
+                height: grid_size,
                 border: "1px solid #000000",
                 borderRadius: "4px",
                 display: "flex",
@@ -140,7 +144,13 @@ export const ReactionZone = ({
                 <>
                   {item.formula && (
                     <>
-                      <div className={"dropImage " + item.formula + "_Image"} />
+                      <div
+                        className={"dropImage " + item.formula + "_Image"}
+                        style={{
+                          width: `${grid_size}px`,
+                          height: `${grid_size}px`,
+                        }}
+                      />
                       <span className={"dropSpan " + item.formula + "_Text"}>
                         {item.formula}
                       </span>
@@ -150,8 +160,8 @@ export const ReactionZone = ({
                     <BondLine
                       parentType="Grid"
                       lineType={item.bondType}
-                      parentWidth={GRID_CELL_SIZE}
-                      parentHeight={GRID_CELL_SIZE}
+                      parentWidth={grid_size}
+                      parentHeight={grid_size}
                     />
                   )}
                   <button
@@ -163,8 +173,8 @@ export const ReactionZone = ({
                       color: "white",
                       border: "none",
                       borderRadius: "50%",
-                      width: "20px",
-                      height: "20px",
+                      width: `${grid_size / 3}px`,
+                      height: `${grid_size / 3}px`,
                       fontSize: "12px",
                       cursor: "pointer",
                       display: "flex",
