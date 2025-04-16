@@ -165,6 +165,7 @@ export const ReactionZone = ({
                     />
                   )}
                   <button
+                    className="reactionZoneButton"
                     style={{
                       position: "absolute",
                       top: "0px",
