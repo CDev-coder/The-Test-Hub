@@ -13,6 +13,11 @@ const HTML5toTouch = {
       backend: TouchBackend,
       options: {
         enableMouseEvents: true,
+        ignoreContextMenu: true,
+        enableTouchEvents: true,
+        enableKeyboardEvents: true,
+        delay: 0,
+        touchSlop: 0,
       },
       preview: true,
       transition: TouchTransition,
@@ -28,16 +33,14 @@ export const DndProviderWrapper = ({
   const [MultiBackend, setMultiBackend] = useState<any>(null);
 
   useEffect(() => {
-    console.log("Starting dynamic import...");
-
+    //console.log("Starting dynamic import...");
     // Ensure the import only happens once
     const loadBackend = async () => {
       try {
         const module = await import("dnd-multi-backend/dist/esm");
-        console.log("Module loaded:", module);
-        console.log("Module exports:", Object.keys(module)); // Log the keys to inspect the exports
+        //console.log("Module loaded:", module);
+        //console.log("Module exports:", Object.keys(module)); // Log the keys to inspect the exports
 
-        // Check if there's a specific export we need
         if (module.MultiBackend) {
           setMultiBackend(() => module.MultiBackend);
         } else {
@@ -52,11 +55,11 @@ export const DndProviderWrapper = ({
   }, []); // The empty dependency array ensures this runs only once
 
   useEffect(() => {
-    console.log("MultiBackend state changed:", MultiBackend);
+    //console.log("MultiBackend state changed:", MultiBackend);
   }, [MultiBackend]); // Logs changes to the MultiBackend state
 
   if (!MultiBackend) {
-    console.log("Loading MultiBackend...");
+    //console.log("Loading MultiBackend...");
     return <div>Loading drag-and-drop...</div>; // Debug loading screen
   }
 

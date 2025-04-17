@@ -1,6 +1,6 @@
 import { useDrop } from "react-dnd";
 import { useRef } from "react";
-import { MoleculeItem, ReactionZoneItem } from "../types";
+import { BondItem, MoleculeItem, ReactionZoneItem } from "../types";
 import BondLine from "./BondLine";
 import { useLanguage } from "./translator";
 
@@ -9,7 +9,7 @@ interface ReactionZoneProps {
   grid_size: number;
   grid_columns: number;
   grid_rows: number;
-  onDrop: (item: MoleculeItem, col: number, row: number) => void;
+  onDrop: (item: MoleculeItem | BondItem, col: number, row: number) => void;
   onRemove: (col: number, row: number) => void;
   onClear: () => void;
 }
@@ -26,19 +26,40 @@ export const ReactionZone = ({
   const { getText } = useLanguage();
   const gridRef = useRef<HTMLDivElement>(null);
 
+  const isTouchDevice = () => {
+    return "ontouchstart" in window || navigator.maxTouchPoints > 0;
+  };
+
   const [, drop] = useDrop(() => ({
     accept: ["MOLECULE", "BOND"],
-    drop: (item: MoleculeItem, monitor) => {
-      const dropOffset = monitor.getClientOffset();
+    drop: (item: MoleculeItem | BondItem, monitor) => {
+      //console.log("DROPPING IN RZ");
+      const dropOffset = isTouchDevice()
+        ? monitor.getSourceClientOffset()
+        : monitor.getClientOffset();
+
+      //console.log("dropOffset: ", dropOffset);
       if (!dropOffset || !gridRef.current) return;
 
       const gridRect = gridRef.current.getBoundingClientRect();
-      const relativeX = dropOffset.x - gridRect.left;
-      const relativeY = dropOffset.y - gridRect.top;
 
+      // Adjust for potential mobile viewport issues
+      const viewportOffsetTop = isTouchDevice()
+        ? window.visualViewport?.offsetTop || 0
+        : 0;
+      const viewportOffsetLeft = isTouchDevice()
+        ? window.visualViewport?.offsetLeft || 0
+        : 0;
+      //console.log("viewportOffsetLeft, ", viewportOffsetLeft);
+      //console.log("viewportOffsetTop, ", viewportOffsetTop);
+      const relativeX = dropOffset.x - gridRect.left - viewportOffsetLeft;
+      const relativeY = dropOffset.y - gridRect.top - viewportOffsetTop;
+      //console.log("Adjusted coordinates - X:", relativeX, "Y:", relativeY);
+      //console.log("BEFORE ROW: " + relativeX / grid_size);
+      //console.log("BEFORE Col: " + relativeY / grid_size);
       const col = Math.floor(relativeX / grid_size);
       const row = Math.floor(relativeY / grid_size);
-
+      //console.log("DROPPING INTO ROW: " + row + " | COL: " + col);
       if (col >= 0 && col < grid_columns && row >= 0 && row < grid_rows) {
         onDrop(item, col, row);
       }
@@ -53,7 +74,7 @@ export const ReactionZone = ({
   const handleOnEnter = (e: { currentTarget: any }) => {
     // Access the button DOM node
     const button = e.currentTarget;
-    console.log("handleOnEnter button ", button);
+    //console.log("handleOnEnter button ", button);
 
     const lastChild = button.lastElementChild as HTMLElement;
     if (lastChild) {
@@ -139,6 +160,9 @@ export const ReactionZone = ({
               }}
               onMouseEnter={handleOnEnter}
               onMouseLeave={handleOnLeave}
+              onTouchStart={handleOnEnter}
+              onTouchEnd={handleOnLeave}
+              onTouchCancel={handleOnLeave}
             >
               {item && (
                 <>
@@ -188,7 +212,10 @@ export const ReactionZone = ({
                       e.stopPropagation();
                       onRemove(col, row);
                     }}
-                    aria-label={`Remove ${item.formula}`}
+                    onTouchStart={(e) => {
+                      e.stopPropagation();
+                      onRemove(col, row);
+                    }}
                   >
                     ×
                   </button>

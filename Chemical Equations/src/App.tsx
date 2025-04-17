@@ -4,26 +4,13 @@ import { ReactionZone } from "./components/ReactionZone";
 import { BondItem, MoleculeItem, ReactionZoneItem } from "./types";
 import { Bond } from "./components/Bond";
 import { useLanguage } from "./components/translator";
+import useIsMobile from "./utils/useIsMobile";
 
 export default function App() {
   const containerRef = useRef<HTMLDivElement>(null);
   const { toggleLanguage, getText, language } = useLanguage();
 
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const checkIsMobile = () => {
-      setIsMobile(window.innerWidth <= 768); // You can tweak the breakpoint
-    };
-
-    checkIsMobile(); // Initial check
-    window.addEventListener("resize", checkIsMobile);
-
-    return () => {
-      window.removeEventListener("resize", checkIsMobile);
-    };
-  }, []);
-
+  const isMobile = useIsMobile();
   const SNAP_DISTANCE = isMobile ? 3 : 30;
   const MOLECULE_SIZE = isMobile ? 44 : 60;
   const GRID_COLUMNS = isMobile ? 6 : 12;
@@ -109,6 +96,7 @@ export default function App() {
 
   const handleReactionZoneDrop = useCallback(
     (item: MoleculeItem | BondItem, col: number, row: number) => {
+      console.log("handleReactionZoneDrop: ");
       // Create a clone for the reaction grid
       if ("formula" in item) {
         const cloneId = `clone-${Date.now()}-${item.formula}`;
@@ -163,6 +151,7 @@ export default function App() {
 
   // Return molecule to its spawn point
   const handleReturnToSpawn = (item: MoleculeItem | BondItem) => {
+    console.log("handleReturnToSpawn");
     // Only return original molecules (not clones) to spawn
     if (!item.id.includes("clone-")) {
       setMolecules((prev) =>
@@ -179,7 +168,6 @@ export default function App() {
   };
 
   const handleReturnBondToSpawn = (item: BondItem) => {
-    // Only return original molecules (not clones) to spawn
     if (!item.id.includes("clone-")) {
       setBonds((prev) =>
         prev.map((bon) =>
@@ -200,12 +188,15 @@ export default function App() {
 
   // Handle molecule snapping in the workspace
   const handleDrop = (item: MoleculeItem | BondItem, monitor: any) => {
+    console.log("handleDrop NOW");
     const offset = monitor.getClientOffset();
     if (!offset || !containerRef.current) return;
 
     const containerRect = containerRef.current.getBoundingClientRect();
     const x = offset.x - containerRect.left;
     const y = offset.y - containerRect.top;
+    console.log("DROPPING X: " + x + " | y: " + y);
+
     if ("formula" in item) {
       const didSnap = trySnapMolecules(item, x, y);
       if (!didSnap) {

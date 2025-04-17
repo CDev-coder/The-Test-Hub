@@ -1,3 +1,7 @@
+body{
+    touch-action: none;
+}
+
 #root {
     -webkit-touch-callout: none;
     /* iOS Safari */
