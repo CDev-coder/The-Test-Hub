@@ -34,7 +34,6 @@ export const ReactionZone = ({
   const [, drop] = useDrop(() => ({
     accept: ["MOLECULE", "BOND"],
     drop: (item: MoleculeItem | BondItem, monitor) => {
-      console.log("monitor: ", monitor);
       // Prefer getClientOffset first
       let dropOffset = monitor.getClientOffset();
 
@@ -56,11 +55,11 @@ export const ReactionZone = ({
       const relativeY =
         dropOffset.y - gridRect.top - viewportOffsetTop + window.scrollY;
 
-      console.log("Adjusted X:", relativeX, "Y:", relativeY);
+      //console.log("Adjusted X:", relativeX, "Y:", relativeY);
 
       const col = Math.round(relativeX / grid_size);
       const row = Math.round(relativeY / grid_size);
-      console.log("COL :", col, "row:", row);
+      //console.log("COL :", col, "row:", row);
       if (col >= 0 && col < grid_columns && row >= 0 && row < grid_rows) {
         onDrop(item, col, row);
       }
@@ -80,7 +79,6 @@ export const ReactionZone = ({
   const handleOnEnter = (e: { currentTarget: any }) => {
     // Access the button DOM node
     const button = e.currentTarget;
-    console.log("handleOnEnter button ", button);
     const lastChild = button.lastElementChild as HTMLElement;
     if (lastChild) {
       lastChild.style.visibility = "visible";
@@ -89,7 +87,6 @@ export const ReactionZone = ({
 
   const handleOnLeave = (e: { currentTarget: any }) => {
     const button = e.currentTarget;
-    console.log("handleOnLeave:", button);
     const lastChild = button.lastElementChild as HTMLElement;
     if (lastChild) {
       lastChild.style.visibility = "hidden";
@@ -138,7 +135,6 @@ export const ReactionZone = ({
           const col = index % grid_columns;
           const row = Math.floor(index / grid_columns);
           const item = reaction.find((i) => i.col === col && i.row === row);
-          //console.log("SEE item is: ", item);
           return (
             <div
               className="reactionZoneDiv"
