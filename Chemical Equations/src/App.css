@@ -24,16 +24,6 @@ h3 {
     font-size: 1.1rem;
 }
 
-@media (min-width: 768px) {
-    h1 {
-        font-size: 2rem;
-    }
-
-    h3 {
-        font-size: 1.3rem;
-    }
-}
-
 .parentDiv {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
@@ -199,7 +189,7 @@ h3 {
 
 .bondWrapper {
     display: grid;
-    grid-template-columns: repeat(8, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     column-gap: 10px;
     justify-items: center;
     align-items: center;
@@ -315,6 +305,14 @@ display: flex;
     will-change: transform;
 }
 
+.equalAreaDiv{
+    padding: "12px";
+    background-color: "#f0f0f0";
+    border-radius: "4px";
+    text-align: "center";
+}
+
+
 @media screen and (max-width: 767px) {
     .workSpaceAreaDiv {
         text-size-adjust: 100%;
@@ -339,6 +337,15 @@ display: flex;
 
 /* Desktop styles (flex) */
 @media (min-width: 768px) {
+
+    h1{
+        font-size: 2rem;
+    }
+    
+    h3 {
+        font-size: 1.3rem;
+    }
+
     .draggableAreaDiv {
         display: flex;
         gap: 20px;

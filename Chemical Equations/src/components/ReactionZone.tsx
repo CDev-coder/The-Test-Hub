@@ -24,7 +24,8 @@ export const ReactionZone = ({
   onClear,
 }: ReactionZoneProps) => {
   const { getText } = useLanguage();
-  const gridRef = useRef<HTMLDivElement>(null);
+  //const gridRef = useRef<HTMLDivElement>(null);
+  const dropTargetRef = useRef<HTMLDivElement | null>(null);
 
   const isTouchDevice = () => {
     return "ontouchstart" in window || navigator.maxTouchPoints > 0;
@@ -33,33 +34,33 @@ export const ReactionZone = ({
   const [, drop] = useDrop(() => ({
     accept: ["MOLECULE", "BOND"],
     drop: (item: MoleculeItem | BondItem, monitor) => {
-      //console.log("DROPPING IN RZ");
-      const dropOffset = isTouchDevice()
-        ? monitor.getSourceClientOffset()
-        : monitor.getClientOffset();
+      console.log("monitor: ", monitor);
+      // Prefer getClientOffset first
+      let dropOffset = monitor.getClientOffset();
 
-      //console.log("dropOffset: ", dropOffset);
-      if (!dropOffset || !gridRef.current) return;
+      // Fallback to getSourceClientOffset if null
+      if (!dropOffset && isTouchDevice()) {
+        dropOffset = monitor.getSourceClientOffset();
+      }
 
-      const gridRect = gridRef.current.getBoundingClientRect();
+      if (!dropOffset || !dropTargetRef.current) return;
+      const gridRect = dropTargetRef.current.getBoundingClientRect();
 
-      // Adjust for potential mobile viewport issues
-      const viewportOffsetTop = isTouchDevice()
-        ? window.visualViewport?.offsetTop || 0
-        : 0;
-      const viewportOffsetLeft = isTouchDevice()
-        ? window.visualViewport?.offsetLeft || 0
-        : 0;
-      //console.log("viewportOffsetLeft, ", viewportOffsetLeft);
-      //console.log("viewportOffsetTop, ", viewportOffsetTop);
-      const relativeX = dropOffset.x - gridRect.left - viewportOffsetLeft;
-      const relativeY = dropOffset.y - gridRect.top - viewportOffsetTop;
-      //console.log("Adjusted coordinates - X:", relativeX, "Y:", relativeY);
-      //console.log("BEFORE ROW: " + relativeX / grid_size);
-      //console.log("BEFORE Col: " + relativeY / grid_size);
-      const col = Math.floor(relativeX / grid_size);
-      const row = Math.floor(relativeY / grid_size);
-      //console.log("DROPPING INTO ROW: " + row + " | COL: " + col);
+      // Use visualViewport if available (esp. for mobile Safari)
+      const viewportOffsetTop = window.visualViewport?.offsetTop || 0;
+      const viewportOffsetLeft = window.visualViewport?.offsetLeft || 0;
+
+      // Adjusted for scrolling, zooming, and viewport panning
+      const relativeX =
+        dropOffset.x - gridRect.left - viewportOffsetLeft + window.scrollX;
+      const relativeY =
+        dropOffset.y - gridRect.top - viewportOffsetTop + window.scrollY;
+
+      console.log("Adjusted X:", relativeX, "Y:", relativeY);
+
+      const col = Math.round(relativeX / grid_size);
+      const row = Math.round(relativeY / grid_size);
+      console.log("COL :", col, "row:", row);
       if (col >= 0 && col < grid_columns && row >= 0 && row < grid_rows) {
         onDrop(item, col, row);
       }
@@ -69,29 +70,26 @@ export const ReactionZone = ({
     }),
   }));
 
-  drop(gridRef);
+  // drop(gridRef);
+
+  const combinedRef = (node: HTMLDivElement | null) => {
+    drop(node); // connect to DnD
+    dropTargetRef.current = node; // save the ref for bounding box checks
+  };
 
   const handleOnEnter = (e: { currentTarget: any }) => {
     // Access the button DOM node
     const button = e.currentTarget;
-    //console.log("handleOnEnter button ", button);
-
+    console.log("handleOnEnter button ", button);
     const lastChild = button.lastElementChild as HTMLElement;
     if (lastChild) {
       lastChild.style.visibility = "visible";
     }
-
-    // Read a custom attribute
-    //const customAttr = button.getAttribute("data-something");
-    //console.log("Hovered button attribute:", customAttr);
-
-    // Read computed or inline styles
-    //console.log("Background color:", button.style.backgroundColor);
   };
 
   const handleOnLeave = (e: { currentTarget: any }) => {
     const button = e.currentTarget;
-    //console.log("handleOnLeave:", button);
+    console.log("handleOnLeave:", button);
     const lastChild = button.lastElementChild as HTMLElement;
     if (lastChild) {
       lastChild.style.visibility = "hidden";
@@ -126,7 +124,7 @@ export const ReactionZone = ({
       </div>
       <div
         className="GridContainer"
-        ref={gridRef}
+        ref={combinedRef}
         style={{
           display: "grid",
           gridTemplateColumns: `repeat(${grid_columns}, ${grid_size}px)`,
@@ -225,14 +223,7 @@ export const ReactionZone = ({
           );
         })}
       </div>
-      <div
-        style={{
-          padding: "12px",
-          backgroundColor: "#f0f0f0",
-          borderRadius: "4px",
-          textAlign: "center",
-        }}
-      >
+      <div className="equalAreaDiv">
         <div style={{ fontSize: "0.9em", marginBottom: "4px" }}>
           {getText("equationTitle")}
         </div>
