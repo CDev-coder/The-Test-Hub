@@ -1,0 +1,10 @@
+{
+  "biceps": {
+    "name": "Biceps Brachii",
+    "info": "A muscle on the front part of the upper arm."
+  },
+  "triceps": {
+    "name": "Triceps Brachii",
+    "info": "Located at the back of the upper arm."
+  }
+}

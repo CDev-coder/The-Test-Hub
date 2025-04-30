@@ -1,0 +1,54 @@
+.muscleContainer_parent {
+  display: flex;
+  justify-content: center;
+}
+
+.muscleContainer_child {
+  position: relative;
+  transform: scale(0.8);
+  transform-Origin: center;
+}
+
+.muscleLayer {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.scaledImage{
+  width: auto;
+  height: auto;
+}
+
+.muscleLabel{
+    position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translate(-50%, -100%);
+      font-weight: bold;
+      font-size: 3rem;
+      color: #444;
+      white-space: nowrap;
+      pointer-events: none;
+}
+
+.muscleInfoBox {
+  position: absolute;
+  background-color: #ffffff;
+  border: 1px solid #ccc;
+  padding: 10px;
+  width: 200px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+  z-index: 10;
+  font-size: 0.9rem;
+  border-radius: 8px;
+}
+
+.muscleInfoBox h3 {
+  font-size: 1.1rem;
+  color: #333;
+}
+
+.muscleInfoBox ul {
+  padding-left: 1rem;
+}
