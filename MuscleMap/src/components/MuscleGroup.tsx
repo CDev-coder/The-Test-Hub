@@ -155,6 +155,12 @@ export const MuscleGroup = ({}: MuscleGroupProps) => {
             <>
               <h3>{data.name}</h3>
               <ul>
+                {data.fact.map((ex, idx) => (
+                  <li key={idx}>{ex}</li>
+                ))}
+              </ul>
+              <div>Excerises</div>
+              <ul>
                 {data.exercises.map((ex, idx) => (
                   <li key={idx}>{ex}</li>
                 ))}

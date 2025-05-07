@@ -60,13 +60,13 @@
     <rect x="96" y="115" width="15.5" height="40.1" />
   </g>
 
-  <!-- Left Calf -->
-  <g id="l-calf" class="Calf" fill="#76aba6"> 
+  <!-- Left Calve -->
+  <g id="l-calve" class="Calve" fill="#76aba6"> 
     <rect x="70" y="160" width="11.5" height="28.6" />
   </g>
 
-  <!-- Right Calf -->
-  <g id="r-calf" class="Calf" fill="#76aba6">
+  <!-- Right Calve -->
+  <g id="r-calve" class="Calve" fill="#76aba6">
     <rect x="98" y="160" width="11.5" height="28.6" />
   </g>
 
