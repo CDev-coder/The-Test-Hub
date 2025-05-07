@@ -4,7 +4,7 @@ The app provides visual feedback and updates in real time as users create or mod
 This project combines logic-driven state management with a smooth interactive experience.
 
 ## Functions
-Users can individually select atoms and bonds to drop on the reaction zone. Users can remove each dropped item or clear the reaction zone on the "Clear" button.  
+Users can individually select atoms and bonds to drop on the reaction zone. Users can remove each dropped item or clear the reaction zone using the "Clear" button.  
 
 ## Feature
 - Drag and drop atoms to the canvas to construct molecules
