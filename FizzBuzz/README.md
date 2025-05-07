@@ -13,8 +13,7 @@ Enter a number to generate a dynamic FizzBuzz sequence
 ## Built With
 - Vite / Create React App
 - React
+- Redux
 - TypeScript 
 - CSS Modules / Tailwind / Styled Components 
 - Netlify
-
-
