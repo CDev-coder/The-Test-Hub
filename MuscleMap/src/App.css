@@ -1,3 +1,19 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow:wght@400;500&family=Bebas+Neue&display=swap');
+
+body {
+  font-family: 'Barlow', sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5 {
+  font-family: 'Bebas Neue', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
 .muscleContainer_parent {
   display: flex;
   justify-content: center;
@@ -21,15 +37,16 @@
 }
 
 .muscleLabel{
-    position: absolute;
-      top: 0;
-      left: 50%;
-      transform: translate(-50%, -100%);
-      font-weight: bold;
-      font-size: 3rem;
-      color: #444;
-      white-space: nowrap;
-      pointer-events: none;
+  font-family: 'Barlow', sans-serif;
+  position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translate(-50%, -100%);
+    font-weight: bold;
+    font-size: 3rem;
+    color: #444;
+    white-space: nowrap;
+    pointer-events: none;
 }
 
 .muscleInfoBox {
@@ -45,6 +62,7 @@
 }
 
 .muscleInfoBox h3 {
+  font-family: 'Barlow', sans-serif;
   font-size: 1.1rem;
   color: #333;
 }
