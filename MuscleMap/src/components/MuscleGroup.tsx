@@ -108,6 +108,7 @@ export const MuscleGroup = ({}: MuscleGroupProps) => {
 
       // Touch start
       const onTouchStart = (e: { preventDefault: () => void }) => {
+        console.log("TOUCHING BOD");
         e.preventDefault();
         handleEnter(svg.id, group);
         setTimeout(() => {
