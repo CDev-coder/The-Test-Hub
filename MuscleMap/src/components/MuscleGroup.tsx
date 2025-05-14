@@ -6,6 +6,7 @@ import { useMuscleData } from "../hooks/useMuscleData"; // Import the hook
 import useIsMobile from "../utils/useIsMobile";
 import { useSelector } from "react-redux";
 import { RootState } from "../store";
+import { useGesture } from "@use-gesture/react";
 
 const TypedFrontSVG = FrontSVG as React.FC<React.SVGProps<SVGSVGElement>>;
 const TypedBackSVG = BackSVG as React.FC<React.SVGProps<SVGSVGElement>>;
@@ -26,7 +27,7 @@ export const MuscleGroup = ({}: MuscleGroupProps) => {
   const originalColors = useRef<Map<string, string>>(new Map());
   const frontRef = useRef<SVGSVGElement | null>(null);
   const backRef = useRef<SVGSVGElement | null>(null);
-
+  const touchTimer = useRef<number | null>(null);
   ///Find if mobile
   const isMobile = useIsMobile();
   const currentBodyView = useSelector(
@@ -37,7 +38,11 @@ export const MuscleGroup = ({}: MuscleGroupProps) => {
   const { data, isLoading, error } = useMuscleData(hoveredId);
 
   const handleEnter = (svgLayer: string, group: SVGGElement) => {
+    console.log("handleEnter");
+    console.log("HE group: ", group);
+
     const id = group.getAttribute("class");
+    console.log("HE id: ", id);
     if (!id) return;
     setHoveredId(id);
 
@@ -141,6 +146,83 @@ export const MuscleGroup = ({}: MuscleGroupProps) => {
       cleanupBack?.();
     };
   }, []);
+
+  // Helper to find which SVG contains the muscle group
+  const getSvgId = (group: SVGGElement): string => {
+    return group.closest("svg")?.id || "";
+  };
+
+  // Create a single gesture configuration
+  const bind = useGesture({
+    onHover: ({ hovering, event }) => {
+      console.log("ON HOVER");
+      const target = (event?.target as HTMLElement)
+        ?.parentElement as unknown as SVGGElement;
+      if (!target?.tagName || target.tagName !== "g") return;
+
+      if (hovering) {
+        handleEnter(getSvgId(target), target);
+      } else {
+        handleLeave(target);
+      }
+    },
+    onTouchStart: ({ event }) => {
+      console.log("ON onTouchStart");
+      event.preventDefault();
+      console.log("event?.target", event);
+      const target = (event?.target as HTMLElement)
+        ?.parentElement as unknown as SVGGElement;
+      if (!target?.tagName || target.tagName !== "g") return;
+
+      handleEnter(getSvgId(target), target);
+      if (touchTimer.current) clearTimeout(touchTimer.current);
+      touchTimer.current = window.setTimeout(() => {
+        handleLeave(target);
+      }, 1500);
+    },
+  });
+
+  useEffect(() => {
+    const applyBindings = (svg: SVGSVGElement) => {
+      // Get all direct child elements of the SVG
+      const groups = svg.querySelectorAll(
+        ":scope > g"
+      ) as NodeListOf<SVGGElement>;
+      const gestureProps = bind();
+
+      groups.forEach((group) => {
+        Object.entries(gestureProps).forEach(([event, handler]) => {
+          if (typeof handler === "function") {
+            const eventName = event.toLowerCase().replace(/^on/, "");
+            group.addEventListener(
+              eventName,
+              handler as unknown as EventListener
+            );
+          }
+        });
+      });
+
+      return () => {
+        groups.forEach((group) => {
+          Object.entries(gestureProps).forEach(([event, handler]) => {
+            if (typeof handler === "function") {
+              const eventName = event.toLowerCase().replace(/^on/, "");
+              group.removeEventListener(
+                eventName,
+                handler as unknown as EventListener
+              );
+            }
+          });
+        });
+      };
+    };
+
+    const cleanups: (() => void)[] = [];
+    if (frontRef.current) cleanups.push(applyBindings(frontRef.current));
+    if (backRef.current) cleanups.push(applyBindings(backRef.current));
+
+    return () => cleanups.forEach((cleanup) => cleanup());
+  }, [bind]);
 
   return (
     <div className="muscleContainer_parent">
