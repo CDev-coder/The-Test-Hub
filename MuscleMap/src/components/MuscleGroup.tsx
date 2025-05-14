@@ -31,8 +31,8 @@ export const MuscleGroup = ({}: MuscleGroupProps) => {
   const handleEnter = (svgLayer: string, group: SVGGElement) => {
     const id = group.getAttribute("class");
     if (!id) return;
-    console.log(group);
-
+    //console.log(group);
+    console.log("ENTER id: ", id);
     setHoveredId(id);
 
     // Get the bounding box of the group element to position the info box
