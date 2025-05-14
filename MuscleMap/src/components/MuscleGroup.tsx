@@ -82,58 +82,53 @@ export const MuscleGroup = ({}: MuscleGroupProps) => {
     }
   };
 
-  const attachHoverListeners = (
-    svgRef: React.RefObject<SVGSVGElement | null>
-  ) => {
+  const attachHoverListeners = (svgRef: any) => {
     const svg = svgRef.current;
     if (!svg) return;
-    console.log("svg", svg.id);
-    const groups = svg.querySelectorAll("g[id]");
-    const enterHandlers: { group: Element; handler: EventListener }[] = [];
-    const leaveHandlers: { group: Element; handler: EventListener }[] = [];
-    const touchHandlers: { group: Element; handler: EventListener }[] = [];
 
-    groups.forEach((group) => {
-      const enter = (e: Event) => {
-        const evt = e as PointerEvent;
-        if (evt.pointerType === "mouse") {
-          handleEnter(svg.id, group as SVGGElement);
+    const groups = svg.querySelectorAll("g[id]");
+    const handlers: (() => void)[] = [];
+
+    groups.forEach((group: SVGGElement) => {
+      // Ensure the group can receive pointer events
+      group.setAttribute("pointer-events", "all");
+
+      // Mouse enter/leave
+      const onPointerEnter = (e: { pointerType: string }) => {
+        if (e.pointerType === "mouse") {
+          handleEnter(svg.id, group);
         }
       };
-      const leave = (e: Event) => {
-        const evt = e as PointerEvent;
-        if (evt.pointerType === "mouse") {
-          handleLeave(group as SVGGElement);
+
+      const onPointerLeave = (e: { pointerType: string }) => {
+        if (e.pointerType === "mouse") {
+          handleLeave(group);
         }
       };
-      const touch = (e: Event) => {
-        e.preventDefault(); // optional: prevent unintended zoom or scrolling
-        handleEnter(svg.id, group as SVGGElement);
+
+      // Touch start
+      const onTouchStart = (e: { preventDefault: () => void }) => {
+        e.preventDefault();
+        handleEnter(svg.id, group);
         setTimeout(() => {
-          handleLeave(group as SVGGElement);
+          handleLeave(group);
         }, 1500);
       };
 
-      group.addEventListener("pointerenter", enter);
-      group.addEventListener("pointerleave", leave);
-      group.addEventListener("touchstart", touch);
-      (group as HTMLElement).style.cursor = "pointer";
+      group.addEventListener("pointerenter", onPointerEnter);
+      group.addEventListener("pointerleave", onPointerLeave);
+      group.addEventListener("touchstart", onTouchStart, { passive: false });
 
-      enterHandlers.push({ group, handler: enter });
-      leaveHandlers.push({ group, handler: leave });
-      touchHandlers.push({ group, handler: touch });
+      handlers.push(() => {
+        group.removeEventListener("pointerenter", onPointerEnter);
+        group.removeEventListener("pointerleave", onPointerLeave);
+        group.removeEventListener("touchstart", onTouchStart);
+      });
     });
 
+    // Return a cleanup function
     return () => {
-      enterHandlers.forEach(({ group, handler }) =>
-        group.removeEventListener("pointerenter", handler)
-      );
-      leaveHandlers.forEach(({ group, handler }) =>
-        group.removeEventListener("pointerleave", handler)
-      );
-      touchHandlers.forEach(({ group, handler }) =>
-        group.removeEventListener("pointerdown", handler)
-      );
+      handlers.forEach((removeHandler) => removeHandler());
     };
   };
 
