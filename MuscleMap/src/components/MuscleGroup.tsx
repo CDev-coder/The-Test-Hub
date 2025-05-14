@@ -107,18 +107,16 @@ export const MuscleGroup = ({}: MuscleGroupProps) => {
         }
       };
       const touch = (e: Event) => {
-        const evt = e as PointerEvent;
-        if (evt.pointerType === "touch") {
-          handleEnter(svg.id, group as SVGGElement);
-          setTimeout(() => {
-            handleLeave(group as SVGGElement);
-          }, 1500);
-        }
+        e.preventDefault(); // optional: prevent unintended zoom or scrolling
+        handleEnter(svg.id, group as SVGGElement);
+        setTimeout(() => {
+          handleLeave(group as SVGGElement);
+        }, 1500);
       };
 
       group.addEventListener("pointerenter", enter);
       group.addEventListener("pointerleave", leave);
-      group.addEventListener("pointerdown", touch);
+      group.addEventListener("touchstart", touch);
       (group as HTMLElement).style.cursor = "pointer";
 
       enterHandlers.push({ group, handler: enter });
