@@ -3,13 +3,15 @@ import shadow from "../assets/Body_Shadow.svg";
 import FrontSVG from "../assets/Body_F.svg?react";
 import BackSVG from "../assets/Body_B.svg?react";
 import { useMuscleData } from "../hooks/useMuscleData"; // Import the hook
+import useIsMobile from "../utils/useIsMobile";
+import { useSelector } from "react-redux";
+import { RootState } from "../store";
 
 const TypedFrontSVG = FrontSVG as React.FC<React.SVGProps<SVGSVGElement>>;
 const TypedBackSVG = BackSVG as React.FC<React.SVGProps<SVGSVGElement>>;
 
 type MuscleGroupProps = {
   size: string;
-  isMobile: boolean;
 };
 
 export const MuscleGroup = ({}: MuscleGroupProps) => {
@@ -20,10 +22,16 @@ export const MuscleGroup = ({}: MuscleGroupProps) => {
     right?: number;
     muscleGroup: string;
   }>({ top: 0, left: 0, muscleGroup: "front", right: 0 });
-  const originalColors = useRef<Map<string, string>>(new Map());
 
+  const originalColors = useRef<Map<string, string>>(new Map());
   const frontRef = useRef<SVGSVGElement | null>(null);
   const backRef = useRef<SVGSVGElement | null>(null);
+
+  ///Find if mobile
+  const isMobile = useIsMobile();
+  const currentBodyView = useSelector(
+    (state: RootState) => state.view.currentBodyView
+  );
 
   // Use the hook to fetch muscle data based on hoveredId
   const { data, isLoading, error } = useMuscleData(hoveredId);
@@ -31,8 +39,6 @@ export const MuscleGroup = ({}: MuscleGroupProps) => {
   const handleEnter = (svgLayer: string, group: SVGGElement) => {
     const id = group.getAttribute("class");
     if (!id) return;
-    //console.log(group);
-    console.log("ENTER id: ", id);
     setHoveredId(id);
 
     // Get the bounding box of the group element to position the info box
@@ -119,21 +125,55 @@ export const MuscleGroup = ({}: MuscleGroupProps) => {
 
   return (
     <div className="muscleContainer_parent">
-      <div className="muscleContainer_child" id="frontGroup">
-        <div className="muscleLabel">Front</div>
+      {isMobile && (
+        <>
+          {currentBodyView === "front" && (
+            <div className="muscleContainer_child" id="frontGroup">
+              <div className="muscleLabel">Front</div>
+              <img
+                src={shadow}
+                className="bodyLayer scaledImage"
+                alt="shadow"
+              />
+              <div className="muscleLayer">
+                <TypedFrontSVG ref={frontRef} />
+              </div>
+            </div>
+          )}
+          {currentBodyView === "back" && (
+            <div className="muscleContainer_child" id="backGroup">
+              <div className="muscleLabel">Back</div>
+              <img
+                src={shadow}
+                className="bodyLayer scaledImage"
+                alt="shadow"
+              />
+              <div className="muscleLayer">
+                <TypedBackSVG ref={backRef} />
+              </div>
+            </div>
+          )}
+        </>
+      )}
+      {!isMobile && (
+        <>
+          <div className="muscleContainer_child" id="frontGroup">
+            <div className="muscleLabel">Front</div>
+            <img src={shadow} className="bodyLayer scaledImage" alt="shadow" />
+            <div className="muscleLayer">
+              <TypedFrontSVG ref={frontRef} />
+            </div>
+          </div>
+          <div className="muscleContainer_child" id="backGroup">
+            <div className="muscleLabel">Back</div>
+            <img src={shadow} className="bodyLayer scaledImage" alt="shadow" />
+            <div className="muscleLayer">
+              <TypedBackSVG ref={backRef} />
+            </div>
+          </div>
+        </>
+      )}
 
-        <img src={shadow} className="bodyLayer scaledImage" alt="shadow" />
-        <div className="muscleLayer">
-          <TypedFrontSVG ref={frontRef} />
-        </div>
-      </div>
-      <div className="muscleContainer_child" id="backGroup">
-        <div className="muscleLabel">Back</div>
-        <img src={shadow} className="bodyLayer scaledImage" alt="shadow" />
-        <div className="muscleLayer">
-          <TypedBackSVG ref={backRef} />
-        </div>
-      </div>
       {hoveredId && (
         <div
           className="muscleInfoBox"

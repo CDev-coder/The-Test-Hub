@@ -1,7 +1,7 @@
-@import url('https://fonts.googleapis.com/css2?family=Barlow:wght@400;500&family=Bebas+Neue&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Barlow:wght@400;500&family=Bebas+Neue&display=swap");
 
 body {
-  font-family: 'Barlow', sans-serif;
+  font-family: "Barlow", sans-serif;
 }
 
 h1,
@@ -9,9 +9,26 @@ h2,
 h3,
 h4,
 h5 {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: "Bebas Neue", sans-serif;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+}
+
+.mobileButtonWrapper {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 9999;
+  pointer-events: auto;
+}
+
+.bodyButton {
+  padding: 8px 12px;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-weight: bold;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 }
 
 .muscleContainer_parent {
@@ -22,7 +39,7 @@ h5 {
 .muscleContainer_child {
   position: relative;
   transform: scale(0.8);
-  transform-Origin: center;
+  transform-origin: center;
 }
 
 .muscleLayer {
@@ -31,22 +48,22 @@ h5 {
   left: 0;
 }
 
-.scaledImage{
+.scaledImage {
   width: auto;
   height: auto;
 }
 
-.muscleLabel{
-  font-family: 'Barlow', sans-serif;
+.muscleLabel {
+  font-family: "Barlow", sans-serif;
   position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translate(-50%, -100%);
-    font-weight: bold;
-    font-size: 3rem;
-    color: #444;
-    white-space: nowrap;
-    pointer-events: none;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, -100%);
+  font-weight: bold;
+  font-size: 3rem;
+  color: #444;
+  white-space: nowrap;
+  pointer-events: none;
 }
 
 .muscleInfoBox {
@@ -62,7 +79,7 @@ h5 {
 }
 
 .muscleInfoBox h3 {
-  font-family: 'Barlow', sans-serif;
+  font-family: "Barlow", sans-serif;
   font-size: 1.1rem;
   color: #333;
 }

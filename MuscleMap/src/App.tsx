@@ -1,11 +1,13 @@
 import "./App.css";
 import { MuscleGroup } from "./components/MuscleGroup";
+import { MobileFixedButton } from "./components/MobileFixedButton";
 
 function App() {
   return (
     <>
       <div className="parentLayer">
-        <MuscleGroup size="medium" isMobile={false} />
+        <MobileFixedButton />
+        <MuscleGroup size="medium" />
       </div>
     </>
   );
