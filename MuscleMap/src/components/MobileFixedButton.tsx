@@ -19,7 +19,7 @@ export const MobileFixedButton = () => {
               dispatch(toggleView());
             }}
           >
-            View
+            Change View
           </button>
         </div>
       )}

@@ -19,10 +19,13 @@ export const MuscleGroup = ({}: MuscleGroupProps) => {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [infoBoxPosition, setInfoBoxPosition] = useState<{
     top: number;
-    left?: number;
-    right?: number;
-    muscleGroup: string;
-  }>({ top: 0, left: 0, muscleGroup: "front", right: 0 });
+    direction: string;
+    distance: number;
+  }>({
+    direction: "left",
+    distance: 0,
+    top: 0,
+  });
 
   const originalColors = useRef<Map<string, string>>(new Map());
   const frontRef = useRef<SVGSVGElement | null>(null);
@@ -37,12 +40,9 @@ export const MuscleGroup = ({}: MuscleGroupProps) => {
   // Use the hook to fetch muscle data based on hoveredId
   const { data, isLoading, error } = useMuscleData(hoveredId);
 
-  const handleEnter = (svgLayer: string, group: SVGGElement, event: any) => {
-    console.log("handleEnter");
-    console.log("HE group: ", group);
-
+  const handleEnter = (group: SVGGElement, event: any) => {
+    //console.log("handleEnter");
     const id = group.getAttribute("class");
-    console.log("HE id: ", id);
     if (!id) return;
     setHoveredId(id);
 
@@ -50,41 +50,31 @@ export const MuscleGroup = ({}: MuscleGroupProps) => {
     const rect = group.getBoundingClientRect();
 
     if (isMobile) {
-      if (svgLayer == "frontGroup") {
-        console.log(
-          "HE event.changedTouches[0].pageX: " +
-            event.changedTouches[0].pageX +
-            " event.pageY: " +
-            event.changedTouches[0].pageY
-        );
-        setInfoBoxPosition({
-          top: event.changedTouches[0].pageY,
-          left: event.changedTouches[0].pageX,
-          muscleGroup: "front",
-        });
-      } else {
-        setInfoBoxPosition({
-          top: rect.top - 70,
-          left: rect.left - (rect.width + 200),
-          muscleGroup: "back",
-        });
-      }
+      const halfWidth = window.innerWidth / 2;
+      const direction =
+        event.changedTouches[0].pageX < halfWidth ? "left" : "right";
+      const distance =
+        direction == "left"
+          ? event.changedTouches[0].pageX
+          : event.changedTouches[0].pageX - (rect.width + 55);
+
+      setInfoBoxPosition({
+        top: event.changedTouches[0].pageY,
+        direction: direction,
+        distance: distance,
+      });
     } else {
-      if (svgLayer == "frontGroup") {
-        console.log("L p: ", rect.right + rect.width / 2);
-        setInfoBoxPosition({
-          top: rect.top - 70,
-          left: rect.right + rect.width / 2,
-          muscleGroup: "front",
-        });
-      } else {
-        console.log("R p: ", rect.left);
-        setInfoBoxPosition({
-          top: rect.top - 70,
-          left: rect.left - (rect.width + 200),
-          muscleGroup: "back",
-        });
-      }
+      const halfWidth = window.innerWidth / 2;
+      const direction = event.pageX < halfWidth ? "left" : "right";
+      const distance =
+        direction == "left"
+          ? event.pageX + rect.width / 2
+          : window.innerWidth - event.pageX + rect.width;
+      setInfoBoxPosition({
+        top: event.pageY,
+        direction: direction,
+        distance: distance,
+      });
     }
 
     const originalColor = group.getAttribute("fill");
@@ -99,9 +89,7 @@ export const MuscleGroup = ({}: MuscleGroupProps) => {
   const handleLeave = (group: SVGGElement) => {
     const id = group.getAttribute("class");
     if (!id) return;
-
     setHoveredId(null);
-
     const originalColor = originalColors.current.get(id);
     if (originalColor) {
       group.setAttribute("fill", originalColor);
@@ -117,43 +105,25 @@ export const MuscleGroup = ({}: MuscleGroupProps) => {
     const handlers: (() => void)[] = [];
 
     groups.forEach((group: SVGGElement) => {
-      // Ensure the group can receive pointer events
       group.setAttribute("pointer-events", "all");
-
       // Mouse enter/leave
       const onPointerEnter = (e: { pointerType: string }) => {
         if (e.pointerType === "mouse") {
-          handleEnter(svg.id, group, e);
+          handleEnter(group, e);
         }
       };
-
       const onPointerLeave = (e: { pointerType: string }) => {
         if (e.pointerType === "mouse") {
           handleLeave(group);
         }
       };
-
-      // Touch start
-      const onTouchStart = (e: { preventDefault: () => void }) => {
-        console.log("TOUCHING BOD");
-        e.preventDefault();
-        handleEnter(svg.id, group, e);
-        setTimeout(() => {
-          handleLeave(group);
-        }, 1500);
-      };
-
       group.addEventListener("pointerenter", onPointerEnter);
       group.addEventListener("pointerleave", onPointerLeave);
-      group.addEventListener("touchstart", onTouchStart, { passive: false });
-
       handlers.push(() => {
         group.removeEventListener("pointerenter", onPointerEnter);
         group.removeEventListener("pointerleave", onPointerLeave);
-        group.removeEventListener("touchstart", onTouchStart);
       });
     });
-
     // Return a cleanup function
     return () => {
       handlers.forEach((removeHandler) => removeHandler());
@@ -169,38 +139,29 @@ export const MuscleGroup = ({}: MuscleGroupProps) => {
     };
   }, []);
 
-  // Helper to find which SVG contains the muscle group
-  const getSvgId = (group: SVGGElement): string => {
-    return group.closest("svg")?.id || "";
-  };
-
   // Create a single gesture configuration
   const bind = useGesture({
     onHover: ({ hovering, event }) => {
-      console.log("ON HOVER");
       const target = (event?.target as HTMLElement)
         ?.parentElement as unknown as SVGGElement;
       if (!target?.tagName || target.tagName !== "g") return;
-
       if (hovering) {
-        handleEnter(getSvgId(target), target, event);
+        handleEnter(target, event);
       } else {
         handleLeave(target);
       }
     },
     onTouchStart: ({ event }) => {
-      console.log("ON onTouchStart");
       event.preventDefault();
-      console.log("event?.target", event);
       const target = (event?.target as HTMLElement)
         ?.parentElement as unknown as SVGGElement;
       if (!target?.tagName || target.tagName !== "g") return;
 
-      handleEnter(getSvgId(target), target, event);
+      handleEnter(target, event);
       if (touchTimer.current) clearTimeout(touchTimer.current);
       touchTimer.current = window.setTimeout(() => {
         handleLeave(target);
-      }, 1500);
+      }, 2000);
     },
   });
 
@@ -300,17 +261,10 @@ export const MuscleGroup = ({}: MuscleGroupProps) => {
       {hoveredId && (
         <div
           className="muscleInfoBox"
-          style={
-            infoBoxPosition.muscleGroup == "front"
-              ? {
-                  top: `${infoBoxPosition.top}px`,
-                  left: `${infoBoxPosition.left}px`,
-                }
-              : {
-                  top: `${infoBoxPosition.top}px`,
-                  left: `${infoBoxPosition.left}px`,
-                }
-          }
+          style={{
+            top: `${infoBoxPosition.top}px`,
+            [infoBoxPosition.direction]: `${infoBoxPosition.distance}px`,
+          }}
         >
           {isLoading && <p>Loading muscle info...</p>}
           {error && <p>Error: {(error as Error).message}</p>}

@@ -176,7 +176,7 @@ const getTargetMuscleName = (groupId: string): string | null => {
 };
 
 const fetchMuscleData = async (groupId: string): Promise<MuscleInfo> => {
-  console.log("FETCHING groupId: ", groupId);
+  //console.log("FETCHING groupId: ", groupId);
   const returnData = localMuscleData[groupId];
   const target = getTargetMuscleName(groupId);
   if (!target) throw new Error(`No API mapping for groupId: ${groupId}`);
@@ -187,15 +187,15 @@ const fetchMuscleData = async (groupId: string): Promise<MuscleInfo> => {
   }
 
   const server_response = await fetch(`${targetAPI}${target}/exercises`);
-  console.log("fetchMuscleData with res: ", server_response);
+  //console.log("fetchMuscleData with res: ", server_response);
 
   if (!server_response.ok) throw new Error("Failed to fetch exercises");
 
   const dataJson = await server_response.json(); //Lets build that local muscle data Obj
-  console.log("fetchMuscleData with dataJson: ", dataJson);
+  //console.log("fetchMuscleData with dataJson: ", dataJson);
 
   let exercises = dataJson.data.exercises.slice(0, 4).map((ex: any) => ex.name);
-  console.log("list of exercises: ", exercises);
+  //console.log("list of exercises: ", exercises);
   if (target == "abs") {
     if (groupId == "Obliques") {
       exercises = dataJson.data.exercises

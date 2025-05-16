@@ -22,7 +22,7 @@
 
   <!-- Upper Back -->
   <g id="upperBack" class="UpperBack" fill="#7B68EE"> <!-- Medium Slate Blue -->
-    <rect x="78.5" y="50.2" width="22.9" height="22" />
+    <rect x="78.5" y="50.2" width="22.9" height="40" />
   </g>
 
   <!-- Left Lat -->
@@ -33,11 +33,6 @@
   <!-- Right Lat -->
   <g id="right-Lat" class="Lats" fill="#4682B4">
     <rect x="101.9" y="49" width="8" height="30" />
-  </g>
-
-  <!-- Lower Back -->
-  <g id="lowerBack" class="LowerBack" fill="#7B68EE">
-    <rect x="78.5" y="74" width="22.9" height="26" />
   </g>
 
   <!-- Left Tricep -->
@@ -52,22 +47,22 @@
 
   <!-- Left Hamstring -->
   <g id="leftHam" class="Hamstring" fill="#48D1CC"> <!-- Medium Turquoise -->
-    <rect x="68" y="115" width="15.5" height="40.1" />
+    <rect x="71" y="103" width="16" height="40.1" />
   </g>
 
   <!-- Right Hamstring -->
   <g id="rightHam" class="Hamstring" fill="#48D1CC">
-    <rect x="96" y="115" width="15.5" height="40.1" />
+    <rect x="93" y="103" width="16" height="40.1" />
   </g>
 
   <!-- Left Calve -->
   <g id="l-calve" class="Calve" fill="#76aba6"> 
-    <rect x="70" y="160" width="11.5" height="28.6" />
+    <rect x="75" y="145" width="11.5" height="28.6" />
   </g>
 
   <!-- Right Calve -->
   <g id="r-calve" class="Calve" fill="#76aba6">
-    <rect x="98" y="160" width="11.5" height="28.6" />
+    <rect x="94" y="145" width="11.5" height="28.6" />
   </g>
 
 </svg>

@@ -53,6 +53,16 @@ h5 {
   height: auto;
 }
 
+.bodyLayer {
+  width: 500px;
+  height: 600px;
+}
+#frontGroup,
+#backGroup {
+  width: 500px;
+  height: 650px;
+}
+
 .muscleLabel {
   font-family: "Barlow", sans-serif;
   position: absolute;
