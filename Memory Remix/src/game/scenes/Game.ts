@@ -1,6 +1,6 @@
 import { Scene } from "phaser";
 import { CARDS, COLS, ROWS, TIMEOUT } from "../utils/constants";
-import Card from "./prefabs/Cards";
+import Card from "../prefabs/Cards";
 
 export class Game extends Scene {
     background: Phaser.GameObjects.Image;
@@ -8,8 +8,21 @@ export class Game extends Scene {
     openCardCount: number;
     timeout: any;
 
+    // Add these properties to hold your parameters
+    gameMode: string = "Quick"; // Default value
+    playerCount: number = 1;
+
     constructor() {
         super("Game");
+    }
+
+    init(data: { gameMode?: string; playerCount?: number }) {
+        // Set parameters with default fallbacks
+        this.gameMode = data.gameMode || "Quick";
+        this.playerCount = data.playerCount || 1;
+
+        console.log(`Starting game with gameMode: ${this.gameMode}`);
+        console.log(`Player count: ${this.playerCount}`);
     }
 
     preload() {
@@ -64,26 +77,48 @@ export class Game extends Scene {
     }
 
     getCardsPosition(): { x: number; y: number; delay: number }[] {
-        const cardWidth = 196 + 5;
-        const cardHeight = 306 + 5;
-        const positions = [];
-        const offsetX =
-            (+this.sys.game.config.width - cardWidth * COLS) / 2 +
-            cardWidth / 2;
-        const offsetY =
-            (+this.sys.game.config.height - cardHeight * ROWS) / 2 +
-            cardHeight / 2;
+        // Card dimensions with padding
+        const cardWidth = 196 + 5; // Width + extra margin
+        const cardHeight = 306 + 5; // Height + extra margin
 
+        // Get current game dimensions
+        const gameWidth = this.scale.width;
+        const gameHeight = this.scale.height;
+
+        // Calculate total grid width/height
+        const gridWidth = cardWidth * COLS;
+        const gridHeight = cardHeight * ROWS;
+
+        // Calculate dynamic scale factor
+        const scaleFactor = Math.min(
+            gameWidth / (gridWidth + 40),
+            gameHeight / (gridHeight + 40),
+            1
+        );
+
+        // Apply scaling if needed (for smaller screens)
+        const scaledCardWidth = cardWidth * scaleFactor;
+        const scaledCardHeight = cardHeight * scaleFactor;
+
+        // Calculate centered offsets
+        const offsetX =
+            (gameWidth - scaledCardWidth * COLS) / 2 + scaledCardWidth / 2;
+        const offsetY =
+            (gameHeight - scaledCardHeight * ROWS) / 2 + scaledCardHeight / 2;
+
+        const positions = [];
         let id = 0;
+
         for (let r = 0; r < ROWS; r++) {
             for (let c = 0; c < COLS; c++) {
                 positions.push({
-                    x: offsetX + c * cardWidth,
-                    y: offsetY + r * cardHeight,
+                    x: offsetX + c * scaledCardWidth,
+                    y: offsetY + r * scaledCardHeight,
                     delay: ++id * 100,
                 });
             }
         }
+
         Phaser.Utils.Array.Shuffle(positions);
         return positions;
     }
@@ -98,8 +133,6 @@ export class Game extends Scene {
             console.log("Card-" + index + " position: ", position);
             if (position != undefined)
                 card.init(position.x, position.y, position.delay);
-
-            // card.setPosition(card.positionX, card.positionY);
         });
     }
 
@@ -113,19 +146,10 @@ export class Game extends Scene {
         this.input.on("gameobjectdown", this.onCardClicked, this);
     }
 
-    ////Lets Make it
+    ////Lets Render it
     create() {
         const bg = this.add.image(0, 0, "background").setOrigin(0, 0);
-
-        // Option 1: Stretch to fit screen exactly (may distort)
         bg.setDisplaySize(this.scale.width, this.scale.height);
-        /*
-        const scaleX = window.innerWidth / bg.width;
-        const scaleY = window.innerHeight / bg.height;
-        const scale = Math.max(scaleX, scaleY);
-        bg.setScale(scale).setScrollFactor(0);
-        */
-
         this.createCards();
         this.start();
     }
