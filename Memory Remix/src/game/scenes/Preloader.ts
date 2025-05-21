@@ -7,25 +7,21 @@ export class Preloader extends Scene {
 
     init() {
         //  We loaded this image in our Boot Scene, so we can display it here
-        console.log("window.innerWidth: ", window.innerWidth);
-
-        /*this.add.image(
+        this.add.image(
             window.innerWidth / 2,
             window.innerHeight / 2,
             "background"
-        );*/
-        //  We loaded this image in our Boot Scene, so we can display it here
-        this.add.image(900, 384, "background");
+        );
     }
 
     preload() {
         this.load.setPath("assets"); //Assign a path pre fix.
-        this.load.image("card", "card.png");
-        this.load.image("card1", "card1.png");
-        this.load.image("card2", "card2.png");
-        this.load.image("card3", "card3.png");
-        this.load.image("card4", "card4.png");
-        this.load.image("card5", "card5.png");
+        this.load.image("card", "GlitchCard_Back.png");
+        this.load.image("card1", "GlitchCard_1.png");
+        this.load.image("card2", "GlitchCard_2.png");
+        this.load.image("card3", "GlitchCard_3.png");
+        this.load.image("card4", "GlitchCard_4.png");
+        this.load.image("card5", "GlitchCard_5.png");
     }
 
     create() {

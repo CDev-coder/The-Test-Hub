@@ -8,19 +8,19 @@ import { Preloader } from "./scenes/Preloader";
 //  https://newdocs.phaser.io/docs/3.70.0/Phaser.Types.Core.GameConfig
 const config: Phaser.Types.Core.GameConfig = {
     type: AUTO,
-    width: 1280,
-    height: 720,
+    width: 1024,
+    height: 768,
     parent: "game-container",
-    backgroundColor: "#ffffff",
+    backgroundColor: "#000000",
     scale: {
-        width: 1280,
-        height: 720,
+        width: 1024,
+        height: 768,
     },
     render: {
         antialiasGL: false,
         pixelArt: true,
     },
-    canvasStyle: `display: block; width: 100%; height: 100%;`,
+    canvasStyle: "display: block; margin: 0 auto;",
     autoFocus: true,
     audio: {
         disableWebAudio: false,

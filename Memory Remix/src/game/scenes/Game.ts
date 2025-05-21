@@ -115,12 +115,17 @@ export class Game extends Scene {
 
     ////Lets Make it
     create() {
-        //this.background = this.add.image(0, 0, "background").setOrigin(0, 0);
-        this.background = this.add.image(
-            window.innerWidth / 2,
-            window.innerHeight / 2,
-            "background"
-        );
+        const bg = this.add.image(0, 0, "background").setOrigin(0, 0);
+
+        // Option 1: Stretch to fit screen exactly (may distort)
+        bg.setDisplaySize(this.scale.width, this.scale.height);
+        /*
+        const scaleX = window.innerWidth / bg.width;
+        const scaleY = window.innerHeight / bg.height;
+        const scale = Math.max(scaleX, scaleY);
+        bg.setScale(scale).setScrollFactor(0);
+        */
+
         this.createCards();
         this.start();
     }
