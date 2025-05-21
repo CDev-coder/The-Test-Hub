@@ -7,6 +7,7 @@ export class Game extends Scene {
     openedCard: null | Card = null;
     openCardCount: number;
     timeout: any;
+    cards: Card[] = [];
 
     // Add these properties to hold your parameters
     gameMode: string = "Quick"; // Default value
@@ -122,8 +123,6 @@ export class Game extends Scene {
         Phaser.Utils.Array.Shuffle(positions);
         return positions;
     }
-
-    cards: Card[] = [];
 
     initCards() {
         const positions = this.getCardsPosition();
