@@ -4,6 +4,7 @@ class Card extends Phaser.GameObjects.Sprite {
     positionY = 0;
     delay = 0;
     value = 0;
+    baseScale: number = 1; // Add this line to track scale
 
     constructor(scene: Phaser.Scene, value: number) {
         super(scene, 0, 0, "card");
@@ -14,14 +15,13 @@ class Card extends Phaser.GameObjects.Sprite {
         this.setInteractive();
     }
 
+    // Update showCard to use baseScale
     showCard() {
-        // This line determines which texture (image) to show on the card.
         const texture = this.isOpened ? `card${this.value}` : "card";
         this.setTexture(texture);
-        // This adds another tween animation, just like in the flipCard method, to animate the card's horizontal scaling.
         this.scene.tweens.add({
             targets: this,
-            scaleX: 1,
+            scaleX: this.baseScale, // Use baseScale instead of fixed 1
             ease: "Linear",
             duration: 150,
         });
@@ -65,11 +65,13 @@ class Card extends Phaser.GameObjects.Sprite {
         });
     }
 
-    init(x: number, y: number, delay: number) {
+    init(x: number, y: number, delay: number, scale: number = 1) {
         this.positionX = x;
         this.positionY = y;
         this.delay = delay;
+        this.baseScale = scale;
         this.setPosition(-this.width, -this.height);
+        this.setScale(scale); // Apply the scale
     }
 }
 

@@ -77,35 +77,44 @@ export class Game extends Scene {
         }
     }
 
-    getCardsPosition(): { x: number; y: number; delay: number }[] {
-        // Card dimensions with padding
-        const cardWidth = 196 + 5; // Width + extra margin
-        const cardHeight = 306 + 5; // Height + extra margin
+    getCardsPosition(): {
+        x: number;
+        y: number;
+        delay: number;
+        scale: number;
+    }[] {
+        // Base dimensions (smaller for mobile)
+        const baseCardWidth = 150;
+        const baseCardHeight = 225;
+        const cardMarginX = 50;
+        const cardMarginY = 100;
 
         // Get current game dimensions
         const gameWidth = this.scale.width;
         const gameHeight = this.scale.height;
 
-        // Calculate total grid width/height
-        const gridWidth = cardWidth * COLS;
-        const gridHeight = cardHeight * ROWS;
+        // Calculate scale factor
+        const maxGridWidth = gameWidth * 0.9; // 90% of screen width
+        const maxGridHeight = gameHeight * 0.7; // 70% of screen height
 
-        // Calculate dynamic scale factor
-        const scaleFactor = Math.min(
-            gameWidth / (gridWidth + 40),
-            gameHeight / (gridHeight + 40),
-            1
-        );
+        const widthScale =
+            maxGridWidth / ((baseCardWidth + cardMarginX) * COLS);
+        const heightScale =
+            maxGridHeight / ((baseCardHeight + cardMarginY) * ROWS);
 
-        // Apply scaling if needed (for smaller screens)
-        const scaledCardWidth = cardWidth * scaleFactor;
-        const scaledCardHeight = cardHeight * scaleFactor;
+        const scaleFactor = Math.min(widthScale, heightScale, 1); // Don't scale up
 
-        // Calculate centered offsets
-        const offsetX =
-            (gameWidth - scaledCardWidth * COLS) / 2 + scaledCardWidth / 2;
-        const offsetY =
-            (gameHeight - scaledCardHeight * ROWS) / 2 + scaledCardHeight / 2;
+        // Calculate final dimensions
+        const cardWidth = baseCardWidth * scaleFactor;
+        const cardHeight = baseCardHeight * scaleFactor;
+        const marginX = cardMarginX * scaleFactor;
+        const marginY = cardMarginY * scaleFactor;
+
+        // Center the grid
+        const gridWidth = (cardWidth + marginX) * COLS;
+        const gridHeight = (cardHeight + marginY) * ROWS;
+        const offsetX = (gameWidth - gridWidth) / 2 + cardWidth / 2;
+        const offsetY = (gameHeight - gridHeight) / 2 + cardHeight / 2;
 
         const positions = [];
         let id = 0;
@@ -113,9 +122,10 @@ export class Game extends Scene {
         for (let r = 0; r < ROWS; r++) {
             for (let c = 0; c < COLS; c++) {
                 positions.push({
-                    x: offsetX + c * scaledCardWidth,
-                    y: offsetY + r * scaledCardHeight,
+                    x: offsetX + c * (cardWidth + marginX),
+                    y: offsetY + r * (cardHeight + marginY),
                     delay: ++id * 100,
+                    scale: scaleFactor,
                 });
             }
         }
@@ -124,14 +134,38 @@ export class Game extends Scene {
         return positions;
     }
 
+    handleResize() {
+        const positions = this.getCardsPosition();
+        this.cards.forEach((card, index) => {
+            const position = positions[index];
+            if (position) {
+                card.positionX = position.x;
+                card.positionY = position.y;
+                card.baseScale = position.scale;
+                this.tweens.add({
+                    targets: card,
+                    x: position.x,
+                    y: position.y,
+                    scaleX: position.scale,
+                    scaleY: position.scale,
+                    duration: 300,
+                });
+            }
+        });
+    }
+
     initCards() {
         const positions = this.getCardsPosition();
-        Phaser.Utils.Array.Shuffle(positions);
         this.cards.forEach((card, index) => {
-            const position = positions.pop();
-            console.log("Card-" + index + " position: ", position);
-            if (position != undefined)
-                card.init(position.x, position.y, position.delay);
+            const position = positions[index];
+            if (position) {
+                card.init(
+                    position.x,
+                    position.y,
+                    position.delay,
+                    position.scale
+                );
+            }
         });
     }
 
@@ -151,5 +185,7 @@ export class Game extends Scene {
         bg.setDisplaySize(this.scale.width, this.scale.height);
         this.createCards();
         this.start();
+        // Add resize listener
+        this.scale.on("resize", this.handleResize, this);
     }
 }

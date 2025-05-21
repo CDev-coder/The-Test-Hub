@@ -32,6 +32,8 @@ const createConfig = (parent: string): Phaser.Types.Core.GameConfig => {
 
     return {
         type: AUTO,
+        width: window.innerWidth, // Use current window size
+        height: window.innerHeight,
         parent: parent,
         backgroundColor: "#000000",
         render: {
@@ -39,10 +41,10 @@ const createConfig = (parent: string): Phaser.Types.Core.GameConfig => {
             pixelArt: true,
         },
         scale: {
-            mode: Scale.ScaleModes.NONE, // We'll handle scaling manually
+            mode: Scale.RESIZE, // Add this for automatic resizing
+            autoCenter: Scale.CENTER_BOTH,
             width: gameSize.width,
             height: gameSize.height,
-            autoCenter: Scale.CENTER_BOTH,
         },
         canvasStyle: `display: block; width: 100%; height: 100%;`,
         autoFocus: true,

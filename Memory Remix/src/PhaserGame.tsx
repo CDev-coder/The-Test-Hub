@@ -118,7 +118,6 @@ export const PhaserGame = forwardRef<IRefPhaserGame, IProps>(
                     width: "100vw",
                     height: "100vh",
                     overflow: "hidden",
-                    position: "relative",
                 }}
             />
         );
