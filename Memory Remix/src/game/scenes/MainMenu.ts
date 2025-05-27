@@ -26,11 +26,11 @@ export class MainMenu extends Scene {
             .setOrigin(0.5)
             .setDepth(100);
 
-        const playButton = this.add
+        const singlePlayerQuickPlay = this.add
             .text(
                 this.scale.width / 2,
                 this.scale.height / 4 + 100,
-                "Quick Play",
+                "1 Player Quick Play",
                 {
                     fontSize: "32px",
                     color: "#ffffff",
@@ -40,12 +40,43 @@ export class MainMenu extends Scene {
             )
             .setOrigin(0.5)
             .setInteractive()
-            .on("pointerover", () => playButton.setStyle({ fill: "#ff0" })) // Hover effect
-            .on("pointerout", () => playButton.setStyle({ fill: "#fff" })) // Normal state
+            .on("pointerover", () =>
+                singlePlayerQuickPlay.setStyle({ fill: "#ff0" })
+            ) // Hover effect
+            .on("pointerout", () =>
+                singlePlayerQuickPlay.setStyle({ fill: "#fff" })
+            ) // Normal state
             .on("pointerdown", () =>
                 this.scene.start("Game", {
                     gameMode: "Quick",
                     playerCount: 1,
+                })
+            );
+
+        const twoPlayerQuickPlay = this.add
+            .text(
+                this.scale.width / 2,
+                this.scale.height / 4 + 160,
+                "2 Player Quick Play",
+                {
+                    fontSize: "32px",
+                    color: "#ffffff",
+                    backgroundColor: "#333333",
+                    padding: { x: 20, y: 10 },
+                }
+            )
+            .setOrigin(0.5)
+            .setInteractive()
+            .on("pointerover", () =>
+                twoPlayerQuickPlay.setStyle({ fill: "#ff0" })
+            ) // Hover effect
+            .on("pointerout", () =>
+                twoPlayerQuickPlay.setStyle({ fill: "#fff" })
+            ) // Normal state
+            .on("pointerdown", () =>
+                this.scene.start("Game", {
+                    gameMode: "Quick",
+                    playerCount: 2,
                 })
             );
 

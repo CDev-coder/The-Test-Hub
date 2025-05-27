@@ -8,7 +8,9 @@ export class Game extends Scene {
     openCardCount: number;
     timeout: any;
     cards: Card[] = [];
-
+    playerTurn: string;
+    player1Score: Phaser.GameObjects.Text;
+    player2Score: Phaser.GameObjects.Text;
     // Add these properties to hold your parameters
     gameMode: string = "Quick"; // Default value
     playerCount: number = 1;
@@ -21,13 +23,12 @@ export class Game extends Scene {
         // Set parameters with default fallbacks
         this.gameMode = data.gameMode || "Quick";
         this.playerCount = data.playerCount || 1;
-
         console.log(`Starting game with gameMode: ${this.gameMode}`);
         console.log(`Player count: ${this.playerCount}`);
     }
 
     preload() {
-        //  Load the assets for the game - Replace with your own assets
+        //  Load the assets for the game
         this.load.setPath("assets");
         this.load.image("card", "card.png");
         this.load.image("card1", "card1.png");
@@ -36,11 +37,13 @@ export class Game extends Scene {
         this.load.image("card4", "card4.png");
         this.load.image("card5", "card5.png");
     }
+
     showCards() {
         this.cards.forEach((card) => {
             card.move();
         });
     }
+
     start() {
         this.openCardCount = 0;
         this.timeout = TIMEOUT;
@@ -61,6 +64,7 @@ export class Game extends Scene {
             if (this.openedCard.value === card.value) {
                 this.openedCard = null;
                 this.openCardCount++;
+                this.updateScore();
             } else {
                 // If the cards don’t match, the previous card (this.openedCard) is closed by calling this.openedCard.closeCard(), and openedCard is updated to reference the newly clicked card.
                 this.openedCard.closeCard();
@@ -75,6 +79,10 @@ export class Game extends Scene {
         if (this.openCardCount === this.cards.length / 2) {
             this.start();
         }
+    }
+
+    updateScore() {
+        this.player1Score.setText("Matched: " + this.openCardCount);
     }
 
     getCardsPosition(): {
@@ -176,7 +184,7 @@ export class Game extends Scene {
             }
         }
         this.initCards();
-        this.input.on("gameobjectdown", this.onCardClicked, this);
+        this.input.on("gameobjectdown", this.onCardClicked, this); ///Assign Card object with a onCardClicked function
     }
 
     ////Lets Render it
@@ -187,5 +195,43 @@ export class Game extends Scene {
         this.start();
         // Add resize listener
         this.scale.on("resize", this.handleResize, this);
+
+        if (this.playerCount === 1) {
+            //Create a Score Tracker
+            this.player1Score = this.add
+                .text(this.scale.width / 2, 50, "Matched: " + 0, {
+                    fontFamily: "Arial Black",
+                    fontSize: 38,
+                    color: "#ffffff",
+                    stroke: "#000000",
+                    strokeThickness: 8,
+                    align: "center",
+                })
+                .setOrigin(0.5)
+                .setDepth(100);
+        } else {
+            this.player1Score = this.add
+                .text(100, 50, "P1 Matched: " + 0, {
+                    fontFamily: "Arial Black",
+                    fontSize: 38,
+                    color: "#ffffff",
+                    stroke: "#000000",
+                    strokeThickness: 8,
+                    align: "center",
+                })
+                .setOrigin(0.5)
+                .setDepth(100);
+            this.player2Score = this.add
+                .text(this.scale.width - 200, 50, "P2 Matched: " + 0, {
+                    fontFamily: "Arial Black",
+                    fontSize: 38,
+                    color: "#ffffff",
+                    stroke: "#000000",
+                    strokeThickness: 8,
+                    align: "center",
+                })
+                .setOrigin(0.5)
+                .setDepth(100);
+        }
     }
 }
