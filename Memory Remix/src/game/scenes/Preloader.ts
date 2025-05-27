@@ -25,6 +25,17 @@ export class Preloader extends Scene {
     }
 
     create() {
-        this.scene.start("MainMenu");
+        //this.scene.start("MainMenu");
+        const devSkipToGame = true;
+        if (devSkipToGame) {
+            this.time.delayedCall(500, () => {
+                this.scene.start("Game", {
+                    gameMode: "Quick",
+                    playerCount: 2,
+                });
+            });
+        } else {
+            this.scene.start("MainMenu");
+        }
     }
 }

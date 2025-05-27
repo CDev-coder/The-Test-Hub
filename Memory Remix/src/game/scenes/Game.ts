@@ -6,9 +6,11 @@ export class Game extends Scene {
     background: Phaser.GameObjects.Image;
     openedCard: null | Card = null;
     openCardCount: number;
+    player1CardCount: number = 0;
+    player2CardCount: number = 0;
     timeout: any;
     cards: Card[] = [];
-    playerTurn: string;
+    playerTurn: string = "Player 1";
     player1Score: Phaser.GameObjects.Text;
     player2Score: Phaser.GameObjects.Text;
     // Add these properties to hold your parameters
@@ -46,6 +48,8 @@ export class Game extends Scene {
 
     start() {
         this.openCardCount = 0;
+        this.player1CardCount = 0;
+        this.player2CardCount = 0;
         this.timeout = TIMEOUT;
         this.initCards();
         this.showCards();
@@ -56,33 +60,59 @@ export class Game extends Scene {
 
     onCardClicked(_pointer: { x: number; y: number }, card: Card) {
         // The first condition checks if the clicked card (card) is already open (card.isOpened). If so, the function returns false to prevent any further actions.
-
+        console.log("onCardClicked this.playerTurn: " + this.playerTurn);
         if (card.isOpened) {
             return false;
         }
         if (this.openedCard) {
             if (this.openedCard.value === card.value) {
                 this.openedCard = null;
-                this.openCardCount++;
                 this.updateScore();
             } else {
                 // If the cards don’t match, the previous card (this.openedCard) is closed by calling this.openedCard.closeCard(), and openedCard is updated to reference the newly clicked card.
                 this.openedCard.closeCard();
                 this.openedCard = card;
+                ///////SWITCH ROLES
+                if (this.playerCount === 2) {
+                    if (this.playerTurn === "Player 1") {
+                        this.playerTurn = "Player 2";
+                    } else {
+                        this.playerTurn = "Player 1";
+                    }
+                }
             }
         } else {
             // If no card is currently open (this.openedCard is null), the clicked card is set as openedCard.
             this.openedCard = card;
         }
         card.openCard();
-
-        if (this.openCardCount === this.cards.length / 2) {
-            this.start();
-        }
     }
 
     updateScore() {
-        this.player1Score.setText("Matched: " + this.openCardCount);
+        this.openCardCount++;
+        console.log("updateScore this.playerTurn: " + this.playerTurn);
+        ///////SWITCH ROLES
+        if (this.playerCount === 2) {
+            if (this.playerTurn === "Player 1") {
+                console.log("P1 UPDATED");
+                this.player1CardCount++;
+                this.player1Score.setText(
+                    "P1 Matched: " + this.player1CardCount
+                );
+            } else {
+                console.log("P2 UPDATED");
+                this.player2CardCount++;
+                this.player2Score.setText(
+                    "P2 Matched: " + this.player2CardCount
+                );
+            }
+        } else {
+            this.player1Score.setText("Matched: " + this.openCardCount);
+        }
+        ////////// END GAME CHECK
+        if (this.openCardCount === this.cards.length / 2) {
+            // this.start();
+        }
     }
 
     getCardsPosition(): {
@@ -195,6 +225,7 @@ export class Game extends Scene {
         this.start();
         // Add resize listener
         this.scale.on("resize", this.handleResize, this);
+        this.handleResize();
 
         if (this.playerCount === 1) {
             //Create a Score Tracker
@@ -211,7 +242,7 @@ export class Game extends Scene {
                 .setDepth(100);
         } else {
             this.player1Score = this.add
-                .text(100, 50, "P1 Matched: " + 0, {
+                .text(170, 50, "P1 Matched: " + 0, {
                     fontFamily: "Arial Black",
                     fontSize: 38,
                     color: "#ffffff",
