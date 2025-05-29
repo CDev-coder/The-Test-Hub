@@ -4,6 +4,7 @@ import Card from "../prefabs/Cards";
 
 export class Game extends Scene {
     background: Phaser.GameObjects.Image;
+    pastCard: null | Card = null;
     openedCard: null | Card = null;
     openCardCount: number;
     player1CardCount: number = 0;
@@ -58,20 +59,28 @@ export class Game extends Scene {
         });
     }
 
-    onCardClicked(_pointer: { x: number; y: number }, card: Card) {
+    onCardClicked(card: Card) {
         // The first condition checks if the clicked card (card) is already open (card.isOpened). If so, the function returns false to prevent any further actions.
-        console.log("onCardClicked this.playerTurn: " + this.playerTurn);
+        //console.log("onCardClicked this.playerTurn: " + this.playerTurn);
         if (card.isOpened) {
             return false;
         }
         if (this.openedCard) {
             if (this.openedCard.value === card.value) {
+                console.log("MATCHED");
                 this.openedCard = null;
+                this.pastCard = null;
                 this.updateScore();
             } else {
+                console.log("DONT MATCHED");
                 // If the cards don’t match, the previous card (this.openedCard) is closed by calling this.openedCard.closeCard(), and openedCard is updated to reference the newly clicked card.
-                this.openedCard.closeCard();
-                this.openedCard = card;
+                this.time.delayedCall(1000, () => {
+                    if (this.openedCard) {
+                        this.openedCard.closeCard();
+                        this.openedCard = null;
+                    }
+                    card.closeCard();
+                });
                 ///////SWITCH ROLES
                 if (this.playerCount === 2) {
                     if (this.playerTurn === "Player 1") {
@@ -82,9 +91,11 @@ export class Game extends Scene {
                 }
             }
         } else {
+            console.log("OPENNING MOVE");
             // If no card is currently open (this.openedCard is null), the clicked card is set as openedCard.
             this.openedCard = card;
         }
+        console.log("OPENNING CARD VALUE: ", card.value);
         card.openCard();
     }
 
@@ -172,6 +183,40 @@ export class Game extends Scene {
         return positions;
     }
 
+    reshuffle() {
+        if (this.openedCard) {
+            this.openedCard.closeCard(5);
+            this.openedCard = null;
+        }
+        // Get only closed cards
+        const closedCards = this.cards.filter((card) => !card.isOpened);
+
+        // Get their current positions (we'll reuse these)
+        const currentPositions = closedCards.map((card) => ({
+            x: card.positionX,
+            y: card.positionY,
+            scale: card.baseScale,
+        }));
+
+        // Shuffle the positions
+        Phaser.Utils.Array.Shuffle(currentPositions);
+
+        // Animate cards to new positions
+        closedCards.forEach((card, index) => {
+            const newPos = currentPositions[index];
+            card.positionX = newPos.x;
+            card.positionY = newPos.y;
+
+            this.tweens.add({
+                targets: card,
+                x: newPos.x,
+                y: newPos.y,
+                duration: 500,
+                ease: "Power2",
+            });
+        });
+    }
+
     handleResize() {
         const positions = this.getCardsPosition();
         this.cards.forEach((card, index) => {
@@ -208,13 +253,19 @@ export class Game extends Scene {
     }
 
     createCards() {
-        for (const card of CARDS) {
+        // Create new cards
+        for (const cardValue of CARDS) {
             for (let i = 0; i < ROWS; i++) {
-                this.cards.push(new Card(this, card));
+                const cardObj = new Card(this, cardValue);
+                this.cards.push(cardObj);
+
+                // Set up click handler directly on the card
+                cardObj.on("pointerdown", () => {
+                    this.onCardClicked(cardObj); // Pass the card directly
+                });
             }
         }
         this.initCards();
-        this.input.on("gameobjectdown", this.onCardClicked, this); ///Assign Card object with a onCardClicked function
     }
 
     ////Lets Render it
@@ -264,5 +315,19 @@ export class Game extends Scene {
                 .setOrigin(0.5)
                 .setDepth(100);
         }
+        ////////////Debug button
+        this.add
+            .text(this.scale.width / 2, 60, "Shuffle", {
+                fontSize: "32px",
+                color: "#ffffff",
+                backgroundColor: "#333333",
+                padding: { x: 20, y: 10 },
+            })
+            .setOrigin(0.5)
+            .setInteractive()
+            .on("pointerdown", () => {
+                console.log("RESHUFFLING");
+                this.reshuffle();
+            });
     }
 }

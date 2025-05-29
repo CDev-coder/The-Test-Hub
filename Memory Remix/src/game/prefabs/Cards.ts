@@ -27,12 +27,12 @@ class Card extends Phaser.GameObjects.Sprite {
         });
     }
 
-    flipCard() {
+    flipCard(speed?: number) {
         this.scene.tweens.add({
             targets: this,
             scaleX: 0,
             ease: "Linear",
-            duration: 150,
+            duration: speed ? speed : 150,
             onComplete: () => {
                 this.showCard();
             },
@@ -44,10 +44,10 @@ class Card extends Phaser.GameObjects.Sprite {
         this.flipCard();
     }
 
-    closeCard() {
+    closeCard(speed?: number) {
         if (this.isOpened) {
             this.isOpened = false;
-            this.flipCard();
+            this.flipCard(speed);
         }
     }
 
@@ -63,6 +63,12 @@ class Card extends Phaser.GameObjects.Sprite {
                 this.showCard();
             },
         });
+    }
+
+    resetPosition(newX: number, newY: number) {
+        this.positionX = newX;
+        this.positionY = newY;
+        this.setPosition(newX, newY);
     }
 
     init(x: number, y: number, delay: number, scale: number = 1) {
