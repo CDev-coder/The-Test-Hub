@@ -18,6 +18,7 @@ export class Game extends Scene {
     gameMode: string = "Quick"; // Default value
     playerCount: number = 1;
     retryGroup: Phaser.GameObjects.Container;
+    canClick: boolean = true;
 
     constructor() {
         super("Game");
@@ -25,11 +26,10 @@ export class Game extends Scene {
 
     init(data: { gameMode?: string; playerCount?: number }) {
         //Used for initializing data, receiving scene parameters.
-        // Set parameters with default fallbacks
         this.gameMode = data.gameMode || "Quick";
         this.playerCount = data.playerCount || 1;
-        console.log(`Starting game with gameMode: ${this.gameMode}`);
-        console.log(`Player count: ${this.playerCount}`);
+        //console.log(`Starting game with gameMode: ${this.gameMode}`);
+        // console.log(`Player count: ${this.playerCount}`);
     }
 
     preload() {
@@ -43,7 +43,7 @@ export class Game extends Scene {
         this.load.image("card5", "card5.png");
     }
 
-    showCards() {
+    setUpCards() {
         this.cards.forEach((card) => {
             card.move();
         });
@@ -54,10 +54,11 @@ export class Game extends Scene {
         this.openCardCount = 0;
         this.player1CardCount = 0;
         this.player2CardCount = 0;
+        this.canClick = true;
         this.timeout = TIMEOUT;
         //this.initCards();
-        console.log("CALLING showCards");
-        this.showCards();
+        console.log("CALLING setUpCards");
+        this.setUpCards();
         this.cards.forEach((card) => {
             card.closeCard();
         });
@@ -160,6 +161,9 @@ export class Game extends Scene {
         if (card.isOpened) {
             return false;
         }
+        if (!this.canClick) {
+            return false;
+        }
         if (this.openedCard) {
             if (this.openedCard.value === card.value) {
                 console.log("MATCHED");
@@ -168,11 +172,13 @@ export class Game extends Scene {
                 this.updateScore();
             } else {
                 console.log("DONT MATCHED");
+                this.canClick = false;
                 // If the cards don’t match, the previous card (this.openedCard) is closed by calling this.openedCard.closeCard(), and openedCard is updated to reference the newly clicked card.
                 this.time.delayedCall(1000, () => {
                     if (this.openedCard) {
                         this.openedCard.closeCard();
                         this.openedCard = null;
+                        this.canClick = true;
                     }
                     card.closeCard();
                 });
@@ -218,7 +224,9 @@ export class Game extends Scene {
         ////////// END GAME CHECK
         if (this.openCardCount === this.cards.length / 2) {
             // this.beginGame();
-            this.show_retryMenu();
+            this.time.delayedCall(1500, () => {
+                this.show_retryMenu();
+            });
         }
     }
 
