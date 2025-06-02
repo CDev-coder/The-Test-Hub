@@ -1,6 +1,7 @@
 import { Scene } from "phaser";
 import { CARDS, COLS, ROWS, TIMEOUT } from "../utils/constants";
 import Card from "../prefabs/Cards";
+import { Modal } from "../prefabs/Modal";
 
 export class Game extends Scene {
     background: Phaser.GameObjects.Image;
@@ -17,8 +18,8 @@ export class Game extends Scene {
     // Add these properties to hold your parameters
     gameMode: string = "Quick"; // Default value
     playerCount: number = 1;
-    retryGroup: Phaser.GameObjects.Container;
     canClick: boolean = true;
+    modal: Modal;
 
     constructor() {
         super("Game");
@@ -63,96 +64,13 @@ export class Game extends Scene {
             card.closeCard();
         });
     }
-
-    createRetryScreen() {
-        const retryScreenWidth = this.scale.width;
-        const retryScreenHeight = this.scale.height;
-
-        // Background overlay
-        const overlay = this.add.rectangle(
-            retryScreenWidth / 2,
-            retryScreenHeight / 2,
-            retryScreenWidth,
-            retryScreenHeight,
-            0x000000,
-            0.5
-        );
-        overlay.setInteractive(); // block clicks through the overlay
-
-        // Popup box
-        const popupWidth = 300;
-        const popupHeight = 200;
-        const popup = this.add.rectangle(
-            retryScreenWidth / 2,
-            retryScreenHeight / 2,
-            popupWidth,
-            popupHeight,
-            0xffffff
-        );
-        popup.setStrokeStyle(2, 0x000000);
-
-        const titleText = this.add
-            .text(retryScreenWidth / 2, retryScreenHeight / 2 - 50, "MATCHED", {
-                fontSize: "28px",
-                color: "#000",
-            })
-            .setOrigin(0.5);
-
-        const retryButton = this.add
-            .text(retryScreenWidth / 2, retryScreenHeight / 2, "Retry", {
-                fontSize: "24px",
-                backgroundColor: "#4CAF50",
-                color: "#fff",
-                padding: { x: 20, y: 10 },
-            })
-            .setOrigin(0.5)
-            .setInteractive();
-
-        retryButton.on("pointerup", () => {
-            console.log("RESetting");
-            this.clean_cards();
-            this.hide_retyMenu();
-            this.scene.restart();
-        });
-
-        const exitButton = this.add
-            .text(retryScreenWidth / 2, retryScreenHeight / 2 + 50, "Exit", {
-                fontSize: "24px",
-                backgroundColor: "#F44336",
-                color: "#fff",
-                padding: { x: 20, y: 10 },
-            })
-            .setOrigin(0.5)
-            .setInteractive();
-
-        exitButton.on("pointerup", () => {
-            this.clean_cards();
-            this.hide_retyMenu();
-            this.scene.start("MainMenu");
-        });
-
-        this.retryGroup = this.add.container(0, 0, [
-            overlay,
-            popup,
-            titleText,
-            retryButton,
-            exitButton,
-        ]);
-
-        this.retryGroup.setVisible(false); // hide by default
+    retryGame() {
+        this.clean_cards();
+        this.scene.restart();
     }
-
-    show_retryMenu() {
-        if (this.retryGroup != null) {
-            this.retryGroup.setVisible(true);
-            this.retryGroup.setDepth(100); // make sure it’s on top
-        }
-    }
-
-    hide_retyMenu() {
-        if (this.retryGroup != null) {
-            this.retryGroup.setVisible(false);
-        }
+    exitGame() {
+        this.clean_cards();
+        this.scene.start("MainMenu");
     }
 
     onCardClicked(card: Card) {
@@ -223,9 +141,15 @@ export class Game extends Scene {
         }
         ////////// END GAME CHECK
         if (this.openCardCount === this.cards.length / 2) {
-            // this.beginGame();
             this.time.delayedCall(1500, () => {
-                this.show_retryMenu();
+                this.modal.show_retryMenu(
+                    () => {
+                        this.retryGame();
+                    },
+                    () => {
+                        this.exitGame();
+                    }
+                );
             });
         }
     }
@@ -374,6 +298,14 @@ export class Game extends Scene {
         this.initCards();
     }
 
+    clean_cards() {
+        this.tweens.killAll();
+        this.cards.forEach((card) => {
+            card.destroy();
+        });
+        this.cards.length = 0;
+    }
+
     ////Lets Render it
     create() {
         ///Called automatically by Phaser after all assets are loaded.
@@ -385,8 +317,7 @@ export class Game extends Scene {
         // Add resize listener
         this.scale.on("resize", this.handleResize, this);
         this.handleResize();
-        this.createRetryScreen();
-        //this.show_retryMenu();
+        this.modal = new Modal(this, this.scale.width, this.scale.height);
 
         if (this.playerCount === 1) {
             //Create a Score Tracker
@@ -425,6 +356,19 @@ export class Game extends Scene {
                 .setOrigin(0.5)
                 .setDepth(100);
         }
+
+        ///Test a modal here
+        /*
+        this.modal.show_retryMenu(
+            () => {
+                this.retryGame();
+            },
+            () => {
+                this.exitGame();
+            }
+        );
+        */
+
         ////////////Debug button
         this.add
             .text(this.scale.width / 2, 60, "Shuffle", {
@@ -439,14 +383,6 @@ export class Game extends Scene {
                 console.log("RESHUFFLING");
                 this.reshuffle();
             });
-    }
-
-    clean_cards() {
-        this.tweens.killAll();
-        this.cards.forEach((card) => {
-            card.destroy();
-        });
-        this.cards.length = 0;
     }
 
     //We can hook into the update(time, delta), but since we don't need to check for frame inputs
