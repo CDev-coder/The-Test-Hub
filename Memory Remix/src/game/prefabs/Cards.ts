@@ -5,21 +5,27 @@ class Card extends Phaser.GameObjects.Sprite {
     delay = 0;
     value = 0;
     baseScale: number = 1; // Add this line to track scale
+    sceneRef: Phaser.Scene;
 
     constructor(scene: Phaser.Scene, value: number) {
         super(scene, 0, 0, "card");
-        this.scene = scene;
+        this.sceneRef = scene;
         this.value = value;
         this.setOrigin(0.5, 0.5);
-        this.scene.add.existing(this);
+        this.sceneRef.add.existing(this);
         this.setInteractive();
     }
 
     // Update showCard to use baseScale
     showCard() {
+        if (!this.sceneRef) {
+            console.warn("Card: scene is not available when calling showCard");
+            return;
+        }
+
         const texture = this.isOpened ? `card${this.value}` : "card";
         this.setTexture(texture);
-        this.scene.tweens.add({
+        this.sceneRef.tweens.add({
             targets: this,
             scaleX: this.baseScale, // Use baseScale instead of fixed 1
             ease: "Linear",
@@ -28,13 +34,15 @@ class Card extends Phaser.GameObjects.Sprite {
     }
 
     flipCard(speed?: number) {
-        this.scene.tweens.add({
+        this.sceneRef.tweens.add({
             targets: this,
             scaleX: 0,
             ease: "Linear",
             duration: speed ? speed : 150,
             onComplete: () => {
-                this.showCard();
+                if (this.sceneRef && this.active) {
+                    this.showCard();
+                }
             },
         });
     }
@@ -52,17 +60,20 @@ class Card extends Phaser.GameObjects.Sprite {
     }
 
     move() {
-        this.scene.tweens.add({
-            targets: this,
-            x: this.positionX,
-            y: this.positionY,
-            ease: "Linear",
-            delay: this.delay,
-            duration: 250,
-            onComplete: () => {
-                this.showCard();
-            },
-        });
+        console.log("MOVING CARD");
+        if (this.sceneRef) {
+            this.sceneRef.tweens.add({
+                targets: this,
+                x: this.positionX,
+                y: this.positionY,
+                ease: "Linear",
+                delay: this.delay,
+                duration: 250,
+                onComplete: () => {
+                    this.showCard();
+                },
+            });
+        }
     }
 
     resetPosition(newX: number, newY: number) {
@@ -78,6 +89,11 @@ class Card extends Phaser.GameObjects.Sprite {
         this.baseScale = scale;
         this.setPosition(-this.width, -this.height);
         this.setScale(scale); // Apply the scale
+    }
+
+    destroy(fromScene?: boolean) {
+        this.sceneRef?.tweens?.killTweensOf(this);
+        super.destroy(fromScene);
     }
 }
 

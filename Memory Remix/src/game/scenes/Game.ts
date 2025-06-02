@@ -17,12 +17,14 @@ export class Game extends Scene {
     // Add these properties to hold your parameters
     gameMode: string = "Quick"; // Default value
     playerCount: number = 1;
+    retryGroup: Phaser.GameObjects.Container;
 
     constructor() {
         super("Game");
     }
 
     init(data: { gameMode?: string; playerCount?: number }) {
+        //Used for initializing data, receiving scene parameters.
         // Set parameters with default fallbacks
         this.gameMode = data.gameMode || "Quick";
         this.playerCount = data.playerCount || 1;
@@ -31,7 +33,7 @@ export class Game extends Scene {
     }
 
     preload() {
-        //  Load the assets for the game
+        ///Useful to load just assets here
         this.load.setPath("assets");
         this.load.image("card", "card.png");
         this.load.image("card1", "card1.png");
@@ -47,16 +49,109 @@ export class Game extends Scene {
         });
     }
 
-    start() {
+    beginGame() {
+        console.log("CALLING beginGame");
         this.openCardCount = 0;
         this.player1CardCount = 0;
         this.player2CardCount = 0;
         this.timeout = TIMEOUT;
-        this.initCards();
+        //this.initCards();
+        console.log("CALLING showCards");
         this.showCards();
         this.cards.forEach((card) => {
             card.closeCard();
         });
+    }
+
+    createRetryScreen() {
+        const retryScreenWidth = this.scale.width;
+        const retryScreenHeight = this.scale.height;
+
+        // Background overlay
+        const overlay = this.add.rectangle(
+            retryScreenWidth / 2,
+            retryScreenHeight / 2,
+            retryScreenWidth,
+            retryScreenHeight,
+            0x000000,
+            0.5
+        );
+        overlay.setInteractive(); // block clicks through the overlay
+
+        // Popup box
+        const popupWidth = 300;
+        const popupHeight = 200;
+        const popup = this.add.rectangle(
+            retryScreenWidth / 2,
+            retryScreenHeight / 2,
+            popupWidth,
+            popupHeight,
+            0xffffff
+        );
+        popup.setStrokeStyle(2, 0x000000);
+
+        const titleText = this.add
+            .text(retryScreenWidth / 2, retryScreenHeight / 2 - 50, "MATCHED", {
+                fontSize: "28px",
+                color: "#000",
+            })
+            .setOrigin(0.5);
+
+        const retryButton = this.add
+            .text(retryScreenWidth / 2, retryScreenHeight / 2, "Retry", {
+                fontSize: "24px",
+                backgroundColor: "#4CAF50",
+                color: "#fff",
+                padding: { x: 20, y: 10 },
+            })
+            .setOrigin(0.5)
+            .setInteractive();
+
+        retryButton.on("pointerup", () => {
+            console.log("RESetting");
+            this.clean_cards();
+            this.hide_retyMenu();
+            this.scene.restart();
+        });
+
+        const exitButton = this.add
+            .text(retryScreenWidth / 2, retryScreenHeight / 2 + 50, "Exit", {
+                fontSize: "24px",
+                backgroundColor: "#F44336",
+                color: "#fff",
+                padding: { x: 20, y: 10 },
+            })
+            .setOrigin(0.5)
+            .setInteractive();
+
+        exitButton.on("pointerup", () => {
+            this.clean_cards();
+            this.hide_retyMenu();
+            this.scene.start("MainMenu");
+        });
+
+        this.retryGroup = this.add.container(0, 0, [
+            overlay,
+            popup,
+            titleText,
+            retryButton,
+            exitButton,
+        ]);
+
+        this.retryGroup.setVisible(false); // hide by default
+    }
+
+    show_retryMenu() {
+        if (this.retryGroup != null) {
+            this.retryGroup.setVisible(true);
+            this.retryGroup.setDepth(100); // make sure it’s on top
+        }
+    }
+
+    hide_retyMenu() {
+        if (this.retryGroup != null) {
+            this.retryGroup.setVisible(false);
+        }
     }
 
     onCardClicked(card: Card) {
@@ -122,7 +217,8 @@ export class Game extends Scene {
         }
         ////////// END GAME CHECK
         if (this.openCardCount === this.cards.length / 2) {
-            // this.start();
+            // this.beginGame();
+            this.show_retryMenu();
         }
     }
 
@@ -238,6 +334,7 @@ export class Game extends Scene {
     }
 
     initCards() {
+        console.log("initCards-");
         const positions = this.getCardsPosition();
         this.cards.forEach((card, index) => {
             const position = positions[index];
@@ -253,6 +350,7 @@ export class Game extends Scene {
     }
 
     createCards() {
+        console.log("CREATE CARDS-");
         // Create new cards
         for (const cardValue of CARDS) {
             for (let i = 0; i < ROWS; i++) {
@@ -270,13 +368,17 @@ export class Game extends Scene {
 
     ////Lets Render it
     create() {
+        ///Called automatically by Phaser after all assets are loaded.
+        console.log("CREATE THE CREATE");
         const bg = this.add.image(0, 0, "background").setOrigin(0, 0);
         bg.setDisplaySize(this.scale.width, this.scale.height);
         this.createCards();
-        this.start();
+        this.beginGame();
         // Add resize listener
         this.scale.on("resize", this.handleResize, this);
         this.handleResize();
+        this.createRetryScreen();
+        //this.show_retryMenu();
 
         if (this.playerCount === 1) {
             //Create a Score Tracker
@@ -330,4 +432,15 @@ export class Game extends Scene {
                 this.reshuffle();
             });
     }
+
+    clean_cards() {
+        this.tweens.killAll();
+        this.cards.forEach((card) => {
+            card.destroy();
+        });
+        this.cards.length = 0;
+    }
+
+    //We can hook into the update(time, delta), but since we don't need to check for frame inputs
+    //i.e collisions physics or pixel flickering in this project, we don't have to use it here.
 }
