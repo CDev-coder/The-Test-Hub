@@ -22,16 +22,21 @@ export class Preloader extends Scene {
         this.load.image("card3", "GlitchCard_3.png");
         this.load.image("card4", "GlitchCard_4.png");
         this.load.image("card5", "GlitchCard_5.png");
+        this.load.image("card6", "GlitchCard_6.png");
+        this.load.image("card7", "GlitchCard_7.png");
+        this.load.image("card8", "GlitchCard_8.png");
+        this.load.image("card9", "GlitchCard_9.png");
+        this.load.image("card10", "GlitchCard_10.png");
     }
 
     create() {
         //this.scene.start("MainMenu");
-        const devSkipToGame = false;
+        const devSkipToGame = true;
         if (devSkipToGame) {
             this.time.delayedCall(500, () => {
                 this.scene.start("Game", {
-                    gameMode: "Quick",
-                    playerCount: 2,
+                    gameMode: "Shuffle",
+                    playerCount: 1,
                 });
             });
         } else {

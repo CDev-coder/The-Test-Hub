@@ -48,7 +48,7 @@ export class MainMenu extends Scene {
             .on("pointerout", () =>
                 singlePlayerQuickPlay.setStyle({ fill: "#fff" })
             ) // Normal state
-            .on("pointerdown", () =>
+            .on("pointerup", () =>
                 this.modal.showModal(
                     "Single Player Classic Mode Rules...",
                     () => {
@@ -60,10 +60,39 @@ export class MainMenu extends Scene {
                 )
             );
 
-        const twoPlayerQuickPlay = this.add
+        const singlePlayerTimeAttackPlay = this.add
             .text(
                 this.scale.width / 2,
                 this.scale.height / 4 + 160,
+                "1 Player Time Attack",
+                {
+                    fontSize: "32px",
+                    color: "#ffffff",
+                    backgroundColor: "#333333",
+                    padding: { x: 20, y: 10 },
+                }
+            )
+            .setOrigin(0.5)
+            .setInteractive()
+            .on("pointerover", () =>
+                singlePlayerTimeAttackPlay.setStyle({ fill: "#ff0" })
+            ) // Hover effect
+            .on("pointerout", () =>
+                singlePlayerTimeAttackPlay.setStyle({ fill: "#fff" })
+            ) // Normal state
+            .on("pointerup", () =>
+                this.modal.showModal("Single Player Time Attack...", () => {
+                    this.scene.start("Game", {
+                        gameMode: "Time",
+                        playerCount: 1,
+                    });
+                })
+            );
+
+        const twoPlayerQuickPlay = this.add
+            .text(
+                this.scale.width / 2,
+                this.scale.height / 4 + 220,
                 "2 Player Quick Play",
                 {
                     fontSize: "32px",
@@ -80,7 +109,7 @@ export class MainMenu extends Scene {
             .on("pointerout", () =>
                 twoPlayerQuickPlay.setStyle({ fill: "#fff" })
             ) // Normal state
-            .on("pointerdown", () =>
+            .on("pointerup", () =>
                 this.modal.showModal(
                     "Two Players Classic Mode Rules...",
                     () => {
@@ -91,6 +120,36 @@ export class MainMenu extends Scene {
                     }
                 )
             );
+
+        const twoPlayerTimeAttackPlay = this.add
+            .text(
+                this.scale.width / 2,
+                this.scale.height / 4 + 280,
+                "2 Player Time Attack",
+                {
+                    fontSize: "32px",
+                    color: "#ffffff",
+                    backgroundColor: "#333333",
+                    padding: { x: 20, y: 10 },
+                }
+            )
+            .setOrigin(0.5)
+            .setInteractive()
+            .on("pointerover", () =>
+                twoPlayerTimeAttackPlay.setStyle({ fill: "#ff0" })
+            ) // Hover effect
+            .on("pointerout", () =>
+                twoPlayerTimeAttackPlay.setStyle({ fill: "#fff" })
+            ) // Normal state
+            .on("pointerup", () =>
+                this.modal.showModal("Two Player Time Attack...", () => {
+                    this.scene.start("Game", {
+                        gameMode: "Time",
+                        playerCount: 2,
+                    });
+                })
+            );
+
         EventBus.emit("current-scene-ready", this);
     }
 }

@@ -1,7 +1,9 @@
 import { Scene } from "phaser";
-import { CARDS, COLS, ROWS, TIMEOUT } from "../utils/constants";
+import { CARDS_ARRAY, COLS, ROWS, TIMEOUT } from "../utils/constants";
 import Card from "../prefabs/Cards";
 import { Modal } from "../prefabs/Modal";
+import { TimeAttackManager } from "../modes/TimeAttackManager";
+import { ShuffleCount } from "../modes/ShuffleCount";
 
 export class Game extends Scene {
     background: Phaser.GameObjects.Image;
@@ -20,6 +22,10 @@ export class Game extends Scene {
     playerCount: number = 1;
     canClick: boolean = true;
     modal: Modal;
+    timeAttackManager?: TimeAttackManager;
+    shuffleCount?: ShuffleCount;
+
+    endGameRule: () => void = () => {};
 
     constructor() {
         super("Game");
@@ -42,6 +48,11 @@ export class Game extends Scene {
         this.load.image("card3", "card3.png");
         this.load.image("card4", "card4.png");
         this.load.image("card5", "card5.png");
+        this.load.image("card6", "card6.png");
+        this.load.image("card7", "card7.png");
+        this.load.image("card8", "card8.png");
+        this.load.image("card9", "card9.png");
+        this.load.image("card10", "card10.png");
     }
 
     setUpCards() {
@@ -57,17 +68,19 @@ export class Game extends Scene {
         this.player2CardCount = 0;
         this.canClick = true;
         this.timeout = TIMEOUT;
-        //this.initCards();
         console.log("CALLING setUpCards");
         this.setUpCards();
         this.cards.forEach((card) => {
             card.closeCard();
         });
     }
+
     retryGame() {
+        this.timeAttackManager?.reset();
         this.clean_cards();
         this.scene.restart();
     }
+
     exitGame() {
         this.clean_cards();
         this.scene.start("MainMenu");
@@ -75,13 +88,13 @@ export class Game extends Scene {
 
     onCardClicked(card: Card) {
         // The first condition checks if the clicked card (card) is already open (card.isOpened). If so, the function returns false to prevent any further actions.
-        //console.log("onCardClicked this.playerTurn: " + this.playerTurn);
         if (card.isOpened) {
             return false;
         }
         if (!this.canClick) {
             return false;
         }
+        /////
         if (this.openedCard) {
             if (this.openedCard.value === card.value) {
                 console.log("MATCHED");
@@ -116,6 +129,7 @@ export class Game extends Scene {
         }
         console.log("OPENNING CARD VALUE: ", card.value);
         card.openCard();
+        this.checkGameMode();
     }
 
     updateScore() {
@@ -139,19 +153,7 @@ export class Game extends Scene {
         } else {
             this.player1Score.setText("Matched: " + this.openCardCount);
         }
-        ////////// END GAME CHECK
-        if (this.openCardCount === this.cards.length / 2) {
-            this.time.delayedCall(1500, () => {
-                this.modal.show_retryMenu(
-                    () => {
-                        this.retryGame();
-                    },
-                    () => {
-                        this.exitGame();
-                    }
-                );
-            });
-        }
+        this.isGameOver();
     }
 
     getCardsPosition(): {
@@ -160,26 +162,36 @@ export class Game extends Scene {
         delay: number;
         scale: number;
     }[] {
-        // Base dimensions (smaller for mobile)
-        const baseCardWidth = 150;
-        const baseCardHeight = 225;
-        const cardMarginX = 50;
-        const cardMarginY = 100;
+        // First detect if we're on mobile
+        const isMobile = this.scale.width < 768; // Common mobile breakpoint
+        console.log("isMobile, " + isMobile);
+        // Mobile-specific adjustments
+        const mobileWidthMultiplier = isMobile ? 0.8 : 0.7; // Use slightly less width on mobile
+        const mobileHeightMultiplier = isMobile ? 0.7 : 0.72; // Use more height on mobile
+        const mobileMarginFactor = isMobile ? 3 : 1; // Reduce margins on mobile
+
+        // Base dimensions calculation (your working formula)
+        const baseCardWidth = this.scale.width / (COLS + (isMobile ? 2.5 : 6));
+        const baseCardHeight = baseCardWidth * (isMobile ? 3.5 : 1.15);
+
+        // Margins with mobile adjustment
+        const cardMarginX = (isMobile ? 50 : 100) * mobileMarginFactor;
+        const cardMarginY = (isMobile ? 60 : 170) * mobileMarginFactor;
 
         // Get current game dimensions
         const gameWidth = this.scale.width;
         const gameHeight = this.scale.height;
 
-        // Calculate scale factor
-        const maxGridWidth = gameWidth * 0.9; // 90% of screen width
-        const maxGridHeight = gameHeight * 0.7; // 70% of screen height
+        // Calculate scale factor with mobile-adjusted grid boundaries
+        const maxGridWidth = gameWidth * mobileWidthMultiplier;
+        const maxGridHeight = gameHeight * mobileHeightMultiplier;
 
         const widthScale =
             maxGridWidth / ((baseCardWidth + cardMarginX) * COLS);
         const heightScale =
             maxGridHeight / ((baseCardHeight + cardMarginY) * ROWS);
 
-        const scaleFactor = Math.min(widthScale, heightScale, 1); // Don't scale up
+        const scaleFactor = Math.min(widthScale, heightScale, 1);
 
         // Calculate final dimensions
         const cardWidth = baseCardWidth * scaleFactor;
@@ -190,8 +202,8 @@ export class Game extends Scene {
         // Center the grid
         const gridWidth = (cardWidth + marginX) * COLS;
         const gridHeight = (cardHeight + marginY) * ROWS;
-        const offsetX = (gameWidth - gridWidth) / 2 + cardWidth / 2;
-        const offsetY = (gameHeight - gridHeight) / 2 + cardHeight / 2;
+        const offsetX = (gameWidth - gridWidth) / 2 + cardWidth / 2 + 25;
+        const offsetY = (gameHeight - gridHeight) / 2 + cardHeight / 2 + 25;
 
         const positions = [];
         let id = 0;
@@ -211,38 +223,121 @@ export class Game extends Scene {
         return positions;
     }
 
+    checkGameMode() {
+        console.log("CHECKING GAME MODE");
+        switch (this.gameMode) {
+            case "Time":
+                if (
+                    this.openedCard != null &&
+                    this.timeAttackManager &&
+                    !this.timeAttackManager.active
+                ) {
+                    this.timeAttackManager.start();
+                    this.endGameRule = () => this.endTimeAttack();
+                }
+                break;
+            case "Quick":
+                this.endGameRule = () => this.endQuickPlay();
+                break;
+            case "Shuffle":
+                if (this.shuffleCount) {
+                    this.shuffleCount.trackAttempt();
+                }
+                this.endGameRule = () => this.endQuickPlay();
+                break;
+            default:
+                console.log("DEFAULT IS ALREADY SET");
+                break;
+        }
+    }
+
+    isGameOver() {
+        ////////// END GAME CHECK
+        if (this.openCardCount === this.cards.length / 2) {
+            this.endGameRule();
+        }
+    }
+
+    endQuickPlay() {
+        this.time.delayedCall(1500, () => {
+            this.modal.show_retryMenu(
+                () => {
+                    this.retryGame();
+                },
+                () => {
+                    this.exitGame();
+                }
+            );
+        });
+    }
+
+    endTimeAttack() {
+        this.timeAttackManager?.end();
+
+        const getTextResult = () => {
+            if (this.playerCount == 1) {
+                return `Your Time is ${this.timeAttackManager?.lastTimerText} seconds`;
+            } else {
+                if (this.player1CardCount > this.player2CardCount) {
+                    return `Player 1's is the Winner`;
+                } else if (this.player1CardCount < this.player2CardCount) {
+                    return `Player 2's is the Winner`;
+                } else {
+                    return "DRAW";
+                }
+            }
+        };
+
+        this.modal.show_retryMenu(
+            () => {
+                this.retryGame();
+            },
+            () => {
+                this.exitGame();
+            },
+            getTextResult()
+        );
+    }
+
     reshuffle() {
+        this.canClick = false;
+        // Close any open card first
         if (this.openedCard) {
-            this.openedCard.closeCard(5);
+            this.openedCard.closeCard();
             this.openedCard = null;
         }
-        // Get only closed cards
+        // Get only closed cards and their current positions
         const closedCards = this.cards.filter((card) => !card.isOpened);
-
-        // Get their current positions (we'll reuse these)
         const currentPositions = closedCards.map((card) => ({
             x: card.positionX,
             y: card.positionY,
             scale: card.baseScale,
         }));
-
-        // Shuffle the positions
+        this.cameras.main.shake(300, 0.01);
+        // Shuffle only the positions (not the cards themselves)
         Phaser.Utils.Array.Shuffle(currentPositions);
 
-        // Animate cards to new positions
+        // Animate closed cards to new positions
         closedCards.forEach((card, index) => {
             const newPos = currentPositions[index];
+
+            // Update card's internal position tracking
             card.positionX = newPos.x;
             card.positionY = newPos.y;
+            card.baseScale = newPos.scale;
 
-            this.tweens.add({
-                targets: card,
-                x: newPos.x,
-                y: newPos.y,
-                duration: 500,
-                ease: "Power2",
-            });
+            // Only animate if the position actually changed
+            if (card.x !== newPos.x || card.y !== newPos.y) {
+                this.tweens.add({
+                    targets: card,
+                    x: newPos.x,
+                    y: newPos.y,
+                    duration: 500,
+                    ease: "Power2",
+                });
+            }
         });
+        this.canClick = true;
     }
 
     handleResize() {
@@ -266,7 +361,6 @@ export class Game extends Scene {
     }
 
     initCards() {
-        console.log("initCards-");
         const positions = this.getCardsPosition();
         this.cards.forEach((card, index) => {
             const position = positions[index];
@@ -277,29 +371,63 @@ export class Game extends Scene {
                     position.delay,
                     position.scale
                 );
+
+                // Debug text (remove in production)
+                const debugText = this.add
+                    .text(position.x, position.y, `${card.value}`, {
+                        fontSize: "24px",
+                        color: "#ff0000",
+                    })
+                    .setOrigin(0.5)
+                    .setDepth(100);
+                this.time.delayedCall(2000, () => debugText.destroy());
             }
         });
     }
 
     createCards() {
-        console.log("CREATE CARDS-");
-        // Create new cards
-        for (const cardValue of CARDS) {
-            for (let i = 0; i < ROWS; i++) {
-                const cardObj = new Card(this, cardValue);
-                this.cards.push(cardObj);
+        console.log("CREATE CARDS_ARRAY-");
+        // Clear any existing cards first
+        this.clean_cards();
 
-                // Set up click handler directly on the card
-                cardObj.on("pointerdown", () => {
-                    this.onCardClicked(cardObj); // Pass the card directly
-                });
-            }
+        // Create pairs for each card value (2 cards per value)
+        const cardsToCreate: number[] = [];
+        for (const cardValue of CARDS_ARRAY) {
+            cardsToCreate.push(cardValue, cardValue); // Add two cards for each value
         }
-        this.initCards();
+
+        // Verify we have the right number of cards for our grid
+        if (cardsToCreate.length !== COLS * ROWS) {
+            console.error(
+                `Card count mismatch! Have ${cardsToCreate.length} cards for ${
+                    COLS * ROWS
+                } grid positions`
+            );
+            return;
+        }
+
+        // Shuffle the card values before creating card objects
+        Phaser.Utils.Array.Shuffle(cardsToCreate);
+
+        // Create card objects for each value
+        cardsToCreate.forEach((cardValue) => {
+            const cardObj = new Card(this, cardValue);
+            this.cards.push(cardObj);
+
+            // Set up click handler
+            cardObj.on("pointerdown", () => {
+                this.onCardClicked(cardObj);
+            });
+        });
+
+        this.initCards(); // Position all cards
     }
 
     clean_cards() {
         this.tweens.killAll();
+        // Clean up any existing timer
+        this.timeAttackManager?.destroy();
+
         this.cards.forEach((card) => {
             card.destroy();
         });
@@ -314,22 +442,50 @@ export class Game extends Scene {
         bg.setDisplaySize(this.scale.width, this.scale.height);
         this.createCards();
         this.beginGame();
-        // Add resize listener
-        this.scale.on("resize", this.handleResize, this);
-        this.handleResize();
         this.modal = new Modal(this, this.scale.width, this.scale.height);
+
+        if (this.gameMode === "Time") {
+            this.add
+                .text(this.scale.width / 2, 30, "TIME ATTACK MODE", {
+                    fontSize: "24px",
+                    color: "#ffff00",
+                })
+                .setOrigin(0.5);
+            this.timeAttackManager = new TimeAttackManager(this, 30000);
+            //this.timeAttackManager = new TimeAttackManager(this, 500);
+            this.timeAttackManager.createTimerText();
+            this.timeAttackManager.events.on("timeup", () => {
+                this.endTimeAttack();
+            });
+        }
+
+        if (this.gameMode === "Shuffle") {
+            this.add
+                .text(this.scale.width / 2, 30, "Shuffle Countdown", {
+                    fontSize: "24px",
+                    color: "#ffff00",
+                })
+                .setOrigin(0.5);
+            this.shuffleCount = new ShuffleCount(this, () => this.reshuffle());
+            this.shuffleCount.createCountdown();
+        }
 
         if (this.playerCount === 1) {
             //Create a Score Tracker
             this.player1Score = this.add
-                .text(this.scale.width / 2, 50, "Matched: " + 0, {
-                    fontFamily: "Arial Black",
-                    fontSize: 38,
-                    color: "#ffffff",
-                    stroke: "#000000",
-                    strokeThickness: 8,
-                    align: "center",
-                })
+                .text(
+                    this.scale.width / 2,
+                    this.scale.height - 100,
+                    "Matched: " + 0,
+                    {
+                        fontFamily: "Arial Black",
+                        fontSize: 38,
+                        color: "#ffffff",
+                        stroke: "#000000",
+                        strokeThickness: 8,
+                        align: "center",
+                    }
+                )
                 .setOrigin(0.5)
                 .setDepth(100);
         } else {
@@ -357,21 +513,9 @@ export class Game extends Scene {
                 .setDepth(100);
         }
 
-        ///Test a modal here
-        /*
-        this.modal.show_retryMenu(
-            () => {
-                this.retryGame();
-            },
-            () => {
-                this.exitGame();
-            }
-        );
-        */
-
         ////////////Debug button
         this.add
-            .text(this.scale.width / 2, 60, "Shuffle", {
+            .text(this.scale.width - 100, this.scale.height - 50, "Shuffle", {
                 fontSize: "32px",
                 color: "#ffffff",
                 backgroundColor: "#333333",
@@ -383,6 +527,23 @@ export class Game extends Scene {
                 console.log("RESHUFFLING");
                 this.reshuffle();
             });
+
+        this.add
+            .text(110, this.scale.height - 50, "Main Menu", {
+                fontSize: "32px",
+                color: "#ffffff",
+                backgroundColor: "#333333",
+                padding: { x: 20, y: 10 },
+            })
+            .setOrigin(0.5)
+            .setInteractive()
+            .on("pointerup", () => {
+                this.exitGame();
+            });
+
+        ////////////////RESIZE
+        this.scale.on("resize", this.handleResize, this);
+        this.handleResize();
     }
 
     //We can hook into the update(time, delta), but since we don't need to check for frame inputs

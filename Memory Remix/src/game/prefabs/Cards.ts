@@ -16,6 +16,12 @@ class Card extends Phaser.GameObjects.Sprite {
         this.setInteractive();
     }
 
+    syncPosition() {
+        this.x = this.positionX;
+        this.y = this.positionY;
+        this.setScale(this.baseScale);
+    }
+
     // Update showCard to use baseScale
     showCard() {
         if (!this.sceneRef) {

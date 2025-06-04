@@ -113,9 +113,12 @@ export class Modal {
 
     show_retryMenu(
         onNextButtonCallBack: () => void,
-        onBackButtonCallBack: () => void
+        onBackButtonCallBack: () => void,
+        gameOverText?: string
     ) {
-        this.modal_text.setText("GAME OVER");
+        this.modal_text.setText(
+            gameOverText != null ? gameOverText : "GAME OVER"
+        );
         this.modal_nextButton.setText("RETRY");
         this.modal_backButton.setText("EXIT");
 
