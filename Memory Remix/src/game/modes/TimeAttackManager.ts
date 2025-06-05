@@ -18,13 +18,23 @@ export class TimeAttackManager {
     }
 
     createTimerText() {
+        this.scene.add
+            .text(this.scene.scale.width / 2, 30, "TIME ATTACK MODE", {
+                fontFamily: "Orbitron",
+                fontSize: "24px",
+                color: "#ffff00",
+                stroke: "#000000",
+                strokeThickness: 8,
+                align: "center",
+            })
+            .setOrigin(0.5);
         this.timerText = this.scene.add
             .text(
                 this.scene.scale.width / 2,
                 70,
                 `Time: ${this.duration / 1000}s`,
                 {
-                    fontFamily: "Arial Black",
+                    fontFamily: "Orbitron",
                     fontSize: 38,
                     color: "#ffffff",
                     stroke: "#000000",

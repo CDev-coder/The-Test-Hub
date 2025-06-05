@@ -24,6 +24,7 @@ export class Game extends Scene {
     modal: Modal;
     timeAttackManager?: TimeAttackManager;
     shuffleCount?: ShuffleCount;
+    isMobile: boolean = false;
 
     endGameRule: () => void = () => {};
 
@@ -37,6 +38,7 @@ export class Game extends Scene {
         this.playerCount = data.playerCount || 1;
         //console.log(`Starting game with gameMode: ${this.gameMode}`);
         // console.log(`Player count: ${this.playerCount}`);
+        this.isMobile = this.scale.width < 768; // Common mobile breakpoint
     }
 
     preload() {
@@ -162,38 +164,53 @@ export class Game extends Scene {
         delay: number;
         scale: number;
     }[] {
-        // First detect if we're on mobile
-        const isMobile = this.scale.width < 768; // Common mobile breakpoint
-        console.log("isMobile, " + isMobile);
-        // Mobile-specific adjustments
-        const mobileWidthMultiplier = isMobile ? 0.8 : 0.7; // Use slightly less width on mobile
-        const mobileHeightMultiplier = isMobile ? 0.7 : 0.72; // Use more height on mobile
-        const mobileMarginFactor = isMobile ? 3 : 1; // Reduce margins on mobile
+        console.log("isMobile: " + this.isMobile);
 
-        // Base dimensions calculation (your working formula)
-        const baseCardWidth = this.scale.width / (COLS + (isMobile ? 2.5 : 6));
-        const baseCardHeight = baseCardWidth * (isMobile ? 3.5 : 1.15);
+        // Desktop configuration
+        const DESKTOP_CONFIG = {
+            widthMultiplier: 0.9, // % of screen width to use (0-1)
+            heightMultiplier: 0.7, // % of screen height to use (0-1)
+            colsPadding: 6, // Higher = smaller cards (adds virtual columns)
+            aspectRatio: 1.5, // Width to height ratio (1.5 = 3:2)
+            marginX: 20, // Horizontal space between cards
+            marginY: 30, // Vertical space between cards
+            marginFactor: 1, // Multiplier for margins
+        };
 
-        // Margins with mobile adjustment
-        const cardMarginX = (isMobile ? 50 : 100) * mobileMarginFactor;
-        const cardMarginY = (isMobile ? 60 : 170) * mobileMarginFactor;
+        // Mobile configuration
+        const MOBILE_CONFIG = {
+            widthMultiplier: 0.85, // Slightly less width on mobile
+            heightMultiplier: 0.75, // More height on mobile
+            colsPadding: 3, // Fewer virtual columns = larger cards
+            aspectRatio: 1.25, // Slightly taller cards on mobile
+            marginX: 15, // Smaller horizontal margins
+            marginY: 20, // Smaller vertical margins
+            marginFactor: 0.8, // Reduce margin size
+        };
 
-        // Get current game dimensions
-        const gameWidth = this.scale.width;
-        const gameHeight = this.scale.height;
+        // Select config based on device
+        const CONFIG = this.isMobile ? MOBILE_CONFIG : DESKTOP_CONFIG;
 
-        // Calculate scale factor with mobile-adjusted grid boundaries
-        const maxGridWidth = gameWidth * mobileWidthMultiplier;
-        const maxGridHeight = gameHeight * mobileHeightMultiplier;
+        // Calculate base dimensions
+        const baseCardWidth = this.scale.width / (COLS + CONFIG.colsPadding);
+        const baseCardHeight = baseCardWidth * CONFIG.aspectRatio;
 
+        // Calculate margins
+        const cardMarginX = CONFIG.marginX * CONFIG.marginFactor;
+        const cardMarginY = CONFIG.marginY * CONFIG.marginFactor;
+
+        // Calculate maximum grid space
+        const maxGridWidth = this.scale.width * CONFIG.widthMultiplier;
+        const maxGridHeight = this.scale.height * CONFIG.heightMultiplier;
+
+        // Calculate scale factor
         const widthScale =
             maxGridWidth / ((baseCardWidth + cardMarginX) * COLS);
         const heightScale =
             maxGridHeight / ((baseCardHeight + cardMarginY) * ROWS);
-
         const scaleFactor = Math.min(widthScale, heightScale, 1);
 
-        // Calculate final dimensions
+        // Final dimensions
         const cardWidth = baseCardWidth * scaleFactor;
         const cardHeight = baseCardHeight * scaleFactor;
         const marginX = cardMarginX * scaleFactor;
@@ -202,9 +219,10 @@ export class Game extends Scene {
         // Center the grid
         const gridWidth = (cardWidth + marginX) * COLS;
         const gridHeight = (cardHeight + marginY) * ROWS;
-        const offsetX = (gameWidth - gridWidth) / 2 + cardWidth / 2 + 25;
-        const offsetY = (gameHeight - gridHeight) / 2 + cardHeight / 2 + 25;
+        const offsetX = (this.scale.width - gridWidth) / 2 + cardWidth / 2;
+        const offsetY = (this.scale.height - gridHeight) / 2 + cardHeight / 2;
 
+        // Generate positions
         const positions = [];
         let id = 0;
 
@@ -445,14 +463,7 @@ export class Game extends Scene {
         this.modal = new Modal(this, this.scale.width, this.scale.height);
 
         if (this.gameMode === "Time") {
-            this.add
-                .text(this.scale.width / 2, 30, "TIME ATTACK MODE", {
-                    fontSize: "24px",
-                    color: "#ffff00",
-                })
-                .setOrigin(0.5);
             this.timeAttackManager = new TimeAttackManager(this, 30000);
-            //this.timeAttackManager = new TimeAttackManager(this, 500);
             this.timeAttackManager.createTimerText();
             this.timeAttackManager.events.on("timeup", () => {
                 this.endTimeAttack();
@@ -460,12 +471,6 @@ export class Game extends Scene {
         }
 
         if (this.gameMode === "Shuffle") {
-            this.add
-                .text(this.scale.width / 2, 30, "Shuffle Countdown", {
-                    fontSize: "24px",
-                    color: "#ffff00",
-                })
-                .setOrigin(0.5);
             this.shuffleCount = new ShuffleCount(this, () => this.reshuffle());
             this.shuffleCount.createCountdown();
         }
@@ -478,7 +483,7 @@ export class Game extends Scene {
                     this.scale.height - 100,
                     "Matched: " + 0,
                     {
-                        fontFamily: "Arial Black",
+                        fontFamily: "Orbitron",
                         fontSize: 38,
                         color: "#ffffff",
                         stroke: "#000000",
@@ -491,7 +496,7 @@ export class Game extends Scene {
         } else {
             this.player1Score = this.add
                 .text(170, 50, "P1 Matched: " + 0, {
-                    fontFamily: "Arial Black",
+                    fontFamily: "Orbitron",
                     fontSize: 38,
                     color: "#ffffff",
                     stroke: "#000000",
@@ -502,7 +507,7 @@ export class Game extends Scene {
                 .setDepth(100);
             this.player2Score = this.add
                 .text(this.scale.width - 200, 50, "P2 Matched: " + 0, {
-                    fontFamily: "Arial Black",
+                    fontFamily: "Orbitron",
                     fontSize: 38,
                     color: "#ffffff",
                     stroke: "#000000",

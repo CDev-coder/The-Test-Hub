@@ -14,13 +14,23 @@ export class ShuffleCount {
     }
 
     createCountdown() {
+        this.scene.add
+            .text(this.scene.scale.width / 2, 30, "Remix Mode ", {
+                fontFamily: "Orbitron",
+                fontSize: "24px",
+                color: "#ffff00",
+                stroke: "#000000",
+                strokeThickness: 8,
+                align: "center",
+            })
+            .setOrigin(0.5);
         this.countText = this.scene.add
             .text(
                 this.scene.scale.width / 2,
                 70,
-                `Card Count: ${this.reshuffleThreshold}`,
+                `Cards Until Remix: ${this.reshuffleThreshold}`,
                 {
-                    fontFamily: "Arial Black",
+                    fontFamily: "Orbitron",
                     fontSize: 38,
                     color: "#ffffff",
                     stroke: "#000000",
@@ -36,7 +46,7 @@ export class ShuffleCount {
         if (!this.countText) return;
         this.attemptCount++;
         const displayCount = this.reshuffleThreshold - this.attemptCount;
-        this.countText.setText(`Card Count: ${displayCount}`);
+        this.countText.setText(`Cards Until Remix: ${displayCount}`);
 
         if (this.attemptCount % this.reshuffleThreshold === 0) {
             const hasClosedCards = this.scene.cards.some(
@@ -50,7 +60,7 @@ export class ShuffleCount {
             this.scene.time.delayedCall(1000, () => {
                 this.attemptCount = 0; // Reset counter after reshuffle
                 this.countText?.setText(
-                    `Card Count: ${this.reshuffleThreshold}`
+                    `Cards Until Remix: ${this.reshuffleThreshold}`
                 );
             });
         }
