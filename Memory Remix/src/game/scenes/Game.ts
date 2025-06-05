@@ -11,6 +11,7 @@ import Card from "../prefabs/Cards";
 import { Modal } from "../prefabs/Modal";
 import { TimeAttackManager } from "../modes/TimeAttackManager";
 import { ShuffleCount } from "../modes/ShuffleCount";
+import { TurnIndicator } from "../prefabs/TurnIndicator";
 
 export class Game extends Scene {
     background: Phaser.GameObjects.Image;
@@ -31,6 +32,7 @@ export class Game extends Scene {
     modal: Modal;
     timeAttackManager?: TimeAttackManager;
     shuffleCount?: ShuffleCount;
+    turnIndicator?: TurnIndicator;
     isMobile: boolean = false;
     configSetting: {
         widthMultiplier: number;
@@ -153,9 +155,17 @@ export class Game extends Scene {
                 ///////SWITCH ROLES
                 if (this.playerCount === 2) {
                     if (this.playerTurn === "Player 1") {
-                        this.playerTurn = "Player 2";
+                        if (this.turnIndicator != undefined) {
+                            this.turnIndicator.show("Player 2", () => {
+                                this.playerTurn = "Player 2";
+                            });
+                        }
                     } else {
-                        this.playerTurn = "Player 1";
+                        if (this.turnIndicator != undefined) {
+                            this.turnIndicator.show("Player 1", () => {
+                                this.playerTurn = "Player 1";
+                            });
+                        }
                     }
                 }
             }
@@ -540,6 +550,7 @@ export class Game extends Scene {
                 .setOrigin(0.5)
                 .setDepth(100);
         } else {
+            this.turnIndicator = new TurnIndicator(this);
             this.player1Score = this.add
                 .text(
                     this.isMobile ? 75 : 170,
