@@ -35,8 +35,8 @@ export class Preloader extends Scene {
         if (devSkipToGame) {
             this.time.delayedCall(500, () => {
                 this.scene.start("Game", {
-                    gameMode: "Shuffle",
-                    playerCount: 1,
+                    gameMode: "Quick",
+                    playerCount: 2,
                 });
             });
         } else {

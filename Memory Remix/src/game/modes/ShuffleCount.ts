@@ -7,9 +7,15 @@ export class ShuffleCount {
     private reshuffleThreshold: number = 4;
     public countText?: Phaser.GameObjects.Text;
     public onReshuffle: () => void;
+    private isMobile: boolean;
 
-    constructor(scene: IShuffleGameScene, onReshuffle: () => void) {
+    constructor(
+        scene: IShuffleGameScene,
+        isMobile: boolean,
+        onReshuffle: () => void
+    ) {
         this.scene = scene;
+        this.isMobile = isMobile;
         this.onReshuffle = onReshuffle;
     }
 
@@ -17,7 +23,7 @@ export class ShuffleCount {
         this.scene.add
             .text(this.scene.scale.width / 2, 30, "Remix Mode ", {
                 fontFamily: "Orbitron",
-                fontSize: "24px",
+                fontSize: this.isMobile ? "24px" : "38px",
                 color: "#ffff00",
                 stroke: "#000000",
                 strokeThickness: 8,
@@ -31,7 +37,7 @@ export class ShuffleCount {
                 `Cards Until Remix: ${this.reshuffleThreshold}`,
                 {
                     fontFamily: "Orbitron",
-                    fontSize: 38,
+                    fontSize: this.isMobile ? "22px" : "30px",
                     color: "#ffffff",
                     stroke: "#000000",
                     strokeThickness: 8,

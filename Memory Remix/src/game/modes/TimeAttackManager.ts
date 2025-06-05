@@ -10,9 +10,11 @@ export class TimeAttackManager {
     public active: boolean = false;
     private startTime: number = 0;
     public events: Phaser.Events.EventEmitter;
+    private isMobile: boolean;
 
-    constructor(scene: Scene, duration: number = 30000) {
+    constructor(scene: Scene, isMobile: boolean, duration: number = 30000) {
         this.scene = scene;
+        this.isMobile = isMobile;
         this.duration = duration;
         this.events = new Phaser.Events.EventEmitter();
     }
@@ -21,7 +23,7 @@ export class TimeAttackManager {
         this.scene.add
             .text(this.scene.scale.width / 2, 30, "TIME ATTACK MODE", {
                 fontFamily: "Orbitron",
-                fontSize: "24px",
+                fontSize: this.isMobile ? "24px" : "38px",
                 color: "#ffff00",
                 stroke: "#000000",
                 strokeThickness: 8,
@@ -35,7 +37,7 @@ export class TimeAttackManager {
                 `Time: ${this.duration / 1000}s`,
                 {
                     fontFamily: "Orbitron",
-                    fontSize: 38,
+                    fontSize: this.isMobile ? "22px" : "30px",
                     color: "#ffffff",
                     stroke: "#000000",
                     strokeThickness: 8,

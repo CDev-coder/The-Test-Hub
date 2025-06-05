@@ -1,5 +1,12 @@
 import { Scene } from "phaser";
-import { CARDS_ARRAY, COLS, ROWS, TIMEOUT } from "../utils/constants";
+import {
+    CARDS_ARRAY,
+    COLS_DEKSTOP,
+    COLS_MOBILE,
+    ROWS_DEKSTOP,
+    ROWS_MOBILE,
+    TIMEOUT,
+} from "../utils/constants";
 import Card from "../prefabs/Cards";
 import { Modal } from "../prefabs/Modal";
 import { TimeAttackManager } from "../modes/TimeAttackManager";
@@ -25,6 +32,15 @@ export class Game extends Scene {
     timeAttackManager?: TimeAttackManager;
     shuffleCount?: ShuffleCount;
     isMobile: boolean = false;
+    configSetting: {
+        widthMultiplier: number;
+        heightMultiplier: number;
+        marginX: number;
+        marginY: number;
+        marginFactor: number;
+        rows: number;
+        columns: number;
+    };
 
     endGameRule: () => void = () => {};
 
@@ -39,6 +55,25 @@ export class Game extends Scene {
         //console.log(`Starting game with gameMode: ${this.gameMode}`);
         // console.log(`Player count: ${this.playerCount}`);
         this.isMobile = this.scale.width < 768; // Common mobile breakpoint
+        this.configSetting = this.isMobile
+            ? {
+                  widthMultiplier: 0.85,
+                  heightMultiplier: 0.75,
+                  marginX: 15,
+                  marginY: 20,
+                  marginFactor: 0.8,
+                  rows: ROWS_DEKSTOP,
+                  columns: COLS_DEKSTOP,
+              }
+            : {
+                  widthMultiplier: 0.9,
+                  heightMultiplier: 0.7,
+                  marginX: 20,
+                  marginY: 30,
+                  marginFactor: 1,
+                  rows: ROWS_MOBILE,
+                  columns: COLS_MOBILE,
+              };
     }
 
     preload() {
@@ -164,73 +199,60 @@ export class Game extends Scene {
         delay: number;
         scale: number;
     }[] {
-        console.log("isMobile: " + this.isMobile);
+        const marginX =
+            this.configSetting.marginX * this.configSetting.marginFactor;
+        const marginY =
+            this.configSetting.marginY * this.configSetting.marginFactor;
 
-        // Desktop configuration
-        const DESKTOP_CONFIG = {
-            widthMultiplier: 0.9, // % of screen width to use (0-1)
-            heightMultiplier: 0.7, // % of screen height to use (0-1)
-            colsPadding: 6, // Higher = smaller cards (adds virtual columns)
-            aspectRatio: 1.5, // Width to height ratio (1.5 = 3:2)
-            marginX: 20, // Horizontal space between cards
-            marginY: 30, // Vertical space between cards
-            marginFactor: 1, // Multiplier for margins
-        };
+        const maxGridWidth =
+            this.scale.width * this.configSetting.widthMultiplier;
+        const maxGridHeight =
+            this.scale.height * this.configSetting.heightMultiplier;
 
-        // Mobile configuration
-        const MOBILE_CONFIG = {
-            widthMultiplier: 0.85, // Slightly less width on mobile
-            heightMultiplier: 0.75, // More height on mobile
-            colsPadding: 3, // Fewer virtual columns = larger cards
-            aspectRatio: 1.25, // Slightly taller cards on mobile
-            marginX: 15, // Smaller horizontal margins
-            marginY: 20, // Smaller vertical margins
-            marginFactor: 0.8, // Reduce margin size
-        };
+        // Real image size
+        const texW = 196;
+        const texH = 306;
 
-        // Select config based on device
-        const CONFIG = this.isMobile ? MOBILE_CONFIG : DESKTOP_CONFIG;
+        // Grid size in raw pixels (before scaling)
+        const rawGridWidth =
+            this.configSetting.columns * texW +
+            (this.configSetting.columns - 1) * marginX;
+        const rawGridHeight =
+            this.configSetting.rows * texH +
+            (this.configSetting.rows - 1) * marginY;
 
-        // Calculate base dimensions
-        const baseCardWidth = this.scale.width / (COLS + CONFIG.colsPadding);
-        const baseCardHeight = baseCardWidth * CONFIG.aspectRatio;
+        // Compute max scale that fits screen
+        const scaleFactor = Math.min(
+            maxGridWidth / rawGridWidth,
+            maxGridHeight / rawGridHeight,
+            1 // never upscale
+        );
 
-        // Calculate margins
-        const cardMarginX = CONFIG.marginX * CONFIG.marginFactor;
-        const cardMarginY = CONFIG.marginY * CONFIG.marginFactor;
+        // Actual size after scaling
+        const cardWidth = texW * scaleFactor;
+        const cardHeight = texH * scaleFactor;
+        const scaledMarginX = marginX * scaleFactor;
+        const scaledMarginY = marginY * scaleFactor;
 
-        // Calculate maximum grid space
-        const maxGridWidth = this.scale.width * CONFIG.widthMultiplier;
-        const maxGridHeight = this.scale.height * CONFIG.heightMultiplier;
-
-        // Calculate scale factor
-        const widthScale =
-            maxGridWidth / ((baseCardWidth + cardMarginX) * COLS);
-        const heightScale =
-            maxGridHeight / ((baseCardHeight + cardMarginY) * ROWS);
-        const scaleFactor = Math.min(widthScale, heightScale, 1);
-
-        // Final dimensions
-        const cardWidth = baseCardWidth * scaleFactor;
-        const cardHeight = baseCardHeight * scaleFactor;
-        const marginX = cardMarginX * scaleFactor;
-        const marginY = cardMarginY * scaleFactor;
-
-        // Center the grid
-        const gridWidth = (cardWidth + marginX) * COLS;
-        const gridHeight = (cardHeight + marginY) * ROWS;
+        // Centered offset
+        const gridWidth =
+            this.configSetting.columns * cardWidth +
+            (this.configSetting.columns - 1) * scaledMarginX;
+        const gridHeight =
+            this.configSetting.rows * cardHeight +
+            (this.configSetting.rows - 1) * scaledMarginY;
         const offsetX = (this.scale.width - gridWidth) / 2 + cardWidth / 2;
         const offsetY = (this.scale.height - gridHeight) / 2 + cardHeight / 2;
 
-        // Generate positions
+        // Build the position list
         const positions = [];
         let id = 0;
 
-        for (let r = 0; r < ROWS; r++) {
-            for (let c = 0; c < COLS; c++) {
+        for (let r = 0; r < this.configSetting.rows; r++) {
+            for (let c = 0; c < this.configSetting.columns; c++) {
                 positions.push({
-                    x: offsetX + c * (cardWidth + marginX),
-                    y: offsetY + r * (cardHeight + marginY),
+                    x: offsetX + c * (cardWidth + scaledMarginX),
+                    y: offsetY + r * (cardHeight + scaledMarginY),
                     delay: ++id * 100,
                     scale: scaleFactor,
                 });
@@ -415,10 +437,13 @@ export class Game extends Scene {
         }
 
         // Verify we have the right number of cards for our grid
-        if (cardsToCreate.length !== COLS * ROWS) {
+        if (
+            cardsToCreate.length !==
+            this.configSetting.columns * this.configSetting.rows
+        ) {
             console.error(
                 `Card count mismatch! Have ${cardsToCreate.length} cards for ${
-                    COLS * ROWS
+                    this.configSetting.columns * this.configSetting.rows
                 } grid positions`
             );
             return;
@@ -463,7 +488,11 @@ export class Game extends Scene {
         this.modal = new Modal(this, this.scale.width, this.scale.height);
 
         if (this.gameMode === "Time") {
-            this.timeAttackManager = new TimeAttackManager(this, 30000);
+            this.timeAttackManager = new TimeAttackManager(
+                this,
+                this.isMobile,
+                30000
+            );
             this.timeAttackManager.createTimerText();
             this.timeAttackManager.events.on("timeup", () => {
                 this.endTimeAttack();
@@ -471,8 +500,23 @@ export class Game extends Scene {
         }
 
         if (this.gameMode === "Shuffle") {
-            this.shuffleCount = new ShuffleCount(this, () => this.reshuffle());
+            this.shuffleCount = new ShuffleCount(this, this.isMobile, () =>
+                this.reshuffle()
+            );
             this.shuffleCount.createCountdown();
+        }
+
+        if (this.gameMode === "Quick") {
+            this.add
+                .text(this.scale.width / 2, 30, "Quick Play Mode ", {
+                    fontFamily: "Orbitron",
+                    fontSize: this.isMobile ? "24px" : "38px",
+                    color: "#ffff00",
+                    stroke: "#000000",
+                    strokeThickness: 8,
+                    align: "center",
+                })
+                .setOrigin(0.5);
         }
 
         if (this.playerCount === 1) {
@@ -480,11 +524,13 @@ export class Game extends Scene {
             this.player1Score = this.add
                 .text(
                     this.scale.width / 2,
-                    this.scale.height - 100,
+                    this.isMobile
+                        ? this.scale.height - 75
+                        : this.scale.height - 100,
                     "Matched: " + 0,
                     {
                         fontFamily: "Orbitron",
-                        fontSize: 38,
+                        fontSize: this.isMobile ? "22px" : "30px",
                         color: "#ffffff",
                         stroke: "#000000",
                         strokeThickness: 8,
@@ -495,47 +541,45 @@ export class Game extends Scene {
                 .setDepth(100);
         } else {
             this.player1Score = this.add
-                .text(170, 50, "P1 Matched: " + 0, {
-                    fontFamily: "Orbitron",
-                    fontSize: 38,
-                    color: "#ffffff",
-                    stroke: "#000000",
-                    strokeThickness: 8,
-                    align: "center",
-                })
+                .text(
+                    this.isMobile ? 75 : 170,
+                    this.isMobile ? 90 : 50,
+                    "P1 Matched: " + 0,
+                    {
+                        fontFamily: "Orbitron",
+                        fontSize: this.isMobile ? 18 : 30,
+                        color: "#ffffff",
+                        stroke: "#000000",
+                        strokeThickness: 8,
+                        align: "center",
+                    }
+                )
                 .setOrigin(0.5)
                 .setDepth(100);
             this.player2Score = this.add
-                .text(this.scale.width - 200, 50, "P2 Matched: " + 0, {
-                    fontFamily: "Orbitron",
-                    fontSize: 38,
-                    color: "#ffffff",
-                    stroke: "#000000",
-                    strokeThickness: 8,
-                    align: "center",
-                })
+                .text(
+                    this.isMobile
+                        ? this.scale.width - 75
+                        : this.scale.width - 200,
+                    this.isMobile ? 90 : 50,
+                    "P2 Matched: " + 0,
+                    {
+                        fontFamily: "Orbitron",
+                        fontSize: this.isMobile ? 18 : 30,
+                        color: "#ffffff",
+                        stroke: "#000000",
+                        strokeThickness: 8,
+                        align: "center",
+                    }
+                )
                 .setOrigin(0.5)
                 .setDepth(100);
         }
 
-        ////////////Debug button
+        ////////////Main Menu Button
         this.add
-            .text(this.scale.width - 100, this.scale.height - 50, "Shuffle", {
-                fontSize: "32px",
-                color: "#ffffff",
-                backgroundColor: "#333333",
-                padding: { x: 20, y: 10 },
-            })
-            .setOrigin(0.5)
-            .setInteractive()
-            .on("pointerdown", () => {
-                console.log("RESHUFFLING");
-                this.reshuffle();
-            });
-
-        this.add
-            .text(110, this.scale.height - 50, "Main Menu", {
-                fontSize: "32px",
+            .text(this.scale.width / 2, this.scale.height - 25, "Main Menu", {
+                fontSize: this.isMobile ? "26px" : "38px",
                 color: "#ffffff",
                 backgroundColor: "#333333",
                 padding: { x: 20, y: 10 },
