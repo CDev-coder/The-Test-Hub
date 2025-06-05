@@ -150,6 +150,37 @@ export class MainMenu extends Scene {
                 })
             );
 
+        const twoPlayerRemixMode = this.add
+            .text(
+                this.scale.width / 2,
+                this.scale.height / 4 + 350,
+                "2 Player Remix Mode",
+                {
+                    fontSize: "32px",
+                    color: "#ffffff",
+                    backgroundColor: "#333333",
+                    padding: { x: 20, y: 10 },
+                }
+            )
+            .setOrigin(0.5)
+            .setInteractive()
+            .on("pointerover", () =>
+                twoPlayerRemixMode.setStyle({
+                    fill: "#ff0",
+                })
+            ) // Hover effect
+            .on("pointerout", () =>
+                twoPlayerRemixMode.setStyle({ fill: "#fff" })
+            ) // Normal state
+            .on("pointerup", () =>
+                this.modal.showModal("Two Player Time Attack...", () => {
+                    this.scene.start("Game", {
+                        gameMode: "Shuffle",
+                        playerCount: 2,
+                    });
+                })
+            );
+
         EventBus.emit("current-scene-ready", this);
     }
 }
