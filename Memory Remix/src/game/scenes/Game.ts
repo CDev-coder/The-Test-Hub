@@ -182,7 +182,11 @@ export class Game extends Scene {
         } else {
             this.player1Score.setText("Matched: " + this.openCardCount);
         }
-        this.deckManager.isGameOver();
+        /////////CHECK IF GAME IS OVER
+        if (this.deckManager.isGameOver()) {
+            this.endGameRule();
+        }
+    }
     }
 
     get cards(): Card[] {
