@@ -1,9 +1,8 @@
-import { IShuffleGameScene } from "../interfaces/shuffleInterface";
 import { Game } from "../scenes/Game";
 import { CARDS_ARRAY } from "../utils/constants";
 import Card from "./Cards";
 
-export class Deck implements IShuffleGameScene {
+export class Deck {
     private game: Game;
     public cards: Card[] = [];
     openCardCount: number = 0;
@@ -80,6 +79,7 @@ export class Deck implements IShuffleGameScene {
     }
 
     clean_cards() {
+        console.log("DECK clean_cards");
         this.game.tweens.killAll();
         // Clean up any existing timer
         this.game.timeAttackManager?.destroy();
@@ -144,12 +144,15 @@ export class Deck implements IShuffleGameScene {
         this.cards.forEach((card) => {
             card.move();
         });
+        //console.log("setUpCards END");
     }
 
     closeAll() {
+        // console.log("DECK closeAll");
         this.cards.forEach((card) => {
             card.closeCard();
         });
+        //console.log("DECK closeAll END");
     }
 
     handleResize() {

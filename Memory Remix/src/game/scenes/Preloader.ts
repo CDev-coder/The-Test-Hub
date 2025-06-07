@@ -62,7 +62,7 @@ export class Preloader extends Scene {
             this.time.delayedCall(500, () => {
                 this.scene.start("Game", {
                     gameMode: "Time",
-                    playerCount: 1,
+                    playerCount: 2,
                 });
             });
         } else {
