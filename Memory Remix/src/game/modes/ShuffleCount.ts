@@ -59,7 +59,7 @@ export class ShuffleCount {
             );
             if (hasClosedCards) {
                 this.scene.time.delayedCall(1200, () => {
-                    //this.onReshuffle();
+                    this.onReshuffle();
                 });
             }
             this.scene.time.delayedCall(1000, () => {
