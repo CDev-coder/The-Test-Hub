@@ -59,26 +59,7 @@ export class ShuffleCount {
             );
             if (hasClosedCards) {
                 this.scene.time.delayedCall(1200, () => {
-                    this.onReshuffle();
-                });
-            }
-            this.scene.time.delayedCall(1000, () => {
-                this.attemptCount = 0; // Reset counter after reshuffle
-                this.countText?.setText(
-                    `Cards Until Remix: ${this.reshuffleThreshold}`
-                );
-            });
-        }
-    }
-
-    checkForEnd() {
-        if (this.attemptCount % this.reshuffleThreshold === 0) {
-            const hasClosedCards = this.scene.cards.some(
-                (card) => !card.isOpened
-            );
-            if (hasClosedCards) {
-                this.scene.time.delayedCall(1200, () => {
-                    this.onReshuffle();
+                    //this.onReshuffle();
                 });
             }
             this.scene.time.delayedCall(1000, () => {

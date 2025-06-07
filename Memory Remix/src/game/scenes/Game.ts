@@ -17,21 +17,18 @@ export class Game extends Scene {
     background: Phaser.GameObjects.Image;
     pastCard: null | Card = null;
     openedCard: null | Card = null;
-    openCardCount: number;
     player1CardCount: number = 0;
     player2CardCount: number = 0;
     timeout: any;
-    //cards: Card[] = [];
     playerTurn: number = 1;
     player1Score: Phaser.GameObjects.Text;
     player2Score: Phaser.GameObjects.Text;
-    // Add these properties to hold your parameters
     gameMode: string = "Quick"; // Default value
     playerCount: number = 1;
     canClick: boolean = true;
     modal: Modal;
     timeAttackManager?: TimeAttackManager;
-    shuffleCount?: ShuffleCount;
+    remixManager?: ShuffleCount;
     turnIndicator?: TurnIndicator;
     isMobile: boolean = false;
     configSetting: {
@@ -44,7 +41,6 @@ export class Game extends Scene {
         columns: number;
     };
     deckManager: Deck;
-
     endGameRule: () => void = () => {};
 
     constructor() {
@@ -55,8 +51,6 @@ export class Game extends Scene {
         //Used for initializing data, receiving scene parameters.
         this.gameMode = data.gameMode || "Quick";
         this.playerCount = data.playerCount || 1;
-        //console.log(`Starting game with gameMode: ${this.gameMode}`);
-        // console.log(`Player count: ${this.playerCount}`);
         this.isMobile = this.scale.width < 768; // Common mobile breakpoint
         this.deckManager = new Deck(this);
         this.configSetting = this.isMobile
@@ -98,7 +92,6 @@ export class Game extends Scene {
 
     beginGame() {
         console.log("CALLING beginGame");
-        this.openCardCount = 0;
         this.player1CardCount = 0;
         this.player2CardCount = 0;
         this.canClick = true;
@@ -111,7 +104,6 @@ export class Game extends Scene {
 
     retryGame() {
         console.log("RETRY GAME");
-        this.timeAttackManager?.reset();
         this.deckManager.clean_cards();
         this.scene.restart();
     }
@@ -135,7 +127,6 @@ export class Game extends Scene {
                 console.log("MATCHED");
                 this.openedCard = null;
                 this.pastCard = null;
-                this.updateScore();
                 this.checkMatchedRule();
             } else {
                 console.log("DONT MATCHED");
@@ -161,40 +152,8 @@ export class Game extends Scene {
         this.checkCardOpenRule();
     }
 
-    updateScore() {
-        this.openCardCount++;
-        console.log("updateScore this.playerTurn: " + this.playerTurn);
-        ///////SWITCH ROLES
-        if (this.playerCount === 2) {
-            if (this.playerTurn === 1) {
-                console.log("P1 UPDATED");
-                this.player1CardCount++;
-                this.player1Score.setText(
-                    "P1 Matched: " + this.player1CardCount
-                );
-            } else {
-                console.log("P2 UPDATED");
-                this.player2CardCount++;
-                this.player2Score.setText(
-                    "P2 Matched: " + this.player2CardCount
-                );
-            }
-        } else {
-            this.player1Score.setText("Matched: " + this.openCardCount);
-        }
-        /////////CHECK IF GAME IS OVER
-        if (this.deckManager.isGameOver()) {
-            this.endGameRule();
-        }
-    }
-
     get cards(): Card[] {
-        return this.deckManager.cards; // satisfy IShuffleGameScene.cards
-    }
-
-    reshuffle(): void {
-        // satisfy IShuffleGameScene.reshuffle()
-        this.deckManager.reshuffle();
+        return this.deckManager.cards; // A get function for the IShuffleGameScene.cards
     }
 
     getCardsPosition(): {
@@ -267,6 +226,10 @@ export class Game extends Scene {
         return positions;
     }
 
+    reshuffle(): void {
+        this.deckManager.reshuffle(); ///Allows the IShuffleGameScene access to another object's function
+    }
+
     endQuickPlay() {
         this.time.delayedCall(1500, () => {
             this.modal.show_retryMenu(
@@ -282,8 +245,8 @@ export class Game extends Scene {
 
     endTimeAttack() {
         this.timeAttackManager?.end();
-        if (this.timeAttackManager?.playerCount == 1) {
-            this.timeAttackManager?.reset();
+        this.timeAttackManager?.reset();
+        if (this.playerCount == 1) {
             this.modal.show_retryMenu(
                 () => {
                     this.retryGame();
@@ -296,12 +259,9 @@ export class Game extends Scene {
         } else {
             if (this.playerTurn == 1) {
                 this.timeAttackManager?.switchPlayers(2);
-                if (this.turnIndicator != undefined) {
-                    this.turnIndicator.show("Player 2", () => {
-                        this.playerTurn = 2;
-                    });
-                }
-                this.timeAttackManager?.reset();
+                this.turnIndicator?.show("Player 2", () => {
+                    this.playerTurn = 2;
+                });
                 this.deckManager.closeAll();
                 this.deckManager.reshuffle();
             }
@@ -325,6 +285,39 @@ export class Game extends Scene {
                     getTextResult()
                 );
             }
+        }
+    }
+
+    endRemixMode() {
+        if (this.playerCount == 1) {
+            this.modal.show_retryMenu(
+                () => {
+                    this.retryGame();
+                },
+                () => {
+                    this.exitGame();
+                },
+                `GAME OVER`
+            );
+        } else {
+            const getTextResult = () => {
+                if (this.player1CardCount > this.player2CardCount) {
+                    return `Player 1's is the Winner`;
+                } else if (this.player1CardCount < this.player2CardCount) {
+                    return `Player 2's is the Winner`;
+                } else {
+                    return "DRAW";
+                }
+            };
+            this.modal.show_retryMenu(
+                () => {
+                    this.retryGame();
+                },
+                () => {
+                    this.exitGame();
+                },
+                getTextResult()
+            );
         }
     }
 
@@ -392,48 +385,6 @@ export class Game extends Scene {
         }
     }
 
-    setGameMode_OLD() {
-        if (this.gameMode === "Time") {
-            console.log("TIME MODE SELECTED");
-            this.timeAttackManager = new TimeAttackManager(
-                this,
-                this.isMobile,
-                10000,
-                this.playerCount
-            );
-            this.timeAttackManager.createTimerText();
-            console.log("timeAttackManager  createTimerText");
-            this.timeAttackManager.events.on("timeup", () => {
-                this.endTimeAttack();
-            });
-            this.turnIndicator = new TurnIndicator(this);
-            this.turnIndicator.show("Player 1 START", () => {
-                this.playerTurn = 1;
-            });
-            console.log("TIME MODE IS SET");
-        }
-
-        if (this.gameMode === "Shuffle") {
-            this.shuffleCount = new ShuffleCount(this, this.isMobile, () =>
-                this.deckManager.reshuffle()
-            );
-            this.shuffleCount.createCountdown();
-        }
-
-        if (this.gameMode === "Quick") {
-            this.add
-                .text(this.scale.width / 2, 30, "Quick Play Mode ", {
-                    fontFamily: "Orbitron",
-                    fontSize: this.isMobile ? "24px" : "38px",
-                    color: "#ffff00",
-                    stroke: "#000000",
-                    strokeThickness: 8,
-                    align: "center",
-                })
-                .setOrigin(0.5);
-        }
-    }
-
     setGameMode() {
         console.log("setGameMode");
         this.playerTurn = 1;
@@ -478,11 +429,11 @@ export class Game extends Scene {
                 }
                 break;
             case "Shuffle":
-                this.shuffleCount = new ShuffleCount(this, this.isMobile, () =>
+                this.remixManager = new ShuffleCount(this, this.isMobile, () =>
                     this.deckManager.reshuffle()
                 );
-                this.shuffleCount.createCountdown();
-                this.endGameRule = () => this.endQuickPlay();
+                this.remixManager.createCountdown();
+                this.endGameRule = () => this.endRemixMode();
                 this.turnIndicator = new TurnIndicator(this);
                 if (this.playerCount === 2) {
                     this.turnIndicator.show("Player 1 START", () => {});
@@ -513,22 +464,35 @@ export class Game extends Scene {
     }
 
     checkMatchedRule() {
-        console.log("checkMatchedRule this.playerTurn " + this.playerTurn);
-        switch (this.gameMode) {
-            case "Time":
-                break;
-            case "Quick":
-                break;
-            case "Shuffle":
-                this.shuffleCount?.checkForEnd();
-                break;
-            default:
-                break;
+        console.log("checkMatchedRule----");
+        console.log("updateScore");
+        this.deckManager.updatedCardCount();
+        console.log("CARDS OPENED: " + this.deckManager.openCardCount);
+        ///////UPDATE PLAYERS SCORE
+        if (this.playerCount === 2) {
+            if (this.playerTurn === 1) {
+                this.player1CardCount++;
+                this.player1Score.setText(
+                    "P1 Matched: " + this.player1CardCount
+                );
+            } else {
+                this.player2CardCount++;
+                this.player2Score.setText(
+                    "P2 Matched: " + this.player2CardCount
+                );
+            }
+        } else {
+            this.player1Score.setText(
+                "Matched: " + this.deckManager.openCardCount
+            );
+        }
+        if (this.deckManager?.isGameOver()) {
+            this.endGameRule();
         }
     }
 
     checkUnMatchedRule() {
-        console.log("checkUnMatchedRule this.playerTurn: " + this.playerTurn);
+        console.log("checkUnMatchedRule");
         switch (this.gameMode) {
             case "Time":
                 break;
@@ -536,17 +500,13 @@ export class Game extends Scene {
                 ///////SWITCH ROLES
                 if (this.playerCount === 2) {
                     if (this.playerTurn === 1) {
-                        if (this.turnIndicator != undefined) {
-                            this.turnIndicator.show("Player 2", () => {
-                                this.playerTurn = 2;
-                            });
-                        }
+                        this.turnIndicator?.show("Player 2", () => {
+                            this.playerTurn = 2;
+                        });
                     } else {
-                        if (this.turnIndicator != undefined) {
-                            this.turnIndicator.show("Player 1", () => {
-                                this.playerTurn = 1;
-                            });
-                        }
+                        this.turnIndicator?.show("Player 1", () => {
+                            this.playerTurn = 1;
+                        });
                     }
                 }
                 break;
@@ -584,8 +544,7 @@ export class Game extends Scene {
             case "Quick":
                 break;
             case "Shuffle":
-                console.log("checkCardOpenRule UPDATE THE ATTEMPT");
-                this.shuffleCount?.trackAttempt();
+                this.remixManager?.trackAttempt();
                 break;
             default:
                 break;

@@ -141,10 +141,15 @@ export class Deck {
     }
 
     setUpCards() {
+        this.openCardCount = 0;
         this.cards.forEach((card) => {
             card.move();
         });
         //console.log("setUpCards END");
+    }
+
+    updatedCardCount() {
+        this.openCardCount++;
     }
 
     closeAll() {
