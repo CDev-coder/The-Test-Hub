@@ -527,6 +527,7 @@ export class Game extends Scene {
                 break;
         }
     }
+    
     checkUnMatchedRule() {
         console.log("checkUnMatchedRule this.playerTurn: " + this.playerTurn);
         switch (this.gameMode) {
