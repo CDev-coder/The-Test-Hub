@@ -187,7 +187,6 @@ export class Game extends Scene {
             this.endGameRule();
         }
     }
-    }
 
     get cards(): Card[] {
         return this.deckManager.cards; // satisfy IShuffleGameScene.cards
@@ -527,7 +526,7 @@ export class Game extends Scene {
                 break;
         }
     }
-    
+
     checkUnMatchedRule() {
         console.log("checkUnMatchedRule this.playerTurn: " + this.playerTurn);
         switch (this.gameMode) {
