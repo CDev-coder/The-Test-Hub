@@ -79,10 +79,6 @@ export const Bond = ({
       <div
         className="bondMaster"
         id={"bondMaster_" + bondType}
-        style={{
-          width: `${width}px`,
-          height: `${height + 45}px`,
-        }}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
       >

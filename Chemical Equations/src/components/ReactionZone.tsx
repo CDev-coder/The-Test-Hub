@@ -1,57 +1,66 @@
 import { useDrop } from "react-dnd";
 import { useRef } from "react";
-import { MoleculeItem, ReactionZoneItem } from "../types";
+import { BondItem, MoleculeItem, ReactionZoneItem } from "../types";
 import BondLine from "./BondLine";
 import { useLanguage } from "./translator";
 
 interface ReactionZoneProps {
   reaction: ReactionZoneItem[];
-  GRID_CELL_SIZE: number;
-  onDrop: (item: MoleculeItem, col: number, row: number) => void;
+  grid_size: number;
+  grid_columns: number;
+  grid_rows: number;
+  onDrop: (item: MoleculeItem | BondItem, col: number, row: number) => void;
   onRemove: (col: number, row: number) => void;
   onClear: () => void;
 }
 
-//const GRID_CELL_SIZE = 70; // Size of each grid cell
-const GRID_COLUMNS = 15; // Number of columns
-const GRID_ROWS = 6; // Number of rows
-
 export const ReactionZone = ({
   reaction,
-  GRID_CELL_SIZE,
+  grid_size,
+  grid_columns,
+  grid_rows,
   onDrop,
   onRemove,
   onClear,
 }: ReactionZoneProps) => {
   const { getText } = useLanguage();
-  const gridRef = useRef<HTMLDivElement>(null);
+  //const gridRef = useRef<HTMLDivElement>(null);
+  const dropTargetRef = useRef<HTMLDivElement | null>(null);
+
+  const isTouchDevice = () => {
+    return "ontouchstart" in window || navigator.maxTouchPoints > 0;
+  };
 
   const [, drop] = useDrop(() => ({
     accept: ["MOLECULE", "BOND"],
-    drop: (item: MoleculeItem & { snapDistance?: number }, monitor) => {
-      const dropOffset = monitor.getClientOffset();
-      if (!dropOffset || !gridRef.current) return;
+    drop: (item: MoleculeItem | BondItem, monitor) => {
+      // Prefer getClientOffset first
+      let dropOffset = monitor.getClientOffset();
 
-      const gridRect = gridRef.current.getBoundingClientRect();
-      const relativeX = dropOffset.x - gridRect.left;
-      const relativeY = dropOffset.y - gridRect.top;
+      // Fallback to getSourceClientOffset if null
+      if (!dropOffset && isTouchDevice()) {
+        dropOffset = monitor.getSourceClientOffset();
+      }
 
-      const snapDistance =
-        item.snapDistance || (window.innerWidth <= 768 ? 18 : 22); // Mobile vs desktop default
+      if (!dropOffset || !dropTargetRef.current) return;
+      const gridRect = dropTargetRef.current.getBoundingClientRect();
 
-      // Snap to grid function
-      const snapToGrid = (value: number) => {
-        return Math.round(value / snapDistance) * snapDistance;
-      };
+      // Use visualViewport if available (esp. for mobile Safari)
+      const viewportOffsetTop = window.visualViewport?.offsetTop || 0;
+      const viewportOffsetLeft = window.visualViewport?.offsetLeft || 0;
 
-      const snappedX = snapToGrid(relativeX);
-      const snappedY = snapToGrid(relativeY);
+      // Adjusted for scrolling, zooming, and viewport panning
+      const relativeX =
+        dropOffset.x - gridRect.left - viewportOffsetLeft + window.scrollX;
+      const relativeY =
+        dropOffset.y - gridRect.top - viewportOffsetTop + window.scrollY;
 
-      // Convert to grid coordinates
-      const col = Math.floor(snappedX / GRID_CELL_SIZE);
-      const row = Math.floor(snappedY / GRID_CELL_SIZE);
+      //console.log("Adjusted X:", relativeX, "Y:", relativeY);
 
-      if (col >= 0 && col < GRID_COLUMNS && row >= 0 && row < GRID_ROWS) {
+      const col = Math.round(relativeX / grid_size);
+      const row = Math.round(relativeY / grid_size);
+      //console.log("COL :", col, "row:", row);
+      if (col >= 0 && col < grid_columns && row >= 0 && row < grid_rows) {
         onDrop(item, col, row);
       }
     },
@@ -60,9 +69,15 @@ export const ReactionZone = ({
     }),
   }));
 
-  drop(gridRef);
+  // drop(gridRef);
+
+  const combinedRef = (node: HTMLDivElement | null) => {
+    drop(node); // connect to DnD
+    dropTargetRef.current = node; // save the ref for bounding box checks
+  };
 
   const handleOnEnter = (e: { currentTarget: any }) => {
+    // Access the button DOM node
     const button = e.currentTarget;
     const lastChild = button.lastElementChild as HTMLElement;
     if (lastChild) {
@@ -72,7 +87,6 @@ export const ReactionZone = ({
 
   const handleOnLeave = (e: { currentTarget: any }) => {
     const button = e.currentTarget;
-    //console.log("handleOnLeave:", button);
     const lastChild = button.lastElementChild as HTMLElement;
     if (lastChild) {
       lastChild.style.visibility = "hidden";
@@ -83,6 +97,7 @@ export const ReactionZone = ({
     const currentFormula = reaction
       .map((item) => (item.formula ? item.formula : ""))
       .filter((formula) => formula !== "");
+
     return <>{currentFormula.join(" + ")}</>;
   };
 
@@ -106,25 +121,28 @@ export const ReactionZone = ({
       </div>
       <div
         className="GridContainer"
-        ref={gridRef}
+        ref={combinedRef}
         style={{
           display: "grid",
-          gridTemplateColumns: `repeat(${GRID_COLUMNS}, ${GRID_CELL_SIZE}px)`,
-          gridTemplateRows: `repeat(${GRID_ROWS}, ${GRID_CELL_SIZE}px)`,
+          gridTemplateColumns: `repeat(${grid_columns}, ${grid_size}px)`,
+          gridTemplateRows: `repeat(${grid_rows}, ${grid_size}px)`,
           gap: "2px",
           marginBottom: "16px",
         }}
       >
-        {Array.from({ length: GRID_ROWS * GRID_COLUMNS }).map((_, index) => {
-          const col = index % GRID_COLUMNS;
-          const row = Math.floor(index / GRID_COLUMNS);
+        {/* Render all grid cells */}
+        {Array.from({ length: grid_rows * grid_columns }).map((_, index) => {
+          const col = index % grid_columns;
+          const row = Math.floor(index / grid_columns);
           const item = reaction.find((i) => i.col === col && i.row === row);
           return (
             <div
+              className="reactionZoneDiv"
+              id={"reactionZone_" + index}
               key={`${row}-${col}`}
               style={{
-                width: GRID_CELL_SIZE,
-                height: GRID_CELL_SIZE,
+                width: grid_size,
+                height: grid_size,
                 border: "1px solid #000000",
                 borderRadius: "4px",
                 display: "flex",
@@ -136,6 +154,9 @@ export const ReactionZone = ({
               }}
               onMouseEnter={handleOnEnter}
               onMouseLeave={handleOnLeave}
+              onTouchStart={handleOnEnter}
+              onTouchEnd={handleOnLeave}
+              onTouchCancel={handleOnLeave}
             >
               {item && (
                 <>
@@ -144,8 +165,8 @@ export const ReactionZone = ({
                       <div
                         className={"dropImage " + item.formula + "_Image"}
                         style={{
-                          width: `${GRID_CELL_SIZE}px`,
-                          height: `${GRID_CELL_SIZE}px`,
+                          width: `${grid_size}px`,
+                          height: `${grid_size}px`,
                         }}
                       />
                       <span className={"dropSpan " + item.formula + "_Text"}>
@@ -157,12 +178,12 @@ export const ReactionZone = ({
                     <BondLine
                       parentType="Grid"
                       lineType={item.bondType}
-                      parentWidth={GRID_CELL_SIZE}
-                      parentHeight={GRID_CELL_SIZE}
+                      parentWidth={grid_size}
+                      parentHeight={grid_size}
                     />
                   )}
                   <button
-                    className="removeButton"
+                    className="reactionZoneButton"
                     style={{
                       position: "absolute",
                       top: "0px",
@@ -171,8 +192,8 @@ export const ReactionZone = ({
                       color: "white",
                       border: "none",
                       borderRadius: "50%",
-                      width: "20px",
-                      height: "20px",
+                      width: `${grid_size / 3}px`,
+                      height: `${grid_size / 3}px`,
                       fontSize: "12px",
                       cursor: "pointer",
                       display: "flex",
@@ -185,7 +206,10 @@ export const ReactionZone = ({
                       e.stopPropagation();
                       onRemove(col, row);
                     }}
-                    aria-label={`Remove ${item.formula}`}
+                    onTouchStart={(e) => {
+                      e.stopPropagation();
+                      onRemove(col, row);
+                    }}
                   >
                     ×
                   </button>
@@ -195,14 +219,7 @@ export const ReactionZone = ({
           );
         })}
       </div>
-      <div
-        style={{
-          padding: "12px",
-          backgroundColor: "#f0f0f0",
-          borderRadius: "4px",
-          textAlign: "center",
-        }}
-      >
+      <div className="equalAreaDiv">
         <div style={{ fontSize: "0.9em", marginBottom: "4px" }}>
           {getText("equationTitle")}
         </div>

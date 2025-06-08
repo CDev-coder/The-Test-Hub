@@ -1,0 +1,68 @@
+<svg fill="#000000" version="1.1" id="frontGroup" xmlns="http://www.w3.org/2000/svg" 
+     xmlns:xlink="http://www.w3.org/1999/xlink" width="800px" height="800px" 
+     viewBox="0 0 180 206.326" xml:space="preserve">
+
+  <!-- Shoulders -->
+  <g id="left-shoulder" class="Shoulder" fill="#FF7F50"> <!-- Coral -->
+    <circle cx="64.5" cy="41.6" r="8.6"/>
+  </g>
+  <g id="right-shoulder" class="Shoulder" fill="#FF7F50">
+    <circle cx="115.5" cy="41.6" r="8.6"/>
+  </g>
+
+  <!-- Chest -->
+  <g id="chest" class="Chest" fill="#FF4500"> <!-- OrangeRed -->
+    <rect x="72.9" y="34" width="34.4" height="30" />
+  </g>
+
+  <!-- Upper Abs -->
+  <g id="upper-abs" class="UpperAbs" fill="#FFA07A"> <!-- Light Salmon -->
+    <rect x="79.4" y="66" width="21" height="17" />
+  </g>
+
+  <!-- Lower Abs -->
+  <g id="lower-abs" class="LowerAbs" fill="#FFA07A">
+    <rect x="79.4" y="85" width="21" height="16" />
+  </g>
+
+  <!-- Left Obliques -->
+  <g id="left-Obliques" class="Obliques" fill="#FF8C00"> <!-- Dark Orange -->
+    <rect x="70" y="69" width="8" height="30" />
+  </g>
+
+  <!-- Right Obliques -->
+  <g id="right-Obliques" class="Obliques" fill="#FF8C00">
+    <rect x="101.9" y="69" width="8" height="30" />
+  </g>
+
+  <!-- Left Bicep -->
+  <g id="leftBicep" class="Bicep" fill="#E9967A"> <!-- Dark Salmon -->
+    <rect x="60.6" y="51" width="8.6" height="22.9" />
+  </g>
+
+  <!-- Right Bicep -->
+  <g id="rightBicep" class="Bicep" fill="#E9967A">
+    <rect x="110.6" y="51" width="8.6" height="22.9" />
+  </g>
+
+  <!-- Left Forearm -->
+  <g id="left-forearm" class="Forearm" fill="#FF6347"> <!-- Tomato -->
+      <rect x="55.6" y="78" width="8" height="18" transform="rotate(-150 60.3 85.45)"/>
+  </g>
+
+  <!-- Right Forearm -->
+  <g id="right-forearm" class="Forearm" fill="#FF6347">
+    <rect x="116" y="78" width="8" height="18" transform="rotate(150 119.3 85.45)"/>
+  </g>
+
+  <!-- Left Quad -->
+  <g id="left-quad" class="Quad" fill="#FFB347"> <!-- Lighter Orange -->
+    <rect x="70" y="105" width="18" height="40.1" />
+  </g>
+
+  <!-- Right Quad -->
+  <g id="right-quad" class="Quad" fill="#FFB347">
+    <rect x="92" y="105" width="18" height="40.1" />
+  </g>
+
+</svg>
