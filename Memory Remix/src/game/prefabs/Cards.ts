@@ -6,6 +6,7 @@ class Card extends Phaser.GameObjects.Sprite {
     value = 0;
     baseScale: number = 1; // Add this line to track scale
     sceneRef: Phaser.Scene;
+    debugText?: Phaser.GameObjects.Text;
 
     constructor(scene: Phaser.Scene, value: number) {
         super(scene, 0, 0, "card");
@@ -14,6 +15,23 @@ class Card extends Phaser.GameObjects.Sprite {
         this.setOrigin(0.5, 0.5);
         this.sceneRef.add.existing(this);
         this.setInteractive();
+        this.debugText = this.sceneRef.add
+            .text(this.positionX, this.positionY, `${this.value}`, {
+                fontSize: "24px",
+                color: "#ff0000",
+            })
+            .setOrigin(0.5)
+            .setDepth(2000);
+    }
+
+    preUpdate(time: number, delta: number) {
+        super.preUpdate(time, delta); // keep Phaser internals happy
+
+        // Keep the debug label centred on the sprite
+        this.debugText?.setPosition(this.x, this.y);
+
+        // Optional: match scale so the number shrinks with the card
+        this.debugText?.setScale(this.scaleX, this.scaleY);
     }
 
     syncPosition() {
@@ -99,6 +117,7 @@ class Card extends Phaser.GameObjects.Sprite {
     }
 
     destroy(fromScene?: boolean) {
+        this.debugText?.destroy();
         this.sceneRef?.tweens?.killTweensOf(this);
         super.destroy(fromScene);
     }

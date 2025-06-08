@@ -15,8 +15,6 @@ import { Deck } from "../prefabs/Deck";
 
 export class Game extends Scene {
     background: Phaser.GameObjects.Image;
-    pastCard: null | Card = null;
-    openedCard: null | Card = null;
     player1CardCount: number = 0;
     player2CardCount: number = 0;
     timeout: any;
@@ -25,7 +23,6 @@ export class Game extends Scene {
     player2Score: Phaser.GameObjects.Text;
     gameMode: string = "Quick"; // Default value
     playerCount: number = 1;
-    canClick: boolean = true;
     modal: Modal;
     timeAttackManager?: TimeAttackManager;
     remixManager?: ShuffleCount;
@@ -95,111 +92,8 @@ export class Game extends Scene {
         return this.deckManager.cards; // A get function for the IShuffleGameScene.cards
     }
 
-    getCardsPosition(): {
-        x: number;
-        y: number;
-        delay: number;
-        scale: number;
-    }[] {
-        const marginX =
-            this.configSetting.marginX * this.configSetting.marginFactor;
-        const marginY =
-            this.configSetting.marginY * this.configSetting.marginFactor;
-
-        const maxGridWidth =
-            this.scale.width * this.configSetting.widthMultiplier;
-        const maxGridHeight =
-            this.scale.height * this.configSetting.heightMultiplier;
-
-        // Real image size
-        const texW = 196;
-        const texH = 306;
-
-        // Grid size in raw pixels (before scaling)
-        const rawGridWidth =
-            this.configSetting.columns * texW +
-            (this.configSetting.columns - 1) * marginX;
-        const rawGridHeight =
-            this.configSetting.rows * texH +
-            (this.configSetting.rows - 1) * marginY;
-
-        // Compute max scale that fits screen
-        const scaleFactor = Math.min(
-            maxGridWidth / rawGridWidth,
-            maxGridHeight / rawGridHeight,
-            1 // never upscale
-        );
-
-        // Actual size after scaling
-        const cardWidth = texW * scaleFactor;
-        const cardHeight = texH * scaleFactor;
-        const scaledMarginX = marginX * scaleFactor;
-        const scaledMarginY = marginY * scaleFactor;
-
-        // Centered offset
-        const gridWidth =
-            this.configSetting.columns * cardWidth +
-            (this.configSetting.columns - 1) * scaledMarginX;
-        const gridHeight =
-            this.configSetting.rows * cardHeight +
-            (this.configSetting.rows - 1) * scaledMarginY;
-        const offsetX = (this.scale.width - gridWidth) / 2 + cardWidth / 2;
-        const offsetY = (this.scale.height - gridHeight) / 2 + cardHeight / 2;
-
-        // Build the position list
-        const positions = [];
-        let id = 0;
-
-        for (let r = 0; r < this.configSetting.rows; r++) {
-            for (let c = 0; c < this.configSetting.columns; c++) {
-                positions.push({
-                    x: offsetX + c * (cardWidth + scaledMarginX),
-                    y: offsetY + r * (cardHeight + scaledMarginY),
-                    delay: ++id * 100,
-                    scale: scaleFactor,
-                });
-            }
-        }
-
-        Phaser.Utils.Array.Shuffle(positions);
-        return positions;
-    }
-
-    onCardClicked(card: Card) {
-        // The first condition checks if the clicked card (card) is already open (card.isOpened). If so, the function returns false to prevent any further actions.
-        if (card.isOpened) {
-            return false;
-        }
-        if (!this.canClick) {
-            return false;
-        }
-        /////
-        if (this.openedCard) {
-            if (this.openedCard.value === card.value) {
-                //console.log("MATCHED");
-                this.openedCard = null;
-                this.pastCard = null;
-                this.checkMatchedRule();
-            } else {
-                //console.log("DONT MATCHED");
-                this.canClick = false;
-                // If the cards don’t match, the previous card (this.openedCard) is closed by calling this.openedCard.closeCard(), and openedCard is updated to reference the newly clicked card.
-                this.time.delayedCall(1000, () => {
-                    if (this.openedCard) {
-                        this.openedCard.closeCard();
-                        this.openedCard = null;
-                    }
-                    card.closeCard();
-                    this.checkUnMatchedRule();
-                });
-            }
-        } else {
-            // If no card is currently open (this.openedCard is null), the clicked card is set as openedCard.
-            this.openedCard = card;
-        }
-        //console.log("OPENNING CARD VALUE: ", card.value);
-        card.openCard();
-        this.checkCardOpenRule();
+    get openedCard(): Card | null {
+        return this.deckManager.openedCard; // A get function for the IShuffleGameScene.cards
     }
 
     reshuffle() {
@@ -211,7 +105,6 @@ export class Game extends Scene {
         this.playerTurn = 1;
         this.player1CardCount = 0;
         this.player2CardCount = 0;
-        this.canClick = true;
         this.timeout = TIMEOUT;
         this.deckManager.setUpCards();
         this.deckManager.closeAll();
@@ -352,7 +245,10 @@ export class Game extends Scene {
     }
 
     checkMatchedRule() {
+        console.log("checkMatchedRule");
         this.deckManager.updatedCardCount();
+        if (this.gameMode == "Shuffle") this.remixManager?.triggerShuffle();
+
         ///////UPDATE PLAYERS SCORE
         if (this.playerCount === 2) {
             if (this.playerTurn === 1) {
@@ -384,19 +280,21 @@ export class Game extends Scene {
                     if (this.playerTurn == 1) {
                         this.turnIndicator?.display("Player 2", 500, () => {
                             this.playerTurn = 2;
-                            this.canClick = true;
+                            this.deckManager.canClick = true;
                         });
                     } else {
                         this.turnIndicator?.display("Player 1", 500, () => {
                             this.playerTurn = 1;
-                            this.canClick = true;
+                            this.deckManager.canClick = true;
                         });
                     }
                 }
+                if (this.gameMode == "Shuffle")
+                    this.remixManager?.triggerShuffle();
                 break;
             case "Time":
             default:
-                this.canClick = true;
+                this.deckManager.canClick = true;
                 break;
         }
     }
@@ -405,7 +303,7 @@ export class Game extends Scene {
         switch (this.gameMode) {
             case "Time":
                 if (
-                    this.openedCard != null &&
+                    this.deckManager.openedCard != null &&
                     !this.timeAttackManager?.active
                 ) {
                     this.timeAttackManager?.start();

@@ -49,21 +49,40 @@ export class ShuffleCount {
     }
 
     trackAttempt() {
+        console.log("TRACK trackAttempt");
         if (!this.countText) return;
         this.attemptCount++;
-        const displayCount = this.reshuffleThreshold - this.attemptCount;
+        let displayCount = this.reshuffleThreshold - this.attemptCount;
+        if (displayCount < 0) {
+            displayCount = 0;
+        }
         this.countText.setText(`Cards Until Remix: ${displayCount}`);
+    }
+
+    triggerShuffle() {
+        console.log("triggerShuffle");
+        console.log("this.attemptCount " + this.attemptCount);
+        console.log("this.reshuffleThreshold " + this.reshuffleThreshold);
+        console.log(
+            "this.attemptCount % this.reshuffleThreshold " +
+                (this.attemptCount % this.reshuffleThreshold)
+        );
+
+        let displayCount = this.reshuffleThreshold - this.attemptCount;
+        console.log("displayCount " + displayCount);
+        if (displayCount <= 0) {
+            displayCount = 0;
+        }
         if (this.attemptCount % this.reshuffleThreshold === 0) {
-            const hasClosedCards = this.scene.cards.some(
-                (card) => !card.isOpened
-            );
-            if (hasClosedCards) {
-                this.scene.time.delayedCall(1200, () => {
-                    this.onReshuffle();
-                });
+            const hasClosedCards = this.scene.cards.some((c) => !c.isOpened);
+            const noCardIsFlipped = this.scene.openedCard === null; ///Check to see if ONE non-matching card is showing
+
+            if (hasClosedCards && noCardIsFlipped) {
+                this.scene.time.delayedCall(250, () => this.onReshuffle());
             }
+
             this.scene.time.delayedCall(1000, () => {
-                this.attemptCount = 0; // Reset counter after reshuffle
+                this.attemptCount = 0;
                 this.countText?.setText(
                     `Cards Until Remix: ${this.reshuffleThreshold}`
                 );

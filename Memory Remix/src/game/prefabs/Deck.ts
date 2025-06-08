@@ -5,14 +5,15 @@ import Card from "./Cards";
 export class Deck {
     private game: Game;
     public cards: Card[] = [];
+    canClick: boolean = true;
     openCardCount: number = 0;
-
+    openedCard: null | Card = null;
     constructor(game: Game) {
         this.game = game;
     }
 
     initCards() {
-        const positions = this.game.getCardsPosition();
+        const positions = this.getCardsPosition();
         this.cards.forEach((card, index) => {
             const position = positions[index];
             if (position) {
@@ -22,16 +23,6 @@ export class Deck {
                     position.delay,
                     position.scale
                 );
-
-                // Debug text (remove in production)
-                const debugText = this.game.add
-                    .text(position.x, position.y, `${card.value}`, {
-                        fontSize: "24px",
-                        color: "#ff0000",
-                    })
-                    .setOrigin(0.5)
-                    .setDepth(100);
-                this.game.time.delayedCall(2000, () => debugText.destroy());
             }
         });
     }
@@ -71,7 +62,7 @@ export class Deck {
 
             // Set up click handler
             cardObj.on("pointerdown", () => {
-                this.game.onCardClicked(cardObj);
+                this.onCardClicked(cardObj);
             });
         });
 
@@ -91,48 +82,58 @@ export class Deck {
     }
 
     reshuffle() {
-        this.game.canClick = false;
-        // Close any open card first
-        if (this.game.openedCard) {
-            this.game.openedCard.closeCard();
-            this.game.openedCard = null;
+        this.canClick = false;
+        // CLOSE ANY OPEN CARDS
+        if (this.openedCard) {
+            this.openedCard.closeCard();
+            this.openedCard = null;
         }
-        // Get only closed cards and their current positions
-        const closedCards = this.cards.filter((card) => !card.isOpened);
-        const currentPositions = closedCards.map((card) => ({
-            x: card.positionX,
-            y: card.positionY,
-            scale: card.baseScale,
-        }));
-        this.game.cameras.main.shake(300, 0.01);
-        // Shuffle only the positions (not the cards themselves)
-        Phaser.Utils.Array.Shuffle(currentPositions);
+        const openCards = this.cards.filter((c) => c.isOpened); //Get all the open cards on screen
+        const closedCards = this.cards.filter((c) => !c.isOpened); //Get all the closed cards on screen
+        ///Now compare to see which spots are avalaible.
+        const allPositions = this.getCardsPosition(); // full grid
+        const blocked = new Set(
+            openCards.map(
+                (c) => `${Math.round(c.positionX)}|${Math.round(c.positionY)}`
+            )
+        );
+        const availablePositions = allPositions.filter(
+            (p) => !blocked.has(`${Math.round(p.x)}|${Math.round(p.y)}`)
+        );
 
-        // Animate closed cards to new positions
-        closedCards.forEach((card, index) => {
-            const newPos = currentPositions[index];
+        /* Safety guard: there must be exactly as many free spots as closed cards */
+        if (availablePositions.length !== closedCards.length) {
+            console.warn(
+                "Mismatch in reshuffle():",
+                availablePositions.length,
+                "free cells vs",
+                closedCards.length,
+                "closed cards."
+            );
+            return;
+        }
+        Phaser.Utils.Array.Shuffle(availablePositions); ///Shuffle only the available spots
 
-            // Update card's internal position tracking
-            card.positionX = newPos.x;
-            card.positionY = newPos.y;
-            card.baseScale = newPos.scale;
+        //Move only the closed cards
+        closedCards.forEach((card, i) => {
+            const { x, y, scale } = availablePositions[i];
+            card.positionX = x;
+            card.positionY = y;
+            card.baseScale = scale;
 
-            // Only animate if the position actually changed
-            if (card.x !== newPos.x || card.y !== newPos.y) {
+            if (card.x !== x || card.y !== y) {
                 this.game.tweens.add({
                     targets: card,
-                    x: newPos.x,
-                    y: newPos.y,
+                    x,
+                    y,
                     duration: 500,
                     ease: "Power2",
                 });
             }
         });
-        this.game.canClick = true;
-    }
 
-    create() {
-        console.log("CREATING DECK OBJ");
+        this.game.cameras.main.shake(300, 0.01);
+        this.canClick = true;
     }
 
     isGameOver() {
@@ -145,6 +146,7 @@ export class Deck {
         this.cards.forEach((card) => {
             card.move();
         });
+        this.canClick = true;
         //console.log("setUpCards END");
     }
 
@@ -251,5 +253,41 @@ export class Deck {
 
         Phaser.Utils.Array.Shuffle(positions);
         return positions;
+    }
+
+    onCardClicked(card: Card) {
+        // The first condition checks if the clicked card (card) is already open (card.isOpened). If so, the function returns false to prevent any further actions.
+        if (card.isOpened) {
+            return false;
+        }
+        if (!this.canClick) {
+            return false;
+        }
+        //console.log("OPENNING CARD VALUE: ", card.value);
+        card.openCard();
+        this.game.checkCardOpenRule(); //Perform the rule for a card openning
+        /////Now we check if there was a previous card open
+        if (this.openedCard) {
+            if (this.openedCard.value === card.value) {
+                //console.log("MATCHED");
+                this.openedCard = null;
+                this.game.checkMatchedRule();
+            } else {
+                //console.log("DONT MATCHED");
+                this.canClick = false;
+                // If the cards don’t match, the previous card (this.openedCard) is closed by calling this.openedCard.closeCard(), and openedCard is updated to reference the newly clicked card.
+                this.game.time.delayedCall(1000, () => {
+                    if (this.openedCard) {
+                        this.openedCard.closeCard();
+                        this.openedCard = null;
+                    }
+                    card.closeCard();
+                    this.game.checkUnMatchedRule();
+                });
+            }
+        } else {
+            // If no card is currently open (this.openedCard is null), the clicked card is set as openedCard.
+            this.openedCard = card;
+        }
     }
 }
