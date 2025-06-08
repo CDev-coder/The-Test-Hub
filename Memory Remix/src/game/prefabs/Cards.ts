@@ -7,7 +7,7 @@ class Card extends Phaser.GameObjects.Sprite {
     value = 0;
     baseScale: number = 1; // Add this line to track scale
     sceneRef: Phaser.Scene;
-    debugMode: boolean = true;
+    debugMode: boolean = false;
     debugText?: Phaser.GameObjects.Text;
 
     constructor(scene: Phaser.Scene, value: number) {

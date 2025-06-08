@@ -447,9 +447,9 @@ export class Game extends Scene {
             .on("pointerup", () => {
                 this.exitGame();
             });
-
+        /*
         this.add
-            .text(this.scale.width / 2, this.scale.height - 70, "MIX", {
+            .text(this.scale.width / 2, this.scale.height - 80, "MIX", {
                 fontSize: this.isMobile ? "26px" : "38px",
                 fontFamily: "Share Tech Mono",
                 color: "#ffffff",
@@ -461,7 +461,7 @@ export class Game extends Scene {
             .on("pointerup", () => {
                 this.reshuffle();
             });
-
+        */
         ////////////////RESIZE
         this.scale.on("resize", this.handleResize, this);
         this.handleResize();
