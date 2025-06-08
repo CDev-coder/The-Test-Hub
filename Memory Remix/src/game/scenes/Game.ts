@@ -1,6 +1,5 @@
 import { Scene } from "phaser";
 import {
-    CARDS_ARRAY,
     COLS_DEKSTOP,
     COLS_MOBILE,
     ROWS_DEKSTOP,
@@ -12,26 +11,24 @@ import { Modal } from "../prefabs/Modal";
 import { TimeAttackManager } from "../modes/TimeAttackManager";
 import { ShuffleCount } from "../modes/ShuffleCount";
 import { TurnIndicator } from "../prefabs/TurnIndicator";
+import { Deck } from "../prefabs/Deck";
 
 export class Game extends Scene {
     background: Phaser.GameObjects.Image;
     pastCard: null | Card = null;
     openedCard: null | Card = null;
-    openCardCount: number;
     player1CardCount: number = 0;
     player2CardCount: number = 0;
     timeout: any;
-    cards: Card[] = [];
-    playerTurn: string = "Player 1";
+    playerTurn: number = 1;
     player1Score: Phaser.GameObjects.Text;
     player2Score: Phaser.GameObjects.Text;
-    // Add these properties to hold your parameters
     gameMode: string = "Quick"; // Default value
     playerCount: number = 1;
     canClick: boolean = true;
     modal: Modal;
     timeAttackManager?: TimeAttackManager;
-    shuffleCount?: ShuffleCount;
+    remixManager?: ShuffleCount;
     turnIndicator?: TurnIndicator;
     isMobile: boolean = false;
     configSetting: {
@@ -43,7 +40,7 @@ export class Game extends Scene {
         rows: number;
         columns: number;
     };
-
+    deckManager: Deck;
     endGameRule: () => void = () => {};
 
     constructor() {
@@ -54,9 +51,8 @@ export class Game extends Scene {
         //Used for initializing data, receiving scene parameters.
         this.gameMode = data.gameMode || "Quick";
         this.playerCount = data.playerCount || 1;
-        //console.log(`Starting game with gameMode: ${this.gameMode}`);
-        // console.log(`Player count: ${this.playerCount}`);
         this.isMobile = this.scale.width < 768; // Common mobile breakpoint
+        this.deckManager = new Deck(this);
         this.configSetting = this.isMobile
             ? {
                   widthMultiplier: 0.85,
@@ -94,113 +90,9 @@ export class Game extends Scene {
         this.load.image("card10", "card10.png");
     }
 
-    setUpCards() {
-        this.cards.forEach((card) => {
-            card.move();
-        });
-    }
-
-    beginGame() {
-        console.log("CALLING beginGame");
-        this.openCardCount = 0;
-        this.player1CardCount = 0;
-        this.player2CardCount = 0;
-        this.canClick = true;
-        this.timeout = TIMEOUT;
-        console.log("CALLING setUpCards");
-        this.setUpCards();
-        this.cards.forEach((card) => {
-            card.closeCard();
-        });
-    }
-
-    retryGame() {
-        this.timeAttackManager?.reset();
-        this.clean_cards();
-        this.scene.restart();
-    }
-
-    exitGame() {
-        this.clean_cards();
-        this.scene.start("MainMenu");
-    }
-
-    onCardClicked(card: Card) {
-        // The first condition checks if the clicked card (card) is already open (card.isOpened). If so, the function returns false to prevent any further actions.
-        if (card.isOpened) {
-            return false;
-        }
-        if (!this.canClick) {
-            return false;
-        }
-        /////
-        if (this.openedCard) {
-            if (this.openedCard.value === card.value) {
-                console.log("MATCHED");
-                this.openedCard = null;
-                this.pastCard = null;
-                this.updateScore();
-            } else {
-                console.log("DONT MATCHED");
-                this.canClick = false;
-                // If the cards don’t match, the previous card (this.openedCard) is closed by calling this.openedCard.closeCard(), and openedCard is updated to reference the newly clicked card.
-                this.time.delayedCall(1000, () => {
-                    if (this.openedCard) {
-                        this.openedCard.closeCard();
-                        this.openedCard = null;
-                        this.canClick = true;
-                    }
-                    card.closeCard();
-                });
-                ///////SWITCH ROLES
-                if (this.playerCount === 2) {
-                    if (this.playerTurn === "Player 1") {
-                        if (this.turnIndicator != undefined) {
-                            this.turnIndicator.show("Player 2", () => {
-                                this.playerTurn = "Player 2";
-                            });
-                        }
-                    } else {
-                        if (this.turnIndicator != undefined) {
-                            this.turnIndicator.show("Player 1", () => {
-                                this.playerTurn = "Player 1";
-                            });
-                        }
-                    }
-                }
-            }
-        } else {
-            console.log("OPENNING MOVE");
-            // If no card is currently open (this.openedCard is null), the clicked card is set as openedCard.
-            this.openedCard = card;
-        }
-        console.log("OPENNING CARD VALUE: ", card.value);
-        card.openCard();
-        this.checkGameMode();
-    }
-
-    updateScore() {
-        this.openCardCount++;
-        console.log("updateScore this.playerTurn: " + this.playerTurn);
-        ///////SWITCH ROLES
-        if (this.playerCount === 2) {
-            if (this.playerTurn === "Player 1") {
-                console.log("P1 UPDATED");
-                this.player1CardCount++;
-                this.player1Score.setText(
-                    "P1 Matched: " + this.player1CardCount
-                );
-            } else {
-                console.log("P2 UPDATED");
-                this.player2CardCount++;
-                this.player2Score.setText(
-                    "P2 Matched: " + this.player2CardCount
-                );
-            }
-        } else {
-            this.player1Score.setText("Matched: " + this.openCardCount);
-        }
-        this.isGameOver();
+    /* CARD FUNCTIONS */
+    get cards(): Card[] {
+        return this.deckManager.cards; // A get function for the IShuffleGameScene.cards
     }
 
     getCardsPosition(): {
@@ -273,262 +165,134 @@ export class Game extends Scene {
         return positions;
     }
 
-    checkGameMode() {
-        console.log("CHECKING GAME MODE");
-        switch (this.gameMode) {
-            case "Time":
-                if (
-                    this.openedCard != null &&
-                    this.timeAttackManager &&
-                    !this.timeAttackManager.active
-                ) {
-                    this.timeAttackManager.start();
-                    this.endGameRule = () => this.endTimeAttack();
-                }
-                break;
-            case "Quick":
-                this.endGameRule = () => this.endQuickPlay();
-                break;
-            case "Shuffle":
-                if (this.shuffleCount) {
-                    this.shuffleCount.trackAttempt();
-                }
-                this.endGameRule = () => this.endQuickPlay();
-                break;
-            default:
-                console.log("DEFAULT IS ALREADY SET");
-                break;
+    onCardClicked(card: Card) {
+        // The first condition checks if the clicked card (card) is already open (card.isOpened). If so, the function returns false to prevent any further actions.
+        if (card.isOpened) {
+            return false;
         }
-    }
-
-    isGameOver() {
-        ////////// END GAME CHECK
-        if (this.openCardCount === this.cards.length / 2) {
-            this.endGameRule();
+        if (!this.canClick) {
+            return false;
         }
-    }
-
-    endQuickPlay() {
-        this.time.delayedCall(1500, () => {
-            this.modal.show_retryMenu(
-                () => {
-                    this.retryGame();
-                },
-                () => {
-                    this.exitGame();
-                }
-            );
-        });
-    }
-
-    endTimeAttack() {
-        this.timeAttackManager?.end();
-
-        const getTextResult = () => {
-            if (this.playerCount == 1) {
-                return `Your Time is ${this.timeAttackManager?.lastTimerText} seconds`;
+        /////
+        if (this.openedCard) {
+            if (this.openedCard.value === card.value) {
+                //console.log("MATCHED");
+                this.openedCard = null;
+                this.pastCard = null;
+                this.checkMatchedRule();
             } else {
-                if (this.player1CardCount > this.player2CardCount) {
-                    return `Player 1's is the Winner`;
-                } else if (this.player1CardCount < this.player2CardCount) {
-                    return `Player 2's is the Winner`;
-                } else {
-                    return "DRAW";
-                }
+                //console.log("DONT MATCHED");
+                this.canClick = false;
+                // If the cards don’t match, the previous card (this.openedCard) is closed by calling this.openedCard.closeCard(), and openedCard is updated to reference the newly clicked card.
+                this.time.delayedCall(1000, () => {
+                    if (this.openedCard) {
+                        this.openedCard.closeCard();
+                        this.openedCard = null;
+                    }
+                    card.closeCard();
+                    this.checkUnMatchedRule();
+                });
             }
-        };
-
-        this.modal.show_retryMenu(
-            () => {
-                this.retryGame();
-            },
-            () => {
-                this.exitGame();
-            },
-            getTextResult()
-        );
+        } else {
+            // If no card is currently open (this.openedCard is null), the clicked card is set as openedCard.
+            this.openedCard = card;
+        }
+        //console.log("OPENNING CARD VALUE: ", card.value);
+        card.openCard();
+        this.checkCardOpenRule();
     }
 
     reshuffle() {
-        this.canClick = false;
-        // Close any open card first
-        if (this.openedCard) {
-            this.openedCard.closeCard();
-            this.openedCard = null;
-        }
-        // Get only closed cards and their current positions
-        const closedCards = this.cards.filter((card) => !card.isOpened);
-        const currentPositions = closedCards.map((card) => ({
-            x: card.positionX,
-            y: card.positionY,
-            scale: card.baseScale,
-        }));
-        this.cameras.main.shake(300, 0.01);
-        // Shuffle only the positions (not the cards themselves)
-        Phaser.Utils.Array.Shuffle(currentPositions);
+        this.deckManager.reshuffle(); ///Allows the IShuffleGameScene access to another object's function
+    }
 
-        // Animate closed cards to new positions
-        closedCards.forEach((card, index) => {
-            const newPos = currentPositions[index];
-
-            // Update card's internal position tracking
-            card.positionX = newPos.x;
-            card.positionY = newPos.y;
-            card.baseScale = newPos.scale;
-
-            // Only animate if the position actually changed
-            if (card.x !== newPos.x || card.y !== newPos.y) {
-                this.tweens.add({
-                    targets: card,
-                    x: newPos.x,
-                    y: newPos.y,
-                    duration: 500,
-                    ease: "Power2",
-                });
-            }
-        });
+    /* INITIAL GAME */
+    beginGame() {
+        this.playerTurn = 1;
+        this.player1CardCount = 0;
+        this.player2CardCount = 0;
         this.canClick = true;
+        this.timeout = TIMEOUT;
+        this.deckManager.setUpCards();
+        this.deckManager.closeAll();
     }
 
-    handleResize() {
-        const positions = this.getCardsPosition();
-        this.cards.forEach((card, index) => {
-            const position = positions[index];
-            if (position) {
-                card.positionX = position.x;
-                card.positionY = position.y;
-                card.baseScale = position.scale;
-                this.tweens.add({
-                    targets: card,
-                    x: position.x,
-                    y: position.y,
-                    scaleX: position.scale,
-                    scaleY: position.scale,
-                    duration: 300,
-                });
-            }
-        });
-    }
-
-    initCards() {
-        const positions = this.getCardsPosition();
-        this.cards.forEach((card, index) => {
-            const position = positions[index];
-            if (position) {
-                card.init(
-                    position.x,
-                    position.y,
-                    position.delay,
-                    position.scale
+    setGameMode() {
+        switch (this.gameMode) {
+            case "Time":
+                this.timeAttackManager = new TimeAttackManager(
+                    this,
+                    this.isMobile,
+                    10000,
+                    this.playerCount
                 );
-
-                // Debug text (remove in production)
-                const debugText = this.add
-                    .text(position.x, position.y, `${card.value}`, {
-                        fontSize: "24px",
-                        color: "#ff0000",
+                this.timeAttackManager.createTimerText();
+                this.timeAttackManager.events.on("timeup", () => {
+                    this.endTimeAttack();
+                });
+                this.turnIndicator = new TurnIndicator(this);
+                if (this.playerCount === 2) {
+                    this.turnIndicator.display("Player 1 START", 500, () => {});
+                } else {
+                    this.turnIndicator.display("GAME START", 500, () => {});
+                }
+                this.endGameRule = () => this.endTimeAttack();
+                break;
+            case "Quick":
+                this.add
+                    .text(this.scale.width / 2, 30, "Quick Play Mode ", {
+                        fontFamily: "Orbitron",
+                        fontSize: this.isMobile ? "24px" : "38px",
+                        color: "#ffff00",
+                        stroke: "#000000",
+                        strokeThickness: 8,
+                        align: "center",
                     })
-                    .setOrigin(0.5)
-                    .setDepth(100);
-                this.time.delayedCall(2000, () => debugText.destroy());
-            }
-        });
+                    .setOrigin(0.5);
+                this.endGameRule = () => this.endQuickPlay();
+                this.turnIndicator = new TurnIndicator(this);
+                if (this.playerCount === 2) {
+                    this.turnIndicator.display("Player 1 START", 500, () => {});
+                } else {
+                    this.turnIndicator.display("GAME START", 500, () => {});
+                }
+                break;
+            case "Shuffle":
+                this.remixManager = new ShuffleCount(this, this.isMobile, () =>
+                    this.deckManager.reshuffle()
+                );
+                this.remixManager.createCountdown();
+                this.endGameRule = () => this.endRemixMode();
+                this.turnIndicator = new TurnIndicator(this);
+                if (this.playerCount === 2) {
+                    this.turnIndicator.display("Player 1 START", 500, () => {});
+                } else {
+                    this.turnIndicator.display("GAME START", 500, () => {});
+                }
+                break;
+            default:
+                this.add
+                    .text(this.scale.width / 2, 30, "Quick Play Mode ", {
+                        fontFamily: "Orbitron",
+                        fontSize: this.isMobile ? "24px" : "38px",
+                        color: "#ffff00",
+                        stroke: "#000000",
+                        strokeThickness: 8,
+                        align: "center",
+                    })
+                    .setOrigin(0.5);
+                this.endGameRule = () => this.endQuickPlay();
+                this.turnIndicator = new TurnIndicator(this);
+                if (this.playerCount === 2) {
+                    this.turnIndicator.display("Player 1 START", 500, () => {});
+                } else {
+                    this.turnIndicator.display("GAME START", 500, () => {});
+                }
+                break;
+        }
     }
 
-    createCards() {
-        console.log("CREATE CARDS_ARRAY-");
-        // Clear any existing cards first
-        this.clean_cards();
-
-        // Create pairs for each card value (2 cards per value)
-        const cardsToCreate: number[] = [];
-        for (const cardValue of CARDS_ARRAY) {
-            cardsToCreate.push(cardValue, cardValue); // Add two cards for each value
-        }
-
-        // Verify we have the right number of cards for our grid
-        if (
-            cardsToCreate.length !==
-            this.configSetting.columns * this.configSetting.rows
-        ) {
-            console.error(
-                `Card count mismatch! Have ${cardsToCreate.length} cards for ${
-                    this.configSetting.columns * this.configSetting.rows
-                } grid positions`
-            );
-            return;
-        }
-
-        // Shuffle the card values before creating card objects
-        Phaser.Utils.Array.Shuffle(cardsToCreate);
-
-        // Create card objects for each value
-        cardsToCreate.forEach((cardValue) => {
-            const cardObj = new Card(this, cardValue);
-            this.cards.push(cardObj);
-
-            // Set up click handler
-            cardObj.on("pointerdown", () => {
-                this.onCardClicked(cardObj);
-            });
-        });
-
-        this.initCards(); // Position all cards
-    }
-
-    clean_cards() {
-        this.tweens.killAll();
-        // Clean up any existing timer
-        this.timeAttackManager?.destroy();
-
-        this.cards.forEach((card) => {
-            card.destroy();
-        });
-        this.cards.length = 0;
-    }
-
-    ////Lets Render it
-    create() {
-        ///Called automatically by Phaser after all assets are loaded.
-        console.log("CREATE THE CREATE");
-        const bg = this.add.image(0, 0, "background").setOrigin(0, 0);
-        bg.setDisplaySize(this.scale.width, this.scale.height);
-        this.createCards();
-        this.beginGame();
-        this.modal = new Modal(this, this.scale.width, this.scale.height);
-
-        if (this.gameMode === "Time") {
-            this.timeAttackManager = new TimeAttackManager(
-                this,
-                this.isMobile,
-                30000
-            );
-            this.timeAttackManager.createTimerText();
-            this.timeAttackManager.events.on("timeup", () => {
-                this.endTimeAttack();
-            });
-        }
-
-        if (this.gameMode === "Shuffle") {
-            this.shuffleCount = new ShuffleCount(this, this.isMobile, () =>
-                this.reshuffle()
-            );
-            this.shuffleCount.createCountdown();
-        }
-
-        if (this.gameMode === "Quick") {
-            this.add
-                .text(this.scale.width / 2, 30, "Quick Play Mode ", {
-                    fontFamily: "Orbitron",
-                    fontSize: this.isMobile ? "24px" : "38px",
-                    color: "#ffff00",
-                    stroke: "#000000",
-                    strokeThickness: 8,
-                    align: "center",
-                })
-                .setOrigin(0.5);
-        }
-
+    setPlayerCountDisplay() {
         if (this.playerCount === 1) {
             //Create a Score Tracker
             this.player1Score = this.add
@@ -539,7 +303,7 @@ export class Game extends Scene {
                         : this.scale.height - 100,
                     "Matched: " + 0,
                     {
-                        fontFamily: "Orbitron",
+                        fontFamily: "Share Tech Mono",
                         fontSize: this.isMobile ? "22px" : "30px",
                         color: "#ffffff",
                         stroke: "#000000",
@@ -550,14 +314,13 @@ export class Game extends Scene {
                 .setOrigin(0.5)
                 .setDepth(100);
         } else {
-            this.turnIndicator = new TurnIndicator(this);
             this.player1Score = this.add
                 .text(
                     this.isMobile ? 75 : 170,
                     this.isMobile ? 90 : 50,
                     "P1 Matched: " + 0,
                     {
-                        fontFamily: "Orbitron",
+                        fontFamily: "Share Tech Mono",
                         fontSize: this.isMobile ? 18 : 30,
                         color: "#ffffff",
                         stroke: "#000000",
@@ -575,7 +338,7 @@ export class Game extends Scene {
                     this.isMobile ? 90 : 50,
                     "P2 Matched: " + 0,
                     {
-                        fontFamily: "Orbitron",
+                        fontFamily: "Share Tech Mono",
                         fontSize: this.isMobile ? 18 : 30,
                         color: "#ffffff",
                         stroke: "#000000",
@@ -586,11 +349,200 @@ export class Game extends Scene {
                 .setOrigin(0.5)
                 .setDepth(100);
         }
+    }
 
+    checkMatchedRule() {
+        this.deckManager.updatedCardCount();
+        ///////UPDATE PLAYERS SCORE
+        if (this.playerCount === 2) {
+            if (this.playerTurn === 1) {
+                this.player1CardCount++;
+                this.player1Score.setText(
+                    "P1 Matched: " + this.player1CardCount
+                );
+            } else {
+                this.player2CardCount++;
+                this.player2Score.setText(
+                    "P2 Matched: " + this.player2CardCount
+                );
+            }
+        } else {
+            this.player1Score.setText(
+                "Matched: " + this.deckManager.openCardCount
+            );
+        }
+        if (this.deckManager?.isGameOver()) {
+            this.endGameRule();
+        }
+    }
+
+    checkUnMatchedRule() {
+        switch (this.gameMode) {
+            case "Quick":
+            case "Shuffle":
+                if (this.playerCount === 2) {
+                    if (this.playerTurn == 1) {
+                        this.turnIndicator?.display("Player 2", 500, () => {
+                            this.playerTurn = 2;
+                            this.canClick = true;
+                        });
+                    } else {
+                        this.turnIndicator?.display("Player 1", 500, () => {
+                            this.playerTurn = 1;
+                            this.canClick = true;
+                        });
+                    }
+                }
+                break;
+            case "Time":
+            default:
+                this.canClick = true;
+                break;
+        }
+    }
+
+    checkCardOpenRule() {
+        switch (this.gameMode) {
+            case "Time":
+                if (
+                    this.openedCard != null &&
+                    !this.timeAttackManager?.active
+                ) {
+                    this.timeAttackManager?.start();
+                }
+                break;
+            case "Quick":
+                break;
+            case "Shuffle":
+                this.remixManager?.trackAttempt();
+                break;
+            default:
+                break;
+        }
+    }
+
+    /* END OF GAME RULES */
+    endQuickPlay() {
+        this.time.delayedCall(1500, () => {
+            this.modal.show_retryMenu(
+                () => {
+                    this.retryGame();
+                },
+                () => {
+                    this.exitGame();
+                }
+            );
+        });
+    }
+
+    endTimeAttack() {
+        this.timeAttackManager?.end();
+        this.timeAttackManager?.reset();
+        if (this.playerCount == 1) {
+            this.modal.show_retryMenu(
+                () => {
+                    this.retryGame();
+                },
+                () => {
+                    this.exitGame();
+                },
+                `Your Time is ${this.timeAttackManager?.lastTimerText} seconds`
+            );
+        } else {
+            if (this.playerTurn == 1) {
+                this.timeAttackManager?.switchPlayers(2);
+                this.turnIndicator?.display("Player 2", 500, () => {
+                    this.playerTurn = 2;
+                });
+                this.deckManager.closeAll();
+                this.deckManager.reshuffle();
+            }
+            if (this.playerTurn == 2) {
+                const getTextResult = () => {
+                    if (this.player1CardCount > this.player2CardCount) {
+                        return `Player 1's is the Winner`;
+                    } else if (this.player1CardCount < this.player2CardCount) {
+                        return `Player 2's is the Winner`;
+                    } else {
+                        return "DRAW";
+                    }
+                };
+                this.modal.show_retryMenu(
+                    () => {
+                        this.retryGame();
+                    },
+                    () => {
+                        this.exitGame();
+                    },
+                    getTextResult()
+                );
+            }
+        }
+    }
+
+    endRemixMode() {
+        if (this.playerCount == 1) {
+            this.modal.show_retryMenu(
+                () => {
+                    this.retryGame();
+                },
+                () => {
+                    this.exitGame();
+                },
+                `GAME OVER`
+            );
+        } else {
+            const getTextResult = () => {
+                if (this.player1CardCount > this.player2CardCount) {
+                    return `Player 1's is the Winner`;
+                } else if (this.player1CardCount < this.player2CardCount) {
+                    return `Player 2's is the Winner`;
+                } else {
+                    return "DRAW";
+                }
+            };
+            this.modal.show_retryMenu(
+                () => {
+                    this.retryGame();
+                },
+                () => {
+                    this.exitGame();
+                },
+                getTextResult()
+            );
+        }
+    }
+
+    retryGame() {
+        this.deckManager.clean_cards();
+        this.scene.restart();
+    }
+
+    exitGame() {
+        this.deckManager.clean_cards();
+        this.scene.start("MainMenu");
+    }
+
+    /* RESIZE CARDS */
+    handleResize() {
+        this.deckManager.handleResize(); ///Resize based on screen width
+    }
+
+    ////Lets Render it
+    create() {
+        ///Called automatically by Phaser after all assets are loaded.
+        const bg = this.add.image(0, 0, "background").setOrigin(0, 0);
+        bg.setDisplaySize(this.scale.width, this.scale.height);
+        this.deckManager.createCards();
+        this.beginGame();
+        this.modal = new Modal(this, this.scale.width, this.scale.height);
+        this.setGameMode();
+        this.setPlayerCountDisplay();
         ////////////Main Menu Button
         this.add
             .text(this.scale.width / 2, this.scale.height - 25, "Main Menu", {
                 fontSize: this.isMobile ? "26px" : "38px",
+                fontFamily: "Share Tech Mono",
                 color: "#ffffff",
                 backgroundColor: "#333333",
                 padding: { x: 20, y: 10 },
@@ -599,6 +551,20 @@ export class Game extends Scene {
             .setInteractive()
             .on("pointerup", () => {
                 this.exitGame();
+            });
+
+        this.add
+            .text(this.scale.width / 2, this.scale.height - 70, "MIX", {
+                fontSize: this.isMobile ? "26px" : "38px",
+                fontFamily: "Share Tech Mono",
+                color: "#ffffff",
+                backgroundColor: "#333333",
+                padding: { x: 20, y: 10 },
+            })
+            .setOrigin(0.5)
+            .setInteractive()
+            .on("pointerup", () => {
+                this.reshuffle();
             });
 
         ////////////////RESIZE

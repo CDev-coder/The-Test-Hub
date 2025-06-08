@@ -17,7 +17,11 @@ export class TurnIndicator {
             .setVisible(false);
     }
 
-    show(playerName: string, onComplete: () => void) {
+    display(
+        playerName: string,
+        duration: number = 500,
+        onComplete: () => void
+    ) {
         const centerX = this.scene.scale.width / 2;
         const exitX = this.scene.scale.width + 300;
 
@@ -29,7 +33,7 @@ export class TurnIndicator {
         this.scene.tweens.add({
             targets: this.text,
             x: centerX,
-            duration: 500,
+            duration: duration,
             ease: "Back.easeOut",
             onComplete: () => {
                 // Pause for 1 second
@@ -38,7 +42,7 @@ export class TurnIndicator {
                     this.scene.tweens.add({
                         targets: this.text,
                         x: exitX,
-                        duration: 500,
+                        duration: duration,
                         ease: "Back.easeIn",
                         onComplete: () => {
                             this.text.setVisible(false);

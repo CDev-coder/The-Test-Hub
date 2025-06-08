@@ -31,6 +31,7 @@ export class Modal {
         // Rule Text
         this.modal_text = scene.add
             .text(width / 2, height / 2 - 50, "", {
+                fontFamily: "Share Tech Mono",
                 fontSize: "20px",
                 color: "#000",
                 wordWrap: { width: popupWidth - 40 },
@@ -41,6 +42,7 @@ export class Modal {
         // Play / Next button
         this.modal_nextButton = scene.add
             .text(width / 2, height / 2 + 50, "Play", {
+                fontFamily: "Share Tech Mono",
                 fontSize: "24px",
                 backgroundColor: "#4CAF50",
                 color: "#fff",
@@ -52,6 +54,7 @@ export class Modal {
         // Go back / Cancel button
         this.modal_backButton = scene.add
             .text(width / 2, height / 2, "Go back", {
+                fontFamily: "Share Tech Mono",
                 fontSize: "24px",
                 backgroundColor: "#F44336",
                 color: "#fff",

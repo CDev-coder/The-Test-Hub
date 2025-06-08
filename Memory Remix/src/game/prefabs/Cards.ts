@@ -66,7 +66,7 @@ class Card extends Phaser.GameObjects.Sprite {
     }
 
     move() {
-        console.log("MOVING CARD");
+        // console.log("MOVING CARD");
         if (this.sceneRef) {
             this.sceneRef.tweens.add({
                 targets: this,
@@ -80,6 +80,7 @@ class Card extends Phaser.GameObjects.Sprite {
                 },
             });
         }
+        // console.log("END MOVE");
     }
 
     resetPosition(newX: number, newY: number) {

@@ -1,11 +1,12 @@
 import { GameObjects, Scene } from "phaser";
 import { EventBus } from "../EventBus";
 import { Modal } from "../prefabs/Modal";
+import { TitleText } from "../prefabs/TitleText";
 
 export class MainMenu extends Scene {
     background: GameObjects.Image;
-    title: GameObjects.Text;
     modal: Modal;
+    title: TitleText;
 
     constructor() {
         super("MainMenu");
@@ -16,17 +17,19 @@ export class MainMenu extends Scene {
         bg.setDisplaySize(this.scale.width, this.scale.height);
 
         this.modal = new Modal(this, this.scale.width, this.scale.height);
-        this.title = this.add
-            .text(this.scale.width / 2, this.scale.height / 4, "Memory Remix", {
-                fontFamily: "Arial Black",
-                fontSize: 38,
+        this.title = new TitleText(
+            this,
+            this.scale.width / 2,
+            this.scale.height / 4,
+            "Memory Remix",
+            {
+                fontFamily: "Orbitron",
+                fontSize: "64px",
                 color: "#ffffff",
                 stroke: "#000000",
                 strokeThickness: 8,
-                align: "center",
-            })
-            .setOrigin(0.5)
-            .setDepth(100);
+            }
+        );
 
         const singlePlayerQuickPlay = this.add
             .text(
@@ -34,6 +37,7 @@ export class MainMenu extends Scene {
                 this.scale.height / 4 + 100,
                 "1 Player Quick Play",
                 {
+                    fontFamily: "Share Tech Mono",
                     fontSize: "32px",
                     color: "#ffffff",
                     backgroundColor: "#333333",
@@ -66,6 +70,7 @@ export class MainMenu extends Scene {
                 this.scale.height / 4 + 160,
                 "1 Player Time Attack",
                 {
+                    fontFamily: "Share Tech Mono",
                     fontSize: "32px",
                     color: "#ffffff",
                     backgroundColor: "#333333",
@@ -95,6 +100,7 @@ export class MainMenu extends Scene {
                 this.scale.height / 4 + 220,
                 "2 Player Quick Play",
                 {
+                    fontFamily: "Share Tech Mono",
                     fontSize: "32px",
                     color: "#ffffff",
                     backgroundColor: "#333333",
@@ -127,6 +133,7 @@ export class MainMenu extends Scene {
                 this.scale.height / 4 + 280,
                 "2 Player Time Attack",
                 {
+                    fontFamily: "Share Tech Mono",
                     fontSize: "32px",
                     color: "#ffffff",
                     backgroundColor: "#333333",
@@ -156,6 +163,7 @@ export class MainMenu extends Scene {
                 this.scale.height / 4 + 350,
                 "2 Player Remix Mode",
                 {
+                    fontFamily: "Share Tech Mono",
                     fontSize: "32px",
                     color: "#ffffff",
                     backgroundColor: "#333333",

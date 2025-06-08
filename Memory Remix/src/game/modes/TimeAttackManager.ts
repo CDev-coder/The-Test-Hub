@@ -11,12 +11,25 @@ export class TimeAttackManager {
     private startTime: number = 0;
     public events: Phaser.Events.EventEmitter;
     private isMobile: boolean;
+    public playerCount: number = 1;
+    public playerTurn: number = 1;
+    public player1Time: number = 1;
+    public player2Time: number = 1;
 
-    constructor(scene: Scene, isMobile: boolean, duration: number = 30000) {
+    constructor(
+        scene: Scene,
+        isMobile: boolean,
+        duration: number = 30000,
+        playerCount: number
+    ) {
         this.scene = scene;
         this.isMobile = isMobile;
         this.duration = duration;
         this.events = new Phaser.Events.EventEmitter();
+        this.playerCount = playerCount;
+        if (this.playerCount > 1) {
+            this.playerTurn = 1;
+        }
     }
 
     createTimerText() {
@@ -93,10 +106,13 @@ export class TimeAttackManager {
         }
     }
 
+    switchPlayers(turn: number) {
+        this.playerTurn = turn;
+    }
+
     end() {
         this.timer?.destroy();
         this.active = false;
-
         if (this.timerText) {
             this.timerText.setText("Time's Up!");
         }

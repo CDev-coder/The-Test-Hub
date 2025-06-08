@@ -53,7 +53,6 @@ export class ShuffleCount {
         this.attemptCount++;
         const displayCount = this.reshuffleThreshold - this.attemptCount;
         this.countText.setText(`Cards Until Remix: ${displayCount}`);
-
         if (this.attemptCount % this.reshuffleThreshold === 0) {
             const hasClosedCards = this.scene.cards.some(
                 (card) => !card.isOpened
