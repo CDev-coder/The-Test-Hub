@@ -21,19 +21,24 @@ export class ShuffleCount {
 
     createCountdown() {
         this.scene.add
-            .text(this.scene.scale.width / 2, 30, "Remix Mode ", {
-                fontFamily: "Orbitron",
-                fontSize: this.isMobile ? "24px" : "38px",
-                color: "#ffff00",
-                stroke: "#000000",
-                strokeThickness: 8,
-                align: "center",
-            })
+            .text(
+                this.scene.scale.width / 2,
+                this.isMobile ? 15 : 30,
+                "Remix Mode ",
+                {
+                    fontFamily: "Orbitron",
+                    fontSize: this.isMobile ? "24px" : "38px",
+                    color: "#ffff00",
+                    stroke: "#000000",
+                    strokeThickness: 8,
+                    align: "center",
+                }
+            )
             .setOrigin(0.5);
         this.countText = this.scene.add
             .text(
                 this.scene.scale.width / 2,
-                70,
+                this.isMobile ? 50 : 70,
                 `Cards Until Remix: ${this.reshuffleThreshold}`,
                 {
                     fontFamily: "Orbitron",
@@ -60,20 +65,8 @@ export class ShuffleCount {
     }
 
     triggerShuffle() {
-        console.log("triggerShuffle");
-        console.log("this.attemptCount " + this.attemptCount);
-        console.log("this.reshuffleThreshold " + this.reshuffleThreshold);
-        console.log(
-            "this.attemptCount % this.reshuffleThreshold " +
-                (this.attemptCount % this.reshuffleThreshold)
-        );
-
-        let displayCount = this.reshuffleThreshold - this.attemptCount;
-        console.log("displayCount " + displayCount);
-        if (displayCount <= 0) {
-            displayCount = 0;
-        }
-        if (this.attemptCount % this.reshuffleThreshold === 0) {
+        console.log("this.attemptCount: " + this.attemptCount);
+        if (this.attemptCount >= this.reshuffleThreshold) {
             const hasClosedCards = this.scene.cards.some((c) => !c.isOpened);
             const noCardIsFlipped = this.scene.openedCard === null; ///Check to see if ONE non-matching card is showing
 

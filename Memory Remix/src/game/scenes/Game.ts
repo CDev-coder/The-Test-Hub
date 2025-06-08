@@ -44,11 +44,11 @@ export class Game extends Scene {
         super("Game");
     }
 
-    init(data: { gameMode?: string; playerCount?: number }) {
+    init(data: { gameMode?: string; playerCount?: number; isMobile: boolean }) {
         //Used for initializing data, receiving scene parameters.
         this.gameMode = data.gameMode || "Quick";
         this.playerCount = data.playerCount || 1;
-        this.isMobile = this.scale.width < 768; // Common mobile breakpoint
+        this.isMobile = this.scale.width < 768 || data.isMobile; //Make a default incase the MainMenu gets bypassed
         this.deckManager = new Deck(this);
         this.configSetting = this.isMobile
             ? {
@@ -111,19 +111,19 @@ export class Game extends Scene {
     }
 
     setGameMode() {
+        this.turnIndicator = new TurnIndicator(this, this.isMobile);
         switch (this.gameMode) {
             case "Time":
                 this.timeAttackManager = new TimeAttackManager(
                     this,
                     this.isMobile,
-                    10000,
+                    30,
                     this.playerCount
                 );
                 this.timeAttackManager.createTimerText();
                 this.timeAttackManager.events.on("timeup", () => {
                     this.endTimeAttack();
                 });
-                this.turnIndicator = new TurnIndicator(this);
                 if (this.playerCount === 2) {
                     this.turnIndicator.display("Player 1 START", 500, () => {});
                 } else {
@@ -143,7 +143,6 @@ export class Game extends Scene {
                     })
                     .setOrigin(0.5);
                 this.endGameRule = () => this.endQuickPlay();
-                this.turnIndicator = new TurnIndicator(this);
                 if (this.playerCount === 2) {
                     this.turnIndicator.display("Player 1 START", 500, () => {});
                 } else {
@@ -156,7 +155,6 @@ export class Game extends Scene {
                 );
                 this.remixManager.createCountdown();
                 this.endGameRule = () => this.endRemixMode();
-                this.turnIndicator = new TurnIndicator(this);
                 if (this.playerCount === 2) {
                     this.turnIndicator.display("Player 1 START", 500, () => {});
                 } else {
@@ -175,7 +173,6 @@ export class Game extends Scene {
                     })
                     .setOrigin(0.5);
                 this.endGameRule = () => this.endQuickPlay();
-                this.turnIndicator = new TurnIndicator(this);
                 if (this.playerCount === 2) {
                     this.turnIndicator.display("Player 1 START", 500, () => {});
                 } else {
@@ -191,9 +188,7 @@ export class Game extends Scene {
             this.player1Score = this.add
                 .text(
                     this.scale.width / 2,
-                    this.isMobile
-                        ? this.scale.height - 75
-                        : this.scale.height - 100,
+                    this.isMobile ? 90 : 100,
                     "Matched: " + 0,
                     {
                         fontFamily: "Share Tech Mono",
@@ -209,7 +204,7 @@ export class Game extends Scene {
         } else {
             this.player1Score = this.add
                 .text(
-                    this.isMobile ? 75 : 170,
+                    this.isMobile ? 70 : 170,
                     this.isMobile ? 90 : 50,
                     "P1 Matched: " + 0,
                     {
@@ -226,7 +221,7 @@ export class Game extends Scene {
             this.player2Score = this.add
                 .text(
                     this.isMobile
-                        ? this.scale.width - 75
+                        ? this.scale.width - 70
                         : this.scale.width - 200,
                     this.isMobile ? 90 : 50,
                     "P2 Matched: " + 0,
@@ -267,7 +262,8 @@ export class Game extends Scene {
                 "Matched: " + this.deckManager.openCardCount
             );
         }
-        if (this.deckManager?.isGameOver()) {
+        const isGameOver = this.deckManager?.isGameOver();
+        if (isGameOver) {
             this.endGameRule();
         }
     }
@@ -276,6 +272,9 @@ export class Game extends Scene {
         switch (this.gameMode) {
             case "Quick":
             case "Shuffle":
+                if (this.gameMode == "Shuffle") {
+                    this.remixManager?.triggerShuffle();
+                }
                 if (this.playerCount === 2) {
                     if (this.playerTurn == 1) {
                         this.turnIndicator?.display("Player 2", 500, () => {
@@ -288,9 +287,9 @@ export class Game extends Scene {
                             this.deckManager.canClick = true;
                         });
                     }
+                } else {
+                    this.deckManager.canClick = true;
                 }
-                if (this.gameMode == "Shuffle")
-                    this.remixManager?.triggerShuffle();
                 break;
             case "Time":
             default:
@@ -302,18 +301,14 @@ export class Game extends Scene {
     checkCardOpenRule() {
         switch (this.gameMode) {
             case "Time":
-                if (
-                    this.deckManager.openedCard != null &&
-                    !this.timeAttackManager?.active
-                ) {
+                if (!this.timeAttackManager?.active) {
                     this.timeAttackManager?.start();
                 }
-                break;
-            case "Quick":
                 break;
             case "Shuffle":
                 this.remixManager?.trackAttempt();
                 break;
+            case "Quick":
             default:
                 break;
         }
@@ -334,6 +329,7 @@ export class Game extends Scene {
     }
 
     endTimeAttack() {
+        console.log("endTimeAttack");
         this.timeAttackManager?.end();
         this.timeAttackManager?.reset();
         if (this.playerCount == 1) {
@@ -344,10 +340,11 @@ export class Game extends Scene {
                 () => {
                     this.exitGame();
                 },
-                `Your Time is ${this.timeAttackManager?.lastTimerText} seconds`
+                `Your Time is ${this.timeAttackManager?.lastTimerText}`
             );
         } else {
             if (this.playerTurn == 1) {
+                this.timeAttackManager?.capturePlayerOneTime();
                 this.timeAttackManager?.switchPlayers(2);
                 this.turnIndicator?.display("Player 2", 500, () => {
                     this.playerTurn = 2;
@@ -356,24 +353,24 @@ export class Game extends Scene {
                 this.deckManager.reshuffle();
             }
             if (this.playerTurn == 2) {
+                this.timeAttackManager?.capturePlayerTwoTime();
+                this.timeAttackManager?.stopTimer();
                 const getTextResult = () => {
-                    if (this.player1CardCount > this.player2CardCount) {
-                        return `Player 1's is the Winner`;
-                    } else if (this.player1CardCount < this.player2CardCount) {
-                        return `Player 2's is the Winner`;
-                    } else {
-                        return "DRAW";
-                    }
+                    const timeResults = this.timeAttackManager?.getWinner();
+                    return timeResults;
                 };
-                this.modal.show_retryMenu(
-                    () => {
-                        this.retryGame();
-                    },
-                    () => {
-                        this.exitGame();
-                    },
-                    getTextResult()
-                );
+
+                this.time.delayedCall(1000, () => {
+                    this.modal.show_retryMenu(
+                        () => {
+                            this.retryGame();
+                        },
+                        () => {
+                            this.exitGame();
+                        },
+                        getTextResult()
+                    );
+                });
             }
         }
     }

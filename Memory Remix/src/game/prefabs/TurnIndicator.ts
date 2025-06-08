@@ -1,14 +1,15 @@
 export class TurnIndicator {
     scene: Phaser.Scene;
     text: Phaser.GameObjects.Text;
+    private isMobile: boolean;
 
-    constructor(scene: Phaser.Scene) {
+    constructor(scene: Phaser.Scene, isMobile: boolean) {
         this.scene = scene;
-
+        this.isMobile = isMobile;
         this.text = this.scene.add
             .text(-300, this.scene.scale.height / 2, "", {
                 fontFamily: "Orbitron",
-                fontSize: "48px",
+                fontSize: this.isMobile ? "30px" : "48px",
                 color: "#ffffff",
                 stroke: "#000000",
                 strokeThickness: 6,
@@ -18,14 +19,14 @@ export class TurnIndicator {
     }
 
     display(
-        playerName: string,
+        textContent: string,
         duration: number = 500,
         onComplete: () => void
     ) {
         const centerX = this.scene.scale.width / 2;
         const exitX = this.scene.scale.width + 300;
 
-        this.text.setText(`${playerName}'s Turn`);
+        this.text.setText(`${textContent}`);
         this.text.setX(-300);
         this.text.setVisible(true);
 

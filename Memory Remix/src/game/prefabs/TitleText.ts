@@ -5,10 +5,12 @@ export class TitleText extends Phaser.GameObjects.Container {
     private glitchTexts: Phaser.GameObjects.Text[] = [];
     private originalStyle: Phaser.Types.GameObjects.Text.TextStyle;
     private glitchEvent?: Phaser.Time.TimerEvent;
-    private baseCharacterWidth: number;
+    private isMobile: boolean;
+    // private baseCharacterWidth?: number;
 
     constructor(
         scene: Phaser.Scene,
+        isMobile: boolean,
         x: number,
         y: number,
         text: string,
@@ -16,9 +18,11 @@ export class TitleText extends Phaser.GameObjects.Container {
     ) {
         super(scene, x, y);
         this.originalText = text;
+        this.isMobile = isMobile;
+
         this.originalStyle = {
             fontFamily: "Orbitron",
-            fontSize: "64px",
+            fontSize: this.isMobile ? "32px" : "64px",
             color: "#ffffff",
             stroke: "#000000",
             strokeThickness: 8,
@@ -30,7 +34,7 @@ export class TitleText extends Phaser.GameObjects.Container {
         const tempText = this.scene.add
             .text(0, 0, "W", this.originalStyle) // 'W' is typically the widest
             .setVisible(false);
-        this.baseCharacterWidth = tempText.width;
+        //this.baseCharacterWidth = tempText.width;
         tempText.destroy();
 
         //this.characterSpacing = this.baseCharacterWidth * spacingMultiplier;
@@ -116,7 +120,11 @@ export class TitleText extends Phaser.GameObjects.Container {
                 Phaser.Math.Between(150, 255),
                 Phaser.Math.Between(150, 255)
             );
-            const matchSize = Phaser.Math.Between(58, 70) + "px";
+            const matchSize =
+                Phaser.Math.Between(
+                    this.isMobile ? 32 : 50,
+                    this.isMobile ? 50 : 70
+                ) + "px";
 
             // Apply glitch to all characters
             this.glitchTexts.forEach((charText, index) => {
@@ -134,7 +142,11 @@ export class TitleText extends Phaser.GameObjects.Container {
                             Phaser.Math.Between(50, 255),
                             Phaser.Math.Between(50, 255)
                         ),
-                        fontSize: Phaser.Math.Between(50, 78) + "px",
+                        fontSize:
+                            Phaser.Math.Between(
+                                this.isMobile ? 32 : 50,
+                                this.isMobile ? 50 : 78
+                            ) + "px",
                     });
                 }
             });

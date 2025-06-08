@@ -2,10 +2,12 @@ class Card extends Phaser.GameObjects.Sprite {
     isOpened: boolean = false;
     positionX = 0;
     positionY = 0;
+    gridCell: string = "";
     delay = 0;
     value = 0;
     baseScale: number = 1; // Add this line to track scale
     sceneRef: Phaser.Scene;
+    debugMode: boolean = true;
     debugText?: Phaser.GameObjects.Text;
 
     constructor(scene: Phaser.Scene, value: number) {
@@ -15,13 +17,15 @@ class Card extends Phaser.GameObjects.Sprite {
         this.setOrigin(0.5, 0.5);
         this.sceneRef.add.existing(this);
         this.setInteractive();
-        this.debugText = this.sceneRef.add
-            .text(this.positionX, this.positionY, `${this.value}`, {
-                fontSize: "24px",
-                color: "#ff0000",
-            })
-            .setOrigin(0.5)
-            .setDepth(2000);
+        if (this.debugMode) {
+            this.debugText = this.sceneRef.add
+                .text(this.positionX, this.positionY, `${this.value}`, {
+                    fontSize: "24px",
+                    color: "#ff0000",
+                })
+                .setOrigin(0.5)
+                .setDepth(2000);
+        }
     }
 
     preUpdate(time: number, delta: number) {
@@ -85,19 +89,17 @@ class Card extends Phaser.GameObjects.Sprite {
 
     move() {
         // console.log("MOVING CARD");
-        if (this.sceneRef) {
-            this.sceneRef.tweens.add({
-                targets: this,
-                x: this.positionX,
-                y: this.positionY,
-                ease: "Linear",
-                delay: this.delay,
-                duration: 250,
-                onComplete: () => {
-                    this.showCard();
-                },
-            });
-        }
+        this.sceneRef?.tweens.add({
+            targets: this,
+            x: this.positionX,
+            y: this.positionY,
+            ease: "Linear",
+            delay: this.delay,
+            duration: 250,
+            onComplete: () => {
+                this.showCard();
+            },
+        });
         // console.log("END MOVE");
     }
 

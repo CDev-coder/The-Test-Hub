@@ -7,9 +7,15 @@ export class MainMenu extends Scene {
     background: GameObjects.Image;
     modal: Modal;
     title: TitleText;
+    isMobile: boolean = false;
 
     constructor() {
         super("MainMenu");
+    }
+
+    init() {
+        console.log("MainMenu INIT");
+        this.isMobile = this.scale.width < 768;
     }
 
     create() {
@@ -19,15 +25,16 @@ export class MainMenu extends Scene {
         this.modal = new Modal(this, this.scale.width, this.scale.height);
         this.title = new TitleText(
             this,
-            this.scale.width / 2,
+            this.isMobile,
+            this.scale.width / 2 - (this.isMobile ? 10 : 0),
             this.scale.height / 4,
             "Memory Remix",
             {
                 fontFamily: "Orbitron",
-                fontSize: "64px",
-                color: "#ffffff",
-                stroke: "#000000",
-                strokeThickness: 8,
+                fontSize: this.isMobile ? "32px" : "64px",
+                color: "#343434",
+                stroke: "#8A00C4",
+                strokeThickness: this.isMobile ? 4 : 8,
             }
         );
 
@@ -59,6 +66,7 @@ export class MainMenu extends Scene {
                         this.scene.start("Game", {
                             gameMode: "Quick",
                             playerCount: 1,
+                            isMobile: this.isMobile,
                         });
                     }
                 )
@@ -90,6 +98,7 @@ export class MainMenu extends Scene {
                     this.scene.start("Game", {
                         gameMode: "Time",
                         playerCount: 1,
+                        isMobile: this.isMobile,
                     });
                 })
             );
@@ -122,6 +131,7 @@ export class MainMenu extends Scene {
                         this.scene.start("Game", {
                             gameMode: "Quick",
                             playerCount: 2,
+                            isMobile: this.isMobile,
                         });
                     }
                 )
@@ -153,6 +163,40 @@ export class MainMenu extends Scene {
                     this.scene.start("Game", {
                         gameMode: "Time",
                         playerCount: 2,
+                        isMobile: this.isMobile,
+                    });
+                })
+            );
+
+        const onePlayerRemixMode = this.add
+            .text(
+                this.scale.width / 2,
+                this.scale.height / 4 + 340,
+                "1 Player Remix Mode",
+                {
+                    fontFamily: "Share Tech Mono",
+                    fontSize: "32px",
+                    color: "#ffffff",
+                    backgroundColor: "#333333",
+                    padding: { x: 20, y: 10 },
+                }
+            )
+            .setOrigin(0.5)
+            .setInteractive()
+            .on("pointerover", () =>
+                onePlayerRemixMode.setStyle({
+                    fill: "#ff0",
+                })
+            ) // Hover effect
+            .on("pointerout", () =>
+                onePlayerRemixMode.setStyle({ fill: "#fff" })
+            ) // Normal state
+            .on("pointerup", () =>
+                this.modal.showModal("Two Player Time Attack...", () => {
+                    this.scene.start("Game", {
+                        gameMode: "Shuffle",
+                        playerCount: 1,
+                        isMobile: this.isMobile,
                     });
                 })
             );
@@ -160,7 +204,7 @@ export class MainMenu extends Scene {
         const twoPlayerRemixMode = this.add
             .text(
                 this.scale.width / 2,
-                this.scale.height / 4 + 350,
+                this.scale.height / 4 + 400,
                 "2 Player Remix Mode",
                 {
                     fontFamily: "Share Tech Mono",
@@ -185,6 +229,7 @@ export class MainMenu extends Scene {
                     this.scene.start("Game", {
                         gameMode: "Shuffle",
                         playerCount: 2,
+                        isMobile: this.isMobile,
                     });
                 })
             );

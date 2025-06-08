@@ -5,26 +5,32 @@ export class TimeAttackManager {
     private scene: Scene;
     private timer?: Phaser.Time.TimerEvent;
     public timerText?: Phaser.GameObjects.Text;
-    public lastTimerText: number;
+    public player1TimerText?: Phaser.GameObjects.Text;
+    public player2TimerText?: Phaser.GameObjects.Text;
+    public lastTimerText: string;
     private duration: number;
     public active: boolean = false;
     private startTime: number = 0;
     public events: Phaser.Events.EventEmitter;
-    private isMobile: boolean;
+    private isMobile: boolean = false;
     public playerCount: number = 1;
     public playerTurn: number = 1;
-    public player1Time: number = 1;
-    public player2Time: number = 1;
+    public player1Time: string;
+    public player2Time: string;
+    public elapsedMs = 0; // live counter for the active player
+    private pausedAt = 0;
+    player1Ms: number;
+    player2Ms: number;
 
     constructor(
         scene: Scene,
         isMobile: boolean,
-        duration: number = 30000,
+        durationSeconds: number = 30,
         playerCount: number
     ) {
         this.scene = scene;
-        this.isMobile = isMobile;
-        this.duration = duration;
+        this.isMobile = isMobile || this.scene.scale.width < 768;
+        this.duration = durationSeconds * 1000; // convert to ms
         this.events = new Phaser.Events.EventEmitter();
         this.playerCount = playerCount;
         if (this.playerCount > 1) {
@@ -32,25 +38,39 @@ export class TimeAttackManager {
         }
     }
 
+    private formatTime(ms: number): string {
+        const minutes = Math.floor(ms / 60000);
+        const seconds = Math.floor((ms % 60000) / 1000);
+        const hundredths = Math.floor((ms % 1000) / 10);
+        return `${this.pad(minutes)}:${this.pad(seconds)}:${this.pad(
+            hundredths
+        )}`;
+    }
+
     createTimerText() {
         this.scene.add
-            .text(this.scene.scale.width / 2, 30, "TIME ATTACK MODE", {
-                fontFamily: "Orbitron",
-                fontSize: this.isMobile ? "24px" : "38px",
-                color: "#ffff00",
-                stroke: "#000000",
-                strokeThickness: 8,
-                align: "center",
-            })
+            .text(
+                this.scene.scale.width / 2,
+                this.isMobile ? 20 : 30,
+                "TIME ATTACK MODE",
+                {
+                    fontFamily: "Orbitron",
+                    fontSize: this.isMobile ? "24px" : "38px",
+                    color: "#ffff00",
+                    stroke: "#000000",
+                    strokeThickness: 8,
+                    align: "center",
+                }
+            )
             .setOrigin(0.5);
         this.timerText = this.scene.add
             .text(
                 this.scene.scale.width / 2,
-                70,
-                `Time: ${this.duration / 1000}s`,
+                this.isMobile ? 55 : 70,
+                `Time: ${this.formatTime(this.duration)}`,
                 {
                     fontFamily: "Orbitron",
-                    fontSize: this.isMobile ? "22px" : "30px",
+                    fontSize: this.isMobile ? "25px" : "30px",
                     color: "#ffffff",
                     stroke: "#000000",
                     strokeThickness: 8,
@@ -59,6 +79,44 @@ export class TimeAttackManager {
             )
             .setOrigin(0.5)
             .setDepth(100);
+
+        if (this.playerCount > 1) {
+            /////////PLAYER 1 TIME
+            this.player1TimerText = this.scene.add
+                .text(
+                    this.isMobile ? 85 : 170,
+                    this.isMobile ? 120 : 100,
+                    `P1 TIME: ${this.formatTime(0)}`,
+                    {
+                        fontFamily: "Share Tech Mono",
+                        fontSize: this.isMobile ? 18 : 30,
+                        color: "#ffffff",
+                        stroke: "#000000",
+                        strokeThickness: 8,
+                        align: "center",
+                    }
+                )
+                .setOrigin(0.5)
+                .setDepth(100);
+            this.player2TimerText = this.scene.add
+                .text(
+                    this.isMobile
+                        ? this.scene.scale.width - 85
+                        : this.scene.scale.width - 200,
+                    this.isMobile ? 120 : 100,
+                    `P2 TIME: ${this.formatTime(0)}`,
+                    {
+                        fontFamily: "Share Tech Mono",
+                        fontSize: this.isMobile ? 18 : 30,
+                        color: "#ffffff",
+                        stroke: "#000000",
+                        strokeThickness: 8,
+                        align: "center",
+                    }
+                )
+                .setOrigin(0.5)
+                .setDepth(100);
+        }
     }
 
     start() {
@@ -80,16 +138,23 @@ export class TimeAttackManager {
         });
     }
 
+    private pad(value: number): string {
+        return value.toString().padStart(2, "0");
+    }
+
     private update() {
         if (!this.timerText) return;
 
-        const elapsed = Date.now() - this.startTime;
+        const now = Date.now();
+        const elapsed = now - this.startTime;
         const remaining = Math.max(0, this.duration - elapsed);
-        const remainingSeconds = Math.ceil(remaining / 1000);
-        this.lastTimerText = remainingSeconds;
-        this.timerText.setText(`Time: ${remainingSeconds}s`);
 
-        if (remainingSeconds < 10) {
+        this.elapsedMs = Math.min(elapsed, this.duration);
+        this.lastTimerText = this.formatTime(this.elapsedMs);
+
+        this.timerText.setText(`Time: ${this.formatTime(remaining)}`);
+
+        if (remaining <= this.duration / 3) {
             this.timerText.setColor("#ff0000");
             this.scene.tweens.add({
                 targets: this.timerText,
@@ -102,11 +167,29 @@ export class TimeAttackManager {
 
         if (remaining <= 0) {
             this.end();
-            this.events.emit("timeup"); ///Game side needs a 'timeup' listeners
+            this.events.emit("timeup");
         }
     }
 
+    stopTimer() {
+        // Only pause if a timer exists and is running
+        if (!this.active || !this.timer) return;
+        this.timer.paused = true; // Phaser-native pause flag
+        this.active = false; // let the rest of your code know
+        this.pausedAt = Date.now(); // remember when we paused
+    }
+    resumeTimer() {
+        // Resume only if we have a paused timer
+        if (this.active || !this.timer || !this.timer.paused) return;
+        const pauseDuration = Date.now() - this.pausedAt;
+        // Shift the startTime forward so elapsed/remaining stay correct
+        this.startTime += pauseDuration;
+        this.timer.paused = false;
+        this.active = true;
+    }
+
     switchPlayers(turn: number) {
+        this.player1TimerText?.setText(`P1 TIME: ${this.lastTimerText}`);
         this.playerTurn = turn;
     }
 
@@ -118,12 +201,32 @@ export class TimeAttackManager {
         }
     }
 
+    capturePlayerOneTime() {
+        console.log("capturePlayerOneTime");
+        this.player1Ms = this.elapsedMs;
+        this.player1TimerText?.setText(`P1 TIME: ${this.lastTimerText}`);
+    }
+    capturePlayerTwoTime() {
+        console.log("capturePlayerTwoTime");
+        this.player2Ms = this.elapsedMs;
+        this.player2TimerText?.setText(`P2 TIME: ${this.lastTimerText}`);
+    }
+
+    getWinner(): "Player 1" | "Player 2" | "Draw" {
+        if (this.player1Ms === 0 || this.player2Ms === 0) {
+            return "Draw";
+        }
+        if (this.player1Ms < this.player2Ms) return "Player 1";
+        if (this.player2Ms < this.player1Ms) return "Player 2";
+        return "Draw";
+    }
+
     reset() {
         this.timer?.destroy();
         this.active = false;
 
         if (this.timerText) {
-            this.timerText.setText(`Time: ${this.duration / 1000}s`);
+            this.timerText.setText(`Time: ${this.formatTime(this.duration)}`);
             this.timerText.setColor("#ffffff");
             this.timerText.setScale(1);
         }
@@ -132,5 +235,7 @@ export class TimeAttackManager {
     destroy() {
         this.timer?.destroy();
         this.timerText?.destroy();
+        this.player1TimerText?.destroy();
+        this.player2TimerText?.destroy();
     }
 }
