@@ -61,7 +61,7 @@ export class MainMenu extends Scene {
             ) // Normal state
             .on("pointerup", () =>
                 this.modal.showModal(
-                    "Single Player Classic Mode Rules...",
+                    "Single Player Quick Play Mode: Match Cards at your own pace",
                     () => {
                         this.scene.start("Game", {
                             gameMode: "Quick",
@@ -94,13 +94,16 @@ export class MainMenu extends Scene {
                 singlePlayerTimeAttackPlay.setStyle({ fill: "#fff" })
             ) // Normal state
             .on("pointerup", () =>
-                this.modal.showModal("Single Player Time Attack...", () => {
-                    this.scene.start("Game", {
-                        gameMode: "Time",
-                        playerCount: 1,
-                        isMobile: this.isMobile,
-                    });
-                })
+                this.modal.showModal(
+                    "Single Player Time Attack Mode: Match Cards under 30 seconds",
+                    () => {
+                        this.scene.start("Game", {
+                            gameMode: "Time",
+                            playerCount: 1,
+                            isMobile: this.isMobile,
+                        });
+                    }
+                )
             );
 
         const twoPlayerQuickPlay = this.add
@@ -126,7 +129,7 @@ export class MainMenu extends Scene {
             ) // Normal state
             .on("pointerup", () =>
                 this.modal.showModal(
-                    "Two Players Classic Mode Rules...",
+                    "Two Player Quick Mode: Players will take turns matching cards at their own pace",
                     () => {
                         this.scene.start("Game", {
                             gameMode: "Quick",
@@ -159,13 +162,16 @@ export class MainMenu extends Scene {
                 twoPlayerTimeAttackPlay.setStyle({ fill: "#fff" })
             ) // Normal state
             .on("pointerup", () =>
-                this.modal.showModal("Two Player Time Attack...", () => {
-                    this.scene.start("Game", {
-                        gameMode: "Time",
-                        playerCount: 2,
-                        isMobile: this.isMobile,
-                    });
-                })
+                this.modal.showModal(
+                    "Two Player Time Attack Mode: Each player will 30 seconds to match as many cards as they can",
+                    () => {
+                        this.scene.start("Game", {
+                            gameMode: "Time",
+                            playerCount: 2,
+                            isMobile: this.isMobile,
+                        });
+                    }
+                )
             );
 
         const onePlayerRemixMode = this.add
@@ -192,13 +198,16 @@ export class MainMenu extends Scene {
                 onePlayerRemixMode.setStyle({ fill: "#fff" })
             ) // Normal state
             .on("pointerup", () =>
-                this.modal.showModal("Two Player Time Attack...", () => {
-                    this.scene.start("Game", {
-                        gameMode: "Shuffle",
-                        playerCount: 1,
-                        isMobile: this.isMobile,
-                    });
-                })
+                this.modal.showModal(
+                    "Single Player Time Attack Mode: Player will 30 seconds to match as many cards as they can",
+                    () => {
+                        this.scene.start("Game", {
+                            gameMode: "Shuffle",
+                            playerCount: 1,
+                            isMobile: this.isMobile,
+                        });
+                    }
+                )
             );
 
         const twoPlayerRemixMode = this.add
@@ -225,13 +234,16 @@ export class MainMenu extends Scene {
                 twoPlayerRemixMode.setStyle({ fill: "#fff" })
             ) // Normal state
             .on("pointerup", () =>
-                this.modal.showModal("Two Player Time Attack...", () => {
-                    this.scene.start("Game", {
-                        gameMode: "Shuffle",
-                        playerCount: 2,
-                        isMobile: this.isMobile,
-                    });
-                })
+                this.modal.showModal(
+                    "Two Player Remix Mode: Cards will shuffle after 4 cards have been flipped",
+                    () => {
+                        this.scene.start("Game", {
+                            gameMode: "Shuffle",
+                            playerCount: 2,
+                            isMobile: this.isMobile,
+                        });
+                    }
+                )
             );
 
         EventBus.emit("current-scene-ready", this);
