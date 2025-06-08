@@ -188,11 +188,10 @@ export class Game extends Scene {
                     if (this.openedCard) {
                         this.openedCard.closeCard();
                         this.openedCard = null;
-                        this.canClick = true;
                     }
                     card.closeCard();
+                    this.checkUnMatchedRule();
                 });
-                this.checkUnMatchedRule();
             }
         } else {
             // If no card is currently open (this.openedCard is null), the clicked card is set as openedCard.
@@ -233,9 +232,9 @@ export class Game extends Scene {
                 });
                 this.turnIndicator = new TurnIndicator(this);
                 if (this.playerCount === 2) {
-                    this.turnIndicator.show("Player 1 START", () => {});
+                    this.turnIndicator.display("Player 1 START", 500, () => {});
                 } else {
-                    this.turnIndicator.show("GAME START", () => {});
+                    this.turnIndicator.display("GAME START", 500, () => {});
                 }
                 this.endGameRule = () => this.endTimeAttack();
                 break;
@@ -253,9 +252,9 @@ export class Game extends Scene {
                 this.endGameRule = () => this.endQuickPlay();
                 this.turnIndicator = new TurnIndicator(this);
                 if (this.playerCount === 2) {
-                    this.turnIndicator.show("Player 1 START", () => {});
+                    this.turnIndicator.display("Player 1 START", 500, () => {});
                 } else {
-                    this.turnIndicator.show("GAME START", () => {});
+                    this.turnIndicator.display("GAME START", 500, () => {});
                 }
                 break;
             case "Shuffle":
@@ -266,9 +265,9 @@ export class Game extends Scene {
                 this.endGameRule = () => this.endRemixMode();
                 this.turnIndicator = new TurnIndicator(this);
                 if (this.playerCount === 2) {
-                    this.turnIndicator.show("Player 1 START", () => {});
+                    this.turnIndicator.display("Player 1 START", 500, () => {});
                 } else {
-                    this.turnIndicator.show("GAME START", () => {});
+                    this.turnIndicator.display("GAME START", 500, () => {});
                 }
                 break;
             default:
@@ -285,9 +284,9 @@ export class Game extends Scene {
                 this.endGameRule = () => this.endQuickPlay();
                 this.turnIndicator = new TurnIndicator(this);
                 if (this.playerCount === 2) {
-                    this.turnIndicator.show("Player 1 START", () => {});
+                    this.turnIndicator.display("Player 1 START", 500, () => {});
                 } else {
-                    this.turnIndicator.show("GAME START", () => {});
+                    this.turnIndicator.display("GAME START", 500, () => {});
                 }
                 break;
         }
@@ -383,18 +382,21 @@ export class Game extends Scene {
             case "Shuffle":
                 if (this.playerCount === 2) {
                     if (this.playerTurn == 1) {
-                        this.turnIndicator?.show("Player 2", () => {
+                        this.turnIndicator?.display("Player 2", 500, () => {
                             this.playerTurn = 2;
+                            this.canClick = true;
                         });
                     } else {
-                        this.turnIndicator?.show("Player 1", () => {
+                        this.turnIndicator?.display("Player 1", 500, () => {
                             this.playerTurn = 1;
+                            this.canClick = true;
                         });
                     }
                 }
                 break;
             case "Time":
             default:
+                this.canClick = true;
                 break;
         }
     }
@@ -449,7 +451,7 @@ export class Game extends Scene {
         } else {
             if (this.playerTurn == 1) {
                 this.timeAttackManager?.switchPlayers(2);
-                this.turnIndicator?.show("Player 2", () => {
+                this.turnIndicator?.display("Player 2", 500, () => {
                     this.playerTurn = 2;
                 });
                 this.deckManager.closeAll();
@@ -549,6 +551,20 @@ export class Game extends Scene {
             .setInteractive()
             .on("pointerup", () => {
                 this.exitGame();
+            });
+
+        this.add
+            .text(this.scale.width / 2, this.scale.height - 70, "MIX", {
+                fontSize: this.isMobile ? "26px" : "38px",
+                fontFamily: "Share Tech Mono",
+                color: "#ffffff",
+                backgroundColor: "#333333",
+                padding: { x: 20, y: 10 },
+            })
+            .setOrigin(0.5)
+            .setInteractive()
+            .on("pointerup", () => {
+                this.reshuffle();
             });
 
         ////////////////RESIZE
