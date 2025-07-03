@@ -55,7 +55,7 @@ export class TimeAttackManager {
                 "TIME ATTACK MODE",
                 {
                     fontFamily: "Orbitron",
-                    fontSize: this.isMobile ? "24px" : "38px",
+                    fontSize: this.isMobile ? "20px" : "38px",
                     color: "#ffff00",
                     stroke: "#000000",
                     strokeThickness: 8,
@@ -66,11 +66,11 @@ export class TimeAttackManager {
         this.timerText = this.scene.add
             .text(
                 this.scene.scale.width / 2,
-                this.isMobile ? 55 : 70,
+                this.isMobile ? 50 : 70,
                 `Time: ${this.formatTime(this.duration)}`,
                 {
                     fontFamily: "Orbitron",
-                    fontSize: this.isMobile ? "25px" : "30px",
+                    fontSize: this.isMobile ? "22px" : "30px",
                     color: "#ffffff",
                     stroke: "#000000",
                     strokeThickness: 8,
@@ -85,7 +85,7 @@ export class TimeAttackManager {
             this.player1TimerText = this.scene.add
                 .text(
                     this.isMobile ? 85 : 170,
-                    this.isMobile ? 120 : 100,
+                    this.isMobile ? 100 : 100,
                     `P1 TIME: ${this.formatTime(0)}`,
                     {
                         fontFamily: "Share Tech Mono",
@@ -103,7 +103,7 @@ export class TimeAttackManager {
                     this.isMobile
                         ? this.scene.scale.width - 85
                         : this.scene.scale.width - 200,
-                    this.isMobile ? 120 : 100,
+                    this.isMobile ? 100 : 100,
                     `P2 TIME: ${this.formatTime(0)}`,
                     {
                         fontFamily: "Share Tech Mono",

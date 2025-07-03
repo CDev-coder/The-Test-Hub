@@ -126,12 +126,12 @@ export class Game extends Scene {
                 this.timeAttackManager.events.on("timeup", () => {
                     this.endTimeAttack();
                 });
+                this.endGameRule = () => this.endTimeAttack();
                 if (this.playerCount === 2) {
                     this.turnIndicator.display("Player 1 START", 500, () => {});
                 } else {
                     this.turnIndicator.display("GAME START", 500, () => {});
                 }
-                this.endGameRule = () => this.endTimeAttack();
                 break;
             case "Quick":
                 this.add
@@ -175,6 +175,7 @@ export class Game extends Scene {
                     })
                     .setOrigin(0.5);
                 this.endGameRule = () => this.endMarathon();
+                this.turnIndicator.display("GAME START", 500, () => {});
                 break;
             case "Score":
                 this.scoreAttackManager = new ScoreAttackManager(
@@ -185,6 +186,11 @@ export class Game extends Scene {
                 );
                 this.scoreAttackManager.createScoreMode();
                 this.endGameRule = () => this.endScore();
+                if (this.playerCount === 2) {
+                    this.turnIndicator.display("Player 1 START", 500, () => {});
+                } else {
+                    this.turnIndicator.display("GAME START", 500, () => {});
+                }
                 break;
             default:
                 this.add
@@ -230,7 +236,7 @@ export class Game extends Scene {
             this.player1Score = this.add
                 .text(
                     this.isMobile ? 70 : 170,
-                    this.isMobile ? 90 : 50,
+                    this.isMobile ? 78 : 50,
                     "P1 Matched: " + 0,
                     {
                         fontFamily: "Share Tech Mono",
@@ -248,7 +254,7 @@ export class Game extends Scene {
                     this.isMobile
                         ? this.scale.width - 70
                         : this.scale.width - 200,
-                    this.isMobile ? 90 : 50,
+                    this.isMobile ? 78 : 50,
                     "P2 Matched: " + 0,
                     {
                         fontFamily: "Share Tech Mono",

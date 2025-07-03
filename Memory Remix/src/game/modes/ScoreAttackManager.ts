@@ -66,7 +66,7 @@ export class ScoreAttackManager {
             this.player1ScoreText = this.scene.add
                 .text(
                     this.isMobile ? 85 : 170,
-                    this.isMobile ? 120 : 100,
+                    this.isMobile ? 50 : 100,
                     `P1 Score: ${this.player1Score}`,
                     {
                         fontFamily: "Share Tech Mono",
@@ -84,7 +84,7 @@ export class ScoreAttackManager {
                     this.isMobile
                         ? this.scene.scale.width - 85
                         : this.scene.scale.width - 200,
-                    this.isMobile ? 120 : 100,
+                    this.isMobile ? 50 : 100,
                     `P2 Score: 0`,
                     {
                         fontFamily: "Share Tech Mono",
