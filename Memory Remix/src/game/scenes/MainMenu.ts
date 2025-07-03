@@ -55,11 +55,25 @@ export class MainMenu extends Scene {
                 ],
             },
             {
-                label: "Time Attack",
+                label: "Marathon Mode",
+                description:
+                    "Endless solo mode — How many matches can you make?",
+                modes: [{ label: "1P", playerCount: 1, gameMode: "Marathon" }],
+            },
+            {
+                label: "Time Attack Mode",
                 description: "Match as many cards as you can under 30 seconds",
                 modes: [
                     { label: "1P", playerCount: 1, gameMode: "Time" },
                     { label: "2P", playerCount: 2, gameMode: "Time" },
+                ],
+            },
+            {
+                label: "Score Mode",
+                description: "Match to earn points",
+                modes: [
+                    { label: "1P", playerCount: 1, gameMode: "Score" },
+                    { label: "2P", playerCount: 2, gameMode: "Score" },
                 ],
             },
             {
@@ -70,11 +84,6 @@ export class MainMenu extends Scene {
                     { label: "2P", playerCount: 2, gameMode: "Shuffle" },
                 ],
             },
-            {
-                label: "Marathon Mode",
-                description: "Endless solo mode — match until you fail",
-                modes: [{ label: "1P", playerCount: 1, gameMode: "Marathon" }],
-            },
         ];
 
         // Calculate starting Y for vertical centering of mode group
@@ -82,9 +91,9 @@ export class MainMenu extends Scene {
         const startY = (height - totalHeight) / 2 + spacingY / 2;
 
         // Define fixed column X positions (adjustable)
-        const colLabelX = width / 2 - 200;
-        const col1PX = width / 2 + 150;
-        const col2PX = width / 2 + 250;
+        const colLabelX = this.isMobile ? width / 2 - 200 : width / 2 - 240;
+        const col1PX = this.isMobile ? width / 2 + 70 : width / 2 + 150;
+        const col2PX = this.isMobile ? width / 2 + 160 : width / 2 + 250;
 
         // Row creation
         let rowIndex = 0;
@@ -100,7 +109,7 @@ export class MainMenu extends Scene {
             this.add
                 .text(colLabelX, y, label, {
                     fontFamily: "Share Tech Mono",
-                    fontSize: this.isMobile ? "30px" : "40px",
+                    fontSize: this.isMobile ? "25px" : "40px",
                     stroke: "black",
                     strokeThickness: this.isMobile ? 6 : 8,
                     color: "#ffffff",

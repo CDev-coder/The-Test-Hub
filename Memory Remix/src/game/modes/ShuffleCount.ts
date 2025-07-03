@@ -54,7 +54,7 @@ export class ShuffleCount {
     }
 
     trackAttempt() {
-        console.log("TRACK trackAttempt");
+        //console.log("TRACK trackAttempt");
         if (!this.countText) return;
         this.attemptCount++;
         let displayCount = this.reshuffleThreshold - this.attemptCount;
@@ -65,7 +65,7 @@ export class ShuffleCount {
     }
 
     triggerShuffle() {
-        console.log("this.attemptCount: " + this.attemptCount);
+        //console.log("this.attemptCount: " + this.attemptCount);
         if (this.attemptCount >= this.reshuffleThreshold) {
             const hasClosedCards = this.scene.cards.some((c) => !c.isOpened);
             const noCardIsFlipped = this.scene.openedCard === null; ///Check to see if ONE non-matching card is showing

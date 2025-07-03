@@ -9,6 +9,7 @@ import {
 import Card from "../prefabs/Cards";
 import { Modal } from "../prefabs/Modal";
 import { TimeAttackManager } from "../modes/TimeAttackManager";
+import { ScoreAttackManager } from "../modes/ScoreAttackManager";
 import { ShuffleCount } from "../modes/ShuffleCount";
 import { TurnIndicator } from "../prefabs/TurnIndicator";
 import { Deck } from "../prefabs/Deck";
@@ -25,6 +26,7 @@ export class Game extends Scene {
     playerCount: number = 1;
     modal: Modal;
     timeAttackManager?: TimeAttackManager;
+    scoreAttackManager?: ScoreAttackManager;
     remixManager?: ShuffleCount;
     turnIndicator?: TurnIndicator;
     isMobile: boolean = false;
@@ -161,6 +163,29 @@ export class Game extends Scene {
                     this.turnIndicator.display("GAME START", 500, () => {});
                 }
                 break;
+            case "Marathon":
+                this.add
+                    .text(this.scale.width / 2, 30, "Marathon Mode ", {
+                        fontFamily: "Orbitron",
+                        fontSize: this.isMobile ? "24px" : "38px",
+                        color: "#ffff00",
+                        stroke: "#000000",
+                        strokeThickness: 8,
+                        align: "center",
+                    })
+                    .setOrigin(0.5);
+                this.endGameRule = () => this.endMarathon();
+                break;
+            case "Score":
+                this.scoreAttackManager = new ScoreAttackManager(
+                    this,
+                    this.isMobile,
+                    100,
+                    this.playerCount
+                );
+                this.scoreAttackManager.createScoreMode();
+                this.endGameRule = () => this.endScore();
+                break;
             default:
                 this.add
                     .text(this.scale.width / 2, 30, "Quick Play Mode ", {
@@ -240,10 +265,12 @@ export class Game extends Scene {
     }
 
     checkMatchedRule() {
-        console.log("checkMatchedRule");
+        //console.log("checkMatchedRule");
         this.deckManager.updatedCardCount();
+        this.deckManager.updatedCardCombo();
         if (this.gameMode == "Shuffle") this.remixManager?.triggerShuffle();
-
+        if (this.gameMode == "Score")
+            this.scoreAttackManager?.setScore(this.deckManager.getCardCombo());
         ///////UPDATE PLAYERS SCORE
         if (this.playerCount === 2) {
             if (this.playerTurn === 1) {
@@ -262,19 +289,60 @@ export class Game extends Scene {
                 "Matched: " + this.deckManager.openCardCount
             );
         }
-        const isGameOver = this.deckManager?.isGameOver();
-        if (isGameOver) {
-            this.endGameRule();
+
+        /////End Game Rules?
+        if (this.gameMode == "Marathon") {
+            this.deckManager.updatedCardCount2();
+            if (this.deckManager?.isResettingCards()) {
+                this.endGameRule();
+            }
+        } else if (this.gameMode == "Score") {
+            this.deckManager.updatedCardCount2();
+
+            if (this.scoreAttackManager?.isGoalReached()) {
+                this.endGameRule();
+            } else {
+                if (this.deckManager?.isResettingCards()) {
+                    this.time.delayedCall(500, () => {
+                        this.deckManager.closeAll();
+                        this.deckManager.reshuffle();
+                    });
+                }
+            }
+        } else {
+            if (this.deckManager?.isGameOver()) {
+                this.endGameRule();
+            }
         }
     }
 
     checkUnMatchedRule() {
         switch (this.gameMode) {
             case "Quick":
+            case "Marathon":
             case "Shuffle":
                 if (this.gameMode == "Shuffle") {
                     this.remixManager?.triggerShuffle();
                 }
+                if (this.playerCount === 2) {
+                    if (this.playerTurn == 1) {
+                        this.turnIndicator?.display("Player 2", 500, () => {
+                            this.playerTurn = 2;
+                            this.deckManager.canClick = true;
+                        });
+                    } else {
+                        this.turnIndicator?.display("Player 1", 500, () => {
+                            this.playerTurn = 1;
+                            this.deckManager.canClick = true;
+                        });
+                    }
+                } else {
+                    this.deckManager.canClick = true;
+                }
+                break;
+            case "Score":
+                this.deckManager.resetCardCombo();
+                this.scoreAttackManager?.switchPlayer();
                 if (this.playerCount === 2) {
                     if (this.playerTurn == 1) {
                         this.turnIndicator?.display("Player 2", 500, () => {
@@ -329,7 +397,7 @@ export class Game extends Scene {
     }
 
     endTimeAttack() {
-        console.log("endTimeAttack");
+        //console.log("endTimeAttack");
         this.timeAttackManager?.end();
         this.timeAttackManager?.reset();
         if (this.playerCount == 1) {
@@ -395,6 +463,53 @@ export class Game extends Scene {
                 } else {
                     return "DRAW";
                 }
+            };
+            this.modal.show_retryMenu(
+                () => {
+                    this.retryGame();
+                },
+                () => {
+                    this.exitGame();
+                },
+                getTextResult()
+            );
+        }
+    }
+
+    endMarathon() {
+        this.time.delayedCall(500, () => {
+            this.deckManager.closeAll();
+            this.deckManager.reshuffle();
+        });
+    }
+
+    endScore() {
+        if (this.playerCount == 1) {
+            this.modal.show_retryMenu(
+                () => {
+                    this.retryGame();
+                },
+                () => {
+                    this.exitGame();
+                },
+                `GAME OVER`
+            );
+        } else {
+            const getTextResult = () => {
+                if (this.scoreAttackManager?.player1Score)
+                    if (
+                        this.scoreAttackManager?.player1Score >
+                        this.scoreAttackManager?.player2Score
+                    ) {
+                        return `Player 1's is the Winner`;
+                    } else if (
+                        this.scoreAttackManager?.player1Score <
+                        this.scoreAttackManager?.player2Score
+                    ) {
+                        return `Player 2's is the Winner`;
+                    } else {
+                        return "DRAW";
+                    }
             };
             this.modal.show_retryMenu(
                 () => {

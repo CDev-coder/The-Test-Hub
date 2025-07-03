@@ -7,7 +7,9 @@ export class Deck {
     public cards: Card[] = [];
     canClick: boolean = true;
     openCardCount: number = 0;
+    openCardCount_2: number = 0;
     openedCard: null | Card = null;
+    cardCombo: number = 0;
 
     constructor(game: Game) {
         this.game = game;
@@ -144,6 +146,16 @@ export class Deck {
         return isGameOver;
     }
 
+    isResettingCards() {
+        console.log("isResettingCards CHECK");
+        const isGameOver = this.openCardCount_2 === this.cards.length / 2;
+        console.log("isGameOver ", isGameOver);
+        if (isGameOver) {
+            this.openCardCount_2 = 0;
+        }
+        return isGameOver;
+    }
+
     setUpCards() {
         this.openCardCount = 0;
         this.cards.forEach((card) => card.move());
@@ -154,8 +166,24 @@ export class Deck {
         this.openCardCount++;
     }
 
+    updatedCardCount2() {
+        this.openCardCount_2++;
+    }
+
+    updatedCardCombo() {
+        this.cardCombo++;
+    }
+
+    getCardCombo() {
+        return this.cardCombo;
+    }
+
     resetCardCount() {
         this.openCardCount = 0;
+    }
+
+    resetCardCombo() {
+        this.cardCombo = 0;
     }
 
     closeAll() {
@@ -262,9 +290,11 @@ export class Deck {
 
         if (this.openedCard) {
             if (this.openedCard.value === card.value) {
+                ////Cards Matched
                 this.openedCard = null;
                 this.game.checkMatchedRule();
             } else {
+                ////Cards Did not Matched
                 this.canClick = false;
                 this.game.time.delayedCall(1000, () => {
                     if (this.openedCard) {
