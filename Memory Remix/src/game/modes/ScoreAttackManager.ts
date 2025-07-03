@@ -139,4 +139,10 @@ export class ScoreAttackManager {
             return this.player1Score >= this.scoreGoal;
         }
     }
+
+    destroy() {
+        this.scoreText?.destroy();
+        this.player1ScoreText?.destroy();
+        this.player2ScoreText?.destroy();
+    }
 }
