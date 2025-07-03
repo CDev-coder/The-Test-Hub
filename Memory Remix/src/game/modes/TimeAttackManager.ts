@@ -202,12 +202,10 @@ export class TimeAttackManager {
     }
 
     capturePlayerOneTime() {
-        console.log("capturePlayerOneTime");
         this.player1Ms = this.elapsedMs;
         this.player1TimerText?.setText(`P1 TIME: ${this.lastTimerText}`);
     }
     capturePlayerTwoTime() {
-        console.log("capturePlayerTwoTime");
         this.player2Ms = this.elapsedMs;
         this.player2TimerText?.setText(`P2 TIME: ${this.lastTimerText}`);
     }

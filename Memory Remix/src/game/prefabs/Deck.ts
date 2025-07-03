@@ -147,9 +147,7 @@ export class Deck {
     }
 
     isResettingCards() {
-        console.log("isResettingCards CHECK");
         const isGameOver = this.openCardCount_2 === this.cards.length / 2;
-        console.log("isGameOver ", isGameOver);
         if (isGameOver) {
             this.openCardCount_2 = 0;
         }

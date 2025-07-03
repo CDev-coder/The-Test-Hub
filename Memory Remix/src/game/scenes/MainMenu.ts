@@ -3,6 +3,17 @@ import { EventBus } from "../EventBus";
 import { Modal } from "../prefabs/Modal";
 import { TitleText } from "../prefabs/TitleText";
 
+type GameModeInfo = {
+    label: string;
+    description1P: string;
+    description2P?: string;
+    modes: {
+        label: string;
+        playerCount: number;
+        gameMode: string;
+    }[];
+};
+
 export class MainMenu extends Scene {
     background: GameObjects.Image;
     modal: Modal;
@@ -45,10 +56,11 @@ export class MainMenu extends Scene {
 
         // Define game mode data
         const spacingY = 80;
-        const modeData = [
+        const modeData: GameModeInfo[] = [
             {
                 label: "Quick Play",
-                description: "Match cards at your own pace",
+                description1P: "Match cards at your own pace",
+                description2P: "Two players match cards at their own pace",
                 modes: [
                     { label: "1P", playerCount: 1, gameMode: "Quick" },
                     { label: "2P", playerCount: 2, gameMode: "Quick" },
@@ -56,13 +68,14 @@ export class MainMenu extends Scene {
             },
             {
                 label: "Marathon Mode",
-                description:
+                description1P:
                     "Endless solo mode — How many matches can you make?",
                 modes: [{ label: "1P", playerCount: 1, gameMode: "Marathon" }],
             },
             {
                 label: "Time Attack Mode",
-                description: "Match as many cards as you can under 30 seconds",
+                description1P: "Match as many cards as you can in 30 seconds",
+                description2P: "Who can match the most in 30 seconds?",
                 modes: [
                     { label: "1P", playerCount: 1, gameMode: "Time" },
                     { label: "2P", playerCount: 2, gameMode: "Time" },
@@ -70,7 +83,10 @@ export class MainMenu extends Scene {
             },
             {
                 label: "Score Mode",
-                description: "Match to earn points",
+                description1P:
+                    "Match to earn points. Match two or more in a row for extra points",
+                description2P:
+                    "Match to earn points. Match two or more in a row for extra points! Ending a match streak switches the player's turn.",
                 modes: [
                     { label: "1P", playerCount: 1, gameMode: "Score" },
                     { label: "2P", playerCount: 2, gameMode: "Score" },
@@ -78,7 +94,9 @@ export class MainMenu extends Scene {
             },
             {
                 label: "Remix Mode",
-                description: "Cards shuffle every 4 flips",
+                description1P: "Cards remix every 4 flips",
+                description2P:
+                    "Cards shuffle every 4 flips. Ending a match streak switches the player's turn",
                 modes: [
                     { label: "1P", playerCount: 1, gameMode: "Shuffle" },
                     { label: "2P", playerCount: 2, gameMode: "Shuffle" },
@@ -100,8 +118,9 @@ export class MainMenu extends Scene {
 
         const createMenuRow = (
             label: string,
-            description: string,
-            modes: { label: string; playerCount: number; gameMode: string }[]
+            description1P: string,
+            modes: { label: string; playerCount: number; gameMode: string }[],
+            description2P?: string
         ) => {
             const y = startY + rowIndex * spacingY;
 
@@ -131,7 +150,7 @@ export class MainMenu extends Scene {
                     .on("pointerover", () => btn1P.setStyle({ fill: "#ff0" }))
                     .on("pointerout", () => btn1P.setStyle({ fill: "#fff" }))
                     .on("pointerup", () => {
-                        this.modal.showModal(description, () => {
+                        this.modal.showModal(description1P, () => {
                             this.scene.start("Game", {
                                 gameMode: mode1P.gameMode,
                                 playerCount: 1,
@@ -157,7 +176,8 @@ export class MainMenu extends Scene {
                     .on("pointerover", () => btn2P.setStyle({ fill: "#ff0" }))
                     .on("pointerout", () => btn2P.setStyle({ fill: "#fff" }))
                     .on("pointerup", () => {
-                        this.modal.showModal(description, () => {
+                        const desc = description2P || description1P;
+                        this.modal.showModal(desc, () => {
                             this.scene.start("Game", {
                                 gameMode: mode2P.gameMode,
                                 playerCount: 2,
@@ -172,8 +192,9 @@ export class MainMenu extends Scene {
         };
 
         // Build all menu rows
-        for (const { label, description, modes } of modeData) {
-            createMenuRow(label, description, modes);
+        for (const item of modeData) {
+            const { label, description1P, description2P, modes } = item;
+            createMenuRow(label, description1P, modes, description2P);
         }
 
         EventBus.emit("current-scene-ready", this);
