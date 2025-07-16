@@ -32,8 +32,6 @@ const createConfig = (parent: string): Phaser.Types.Core.GameConfig => {
 
     return {
         type: AUTO,
-        width: window.innerWidth, // Use current window size
-        height: window.innerHeight,
         parent: parent,
         backgroundColor: "#000000",
         render: {
@@ -46,7 +44,7 @@ const createConfig = (parent: string): Phaser.Types.Core.GameConfig => {
             width: gameSize.width,
             height: gameSize.height,
         },
-        canvasStyle: `display: block; width: 100%; height: 100%;`,
+        canvasStyle: "display: block; max-width: 100vw; height: auto;",
         autoFocus: true,
         audio: {
             disableWebAudio: false,

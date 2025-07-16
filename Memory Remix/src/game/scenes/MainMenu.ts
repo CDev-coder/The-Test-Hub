@@ -31,6 +31,18 @@ export class MainMenu extends Scene {
 
     create() {
         const { width, height } = this.scale;
+        const spacingY = height * 0.08; // 8% vertical spacing
+        const baseFontSize = height * 0.025; // 4.5% of screen height
+        const titleFontSize = this.isMobile
+            ? baseFontSize + 10
+            : baseFontSize + 35; // for the title
+        console.log("baseFontSize: ", +baseFontSize);
+        console.log("titleFontSize: ", +titleFontSize);
+        // Define fixed column X positions (adjustable)
+        const labelMaxWidth = this.isMobile ? width * 0.5 : width * 0.35;
+        const labelX = this.isMobile ? width * 0.08 : width * 0.3; // Same padding left
+        const col1PX = this.isMobile ? width * 0.65 : width * 0.6;
+        const col2PX = this.isMobile ? width * 0.85 : width * 0.7;
 
         // Background
         const bg = this.add.image(0, 0, "background").setOrigin(0, 0);
@@ -47,15 +59,15 @@ export class MainMenu extends Scene {
             "Memory Remix",
             {
                 fontFamily: "Orbitron",
-                fontSize: this.isMobile ? "36px" : "64px",
+                //fontSize: this.isMobile ? "36px" : "64px",
+                fontSize: `${titleFontSize}px`,
                 color: "#343434",
                 stroke: "#8A00C4",
-                strokeThickness: this.isMobile ? 4 : 8,
+                strokeThickness: titleFontSize * 0.1,
             }
         );
 
         // Define game mode data
-        const spacingY = 80;
         const modeData: GameModeInfo[] = [
             {
                 label: "Quick Play",
@@ -107,15 +119,8 @@ export class MainMenu extends Scene {
         // Calculate starting Y for vertical centering of mode group
         const totalHeight = modeData.length * spacingY;
         const startY = (height - totalHeight) / 2 + spacingY / 2;
-
-        // Define fixed column X positions (adjustable)
-        const colLabelX = this.isMobile ? width / 2 - 200 : width / 2 - 240;
-        const col1PX = this.isMobile ? width / 2 + 70 : width / 2 + 150;
-        const col2PX = this.isMobile ? width / 2 + 160 : width / 2 + 250;
-
         // Row creation
         let rowIndex = 0;
-
         const createMenuRow = (
             label: string,
             description1P: string,
@@ -123,25 +128,28 @@ export class MainMenu extends Scene {
             description2P?: string
         ) => {
             const y = startY + rowIndex * spacingY;
+            // Mode label (allow wrapping if needed)
+            const labelText = this.add.text(labelX, y, label, {
+                fontFamily: "Share Tech Mono",
+                fontSize: `${baseFontSize}px`,
+                stroke: "black",
+                strokeThickness: baseFontSize * 0.2,
+                color: "#ffffff",
+                wordWrap: { width: labelMaxWidth },
+                align: "left",
+            });
+            if (labelText.width > labelMaxWidth) {
+                labelText.setFontSize(baseFontSize * 0.9); // Shrink font slightly
+            }
+            labelText.setOrigin(0, 0.5);
 
-            // Mode label
-            this.add
-                .text(colLabelX, y, label, {
-                    fontFamily: "Share Tech Mono",
-                    fontSize: this.isMobile ? "25px" : "40px",
-                    stroke: "black",
-                    strokeThickness: this.isMobile ? 6 : 8,
-                    color: "#ffffff",
-                })
-                .setOrigin(0, 0.5); // Align left and vertically center
-
-            // 1P button (if available)
+            // 1P button
             const mode1P = modes.find((m) => m.playerCount === 1);
             if (mode1P) {
                 const btn1P = this.add
                     .text(col1PX, y, "1P", {
                         fontFamily: "Share Tech Mono",
-                        fontSize: this.isMobile ? "30px" : "36px",
+                        fontSize: `${baseFontSize}px`,
                         color: "#ffffff",
                         backgroundColor: "#333333",
                         padding: { x: 12, y: 6 },
@@ -158,16 +166,16 @@ export class MainMenu extends Scene {
                             });
                         });
                     })
-                    .setOrigin(0.5, 0.5); // Centered on its X/Y
+                    .setOrigin(0.5, 0.5);
             }
 
-            // 2P button (if available)
+            // 2P button
             const mode2P = modes.find((m) => m.playerCount === 2);
             if (mode2P) {
                 const btn2P = this.add
                     .text(col2PX, y, "2P", {
                         fontFamily: "Share Tech Mono",
-                        fontSize: this.isMobile ? "30px" : "36px",
+                        fontSize: `${baseFontSize}px`,
                         color: "#ffffff",
                         backgroundColor: "#333333",
                         padding: { x: 12, y: 6 },
@@ -185,7 +193,7 @@ export class MainMenu extends Scene {
                             });
                         });
                     })
-                    .setOrigin(0.5, 0.5); // Centered on its X/Y
+                    .setOrigin(0.5, 0.5);
             }
 
             rowIndex++;
