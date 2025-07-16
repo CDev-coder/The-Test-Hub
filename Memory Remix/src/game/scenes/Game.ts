@@ -13,9 +13,15 @@ import { ScoreAttackManager } from "../modes/ScoreAttackManager";
 import { ShuffleCount } from "../modes/ShuffleCount";
 import { TurnIndicator } from "../prefabs/TurnIndicator";
 import { Deck } from "../prefabs/Deck";
+import {
+    getBaseFontSize,
+    getMatchedX,
+    getMatchedY,
+} from "../utils/ui_dimensions";
 
 export class Game extends Scene {
     background: Phaser.GameObjects.Image;
+    baseFontSize: number = 18;
     player1CardCount: number = 0;
     player2CardCount: number = 0;
     timeout: any;
@@ -137,7 +143,9 @@ export class Game extends Scene {
                 this.add
                     .text(this.scale.width / 2, 30, "Quick Play Mode ", {
                         fontFamily: "Orbitron",
-                        fontSize: this.isMobile ? "24px" : "38px",
+                        fontSize: this.isMobile
+                            ? this.baseFontSize + 10
+                            : this.baseFontSize + 25,
                         color: "#ffff00",
                         stroke: "#000000",
                         strokeThickness: 8,
@@ -167,7 +175,9 @@ export class Game extends Scene {
                 this.add
                     .text(this.scale.width / 2, 30, "Marathon Mode ", {
                         fontFamily: "Orbitron",
-                        fontSize: this.isMobile ? "24px" : "38px",
+                        fontSize: this.isMobile
+                            ? this.baseFontSize + 10
+                            : this.baseFontSize + 25,
                         color: "#ffff00",
                         stroke: "#000000",
                         strokeThickness: 8,
@@ -196,7 +206,9 @@ export class Game extends Scene {
                 this.add
                     .text(this.scale.width / 2, 30, "Quick Play Mode ", {
                         fontFamily: "Orbitron",
-                        fontSize: this.isMobile ? "24px" : "38px",
+                        fontSize: this.isMobile
+                            ? this.baseFontSize + 10
+                            : this.baseFontSize + 25,
                         color: "#ffff00",
                         stroke: "#000000",
                         strokeThickness: 8,
@@ -219,11 +231,13 @@ export class Game extends Scene {
             this.player1Score = this.add
                 .text(
                     this.scale.width / 2,
-                    this.isMobile ? 90 : 100,
+                    getMatchedY(this.scale.height, this.isMobile),
                     "Matched: " + 0,
                     {
                         fontFamily: "Share Tech Mono",
-                        fontSize: this.isMobile ? "22px" : "30px",
+                        fontSize: this.isMobile
+                            ? this.baseFontSize - 5
+                            : this.baseFontSize + 15,
                         color: "#ffffff",
                         stroke: "#000000",
                         strokeThickness: 8,
@@ -235,12 +249,19 @@ export class Game extends Scene {
         } else {
             this.player1Score = this.add
                 .text(
-                    this.isMobile ? 70 : 170,
-                    this.isMobile ? 78 : 50,
+                    getMatchedX(
+                        this.scale.width,
+                        this.scale.height,
+                        this.isMobile,
+                        1
+                    ),
+                    getMatchedY(this.scale.height, this.isMobile),
                     "P1 Matched: " + 0,
                     {
                         fontFamily: "Share Tech Mono",
-                        fontSize: this.isMobile ? 18 : 30,
+                        fontSize: this.isMobile
+                            ? this.baseFontSize - 5
+                            : this.baseFontSize + 15,
                         color: "#ffffff",
                         stroke: "#000000",
                         strokeThickness: 8,
@@ -251,14 +272,19 @@ export class Game extends Scene {
                 .setDepth(100);
             this.player2Score = this.add
                 .text(
-                    this.isMobile
-                        ? this.scale.width - 70
-                        : this.scale.width - 200,
-                    this.isMobile ? 78 : 50,
+                    getMatchedX(
+                        this.scale.width,
+                        this.scale.height,
+                        this.isMobile,
+                        2
+                    ),
+                    getMatchedY(this.scale.height, this.isMobile),
                     "P2 Matched: " + 0,
                     {
                         fontFamily: "Share Tech Mono",
-                        fontSize: this.isMobile ? 18 : 30,
+                        fontSize: this.isMobile
+                            ? this.baseFontSize - 5
+                            : this.baseFontSize + 15,
                         color: "#ffffff",
                         stroke: "#000000",
                         strokeThickness: 8,
@@ -549,6 +575,7 @@ export class Game extends Scene {
         ///Called automatically by Phaser after all assets are loaded.
         const bg = this.add.image(0, 0, "background").setOrigin(0, 0);
         bg.setDisplaySize(this.scale.width, this.scale.height);
+        this.baseFontSize = getBaseFontSize(this.scale.height);
         this.deckManager.createCards();
         this.beginGame();
         this.modal = new Modal(this, this.scale.width, this.scale.height);

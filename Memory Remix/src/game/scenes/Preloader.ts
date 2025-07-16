@@ -1,10 +1,10 @@
 import { Scene } from "phaser";
 
 export class Preloader extends Scene {
+    debugMode: boolean = true;
     constructor() {
         super("Preloader");
     }
-
     init() {
         //  We loaded this image in our Boot Scene, so we can display it here
         this.add.image(
@@ -56,11 +56,11 @@ export class Preloader extends Scene {
     }
 
     create() {
-        const devSkipToGame = false;
+        const devSkipToGame = this.debugMode;
         if (devSkipToGame) {
             this.time.delayedCall(500, () => {
                 this.scene.start("Game", {
-                    gameMode: "Score",
+                    gameMode: "Quick",
                     playerCount: 2,
                 });
             });

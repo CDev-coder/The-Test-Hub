@@ -1,5 +1,6 @@
 //import { Scene } from "phaser";
 import { IShuffleGameScene } from "../interfaces/shuffleInterface";
+import { getBaseFontSize, getTitleY } from "../utils/ui_dimensions";
 
 export class ShuffleCount {
     private scene: IShuffleGameScene;
@@ -8,6 +9,7 @@ export class ShuffleCount {
     public countText?: Phaser.GameObjects.Text;
     public onReshuffle: () => void;
     private isMobile: boolean;
+    public baseFontSize: number = 15;
 
     constructor(
         scene: IShuffleGameScene,
@@ -17,32 +19,36 @@ export class ShuffleCount {
         this.scene = scene;
         this.isMobile = isMobile;
         this.onReshuffle = onReshuffle;
+        this.baseFontSize = getBaseFontSize(this.scene.scale.height);
     }
 
     createCountdown() {
+        const { height } = this.scene.scale;
+        const titleY = getTitleY(height, this.isMobile);
+        const infoY = height * (this.isMobile ? 0.07 : 0.1); // ~7% or 10% from top
+
         this.scene.add
-            .text(
-                this.scene.scale.width / 2,
-                this.isMobile ? 15 : 30,
-                "Remix Mode ",
-                {
-                    fontFamily: "Orbitron",
-                    fontSize: this.isMobile ? "24px" : "38px",
-                    color: "#ffff00",
-                    stroke: "#000000",
-                    strokeThickness: 8,
-                    align: "center",
-                }
-            )
+            .text(this.scene.scale.width / 2, titleY, "Remix Mode ", {
+                fontFamily: "Orbitron",
+                fontSize: this.isMobile
+                    ? this.baseFontSize + 10
+                    : this.baseFontSize + 15,
+                color: "#ffff00",
+                stroke: "#000000",
+                strokeThickness: 8,
+                align: "center",
+            })
             .setOrigin(0.5);
         this.countText = this.scene.add
             .text(
                 this.scene.scale.width / 2,
-                this.isMobile ? 50 : 70,
+                infoY,
                 `Cards Until Remix: ${this.reshuffleThreshold}`,
                 {
                     fontFamily: "Orbitron",
-                    fontSize: this.isMobile ? "22px" : "30px",
+                    fontSize: this.isMobile
+                        ? this.baseFontSize - 4
+                        : this.baseFontSize + 8,
                     color: "#ffffff",
                     stroke: "#000000",
                     strokeThickness: 8,

@@ -1,5 +1,6 @@
 // src/managers/ScoreAttackManager.ts
 import { Scene } from "phaser";
+import { getBaseFontSize } from "../utils/ui_dimensions";
 
 export class ScoreAttackManager {
     private scene: Scene;
@@ -7,6 +8,7 @@ export class ScoreAttackManager {
     private isMobile: boolean = false;
     public scoreGoal: number = 0;
     public playerCount: number = 1;
+    public baseFontSize: number = 15;
     public playerTurn: number = 1;
     public player1Score: number = 0;
     public player2Score: number = 0;
@@ -27,6 +29,7 @@ export class ScoreAttackManager {
         if (this.playerCount > 1) {
             this.playerTurn = 1;
         }
+        this.baseFontSize = getBaseFontSize(this.scene.scale.height);
     }
 
     createScoreMode() {
@@ -34,10 +37,12 @@ export class ScoreAttackManager {
             .text(
                 this.scene.scale.width / 2,
                 this.isMobile ? 15 : 30,
-                "Score Attack Mode ",
+                "Score Mode ",
                 {
                     fontFamily: "Orbitron",
-                    fontSize: this.isMobile ? "24px" : "38px",
+                    fontSize: this.isMobile
+                        ? this.baseFontSize + 10
+                        : this.baseFontSize + 15,
                     color: "#ffff00",
                     stroke: "#000000",
                     strokeThickness: 8,
@@ -53,7 +58,9 @@ export class ScoreAttackManager {
                     `Score: ${this.player1Score}`,
                     {
                         fontFamily: "Orbitron",
-                        fontSize: this.isMobile ? "22px" : "30px",
+                        fontSize: this.isMobile
+                            ? this.baseFontSize
+                            : this.baseFontSize + 5,
                         color: "#ffffff",
                         stroke: "#000000",
                         strokeThickness: 8,
@@ -70,7 +77,9 @@ export class ScoreAttackManager {
                     `P1 Score: ${this.player1Score}`,
                     {
                         fontFamily: "Share Tech Mono",
-                        fontSize: this.isMobile ? 18 : 30,
+                        fontSize: this.isMobile
+                            ? this.baseFontSize
+                            : this.baseFontSize + 5,
                         color: "#ffffff",
                         stroke: "#000000",
                         strokeThickness: 8,
@@ -88,7 +97,9 @@ export class ScoreAttackManager {
                     `P2 Score: 0`,
                     {
                         fontFamily: "Share Tech Mono",
-                        fontSize: this.isMobile ? 18 : 30,
+                        fontSize: this.isMobile
+                            ? this.baseFontSize
+                            : this.baseFontSize + 5,
                         color: "#ffffff",
                         stroke: "#000000",
                         strokeThickness: 8,

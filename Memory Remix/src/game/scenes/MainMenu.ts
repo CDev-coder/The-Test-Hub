@@ -2,6 +2,7 @@ import { GameObjects, Scene } from "phaser";
 import { EventBus } from "../EventBus";
 import { Modal } from "../prefabs/Modal";
 import { TitleText } from "../prefabs/TitleText";
+import { getBaseFontSize, getTitleFontSize } from "../utils/ui_dimensions";
 
 type GameModeInfo = {
     label: string;
@@ -32,12 +33,8 @@ export class MainMenu extends Scene {
     create() {
         const { width, height } = this.scale;
         const spacingY = height * 0.08; // 8% vertical spacing
-        const baseFontSize = height * 0.025; // 4.5% of screen height
-        const titleFontSize = this.isMobile
-            ? baseFontSize + 10
-            : baseFontSize + 35; // for the title
-        console.log("baseFontSize: ", +baseFontSize);
-        console.log("titleFontSize: ", +titleFontSize);
+        const baseFontSize = getBaseFontSize(height);
+        const titleFontSize = getTitleFontSize(this.isMobile, baseFontSize);
         // Define fixed column X positions (adjustable)
         const labelMaxWidth = this.isMobile ? width * 0.5 : width * 0.35;
         const labelX = this.isMobile ? width * 0.08 : width * 0.3; // Same padding left
@@ -121,6 +118,7 @@ export class MainMenu extends Scene {
         const startY = (height - totalHeight) / 2 + spacingY / 2;
         // Row creation
         let rowIndex = 0;
+
         const createMenuRow = (
             label: string,
             description1P: string,

@@ -1,9 +1,11 @@
 // src/managers/TimeAttackManager.ts
 import { Scene } from "phaser";
+import { getBaseFontSize } from "../utils/ui_dimensions";
 
 export class TimeAttackManager {
     private scene: Scene;
     private timer?: Phaser.Time.TimerEvent;
+    public baseFontSize: number = 15;
     public timerText?: Phaser.GameObjects.Text;
     public player1TimerText?: Phaser.GameObjects.Text;
     public player2TimerText?: Phaser.GameObjects.Text;
@@ -36,6 +38,7 @@ export class TimeAttackManager {
         if (this.playerCount > 1) {
             this.playerTurn = 1;
         }
+        this.baseFontSize = getBaseFontSize(this.scene.scale.height);
     }
 
     private formatTime(ms: number): string {
@@ -55,7 +58,9 @@ export class TimeAttackManager {
                 "TIME ATTACK MODE",
                 {
                     fontFamily: "Orbitron",
-                    fontSize: this.isMobile ? "20px" : "38px",
+                    fontSize: this.isMobile
+                        ? this.baseFontSize
+                        : this.baseFontSize + 15,
                     color: "#ffff00",
                     stroke: "#000000",
                     strokeThickness: 8,
@@ -70,7 +75,9 @@ export class TimeAttackManager {
                 `Time: ${this.formatTime(this.duration)}`,
                 {
                     fontFamily: "Orbitron",
-                    fontSize: this.isMobile ? "22px" : "30px",
+                    fontSize: this.isMobile
+                        ? this.baseFontSize - 1
+                        : this.baseFontSize + 8,
                     color: "#ffffff",
                     stroke: "#000000",
                     strokeThickness: 8,
@@ -89,7 +96,9 @@ export class TimeAttackManager {
                     `P1 TIME: ${this.formatTime(0)}`,
                     {
                         fontFamily: "Share Tech Mono",
-                        fontSize: this.isMobile ? 18 : 30,
+                        fontSize: this.isMobile
+                            ? this.baseFontSize - 8
+                            : this.baseFontSize + 8,
                         color: "#ffffff",
                         stroke: "#000000",
                         strokeThickness: 8,
@@ -107,7 +116,9 @@ export class TimeAttackManager {
                     `P2 TIME: ${this.formatTime(0)}`,
                     {
                         fontFamily: "Share Tech Mono",
-                        fontSize: this.isMobile ? 18 : 30,
+                        fontSize: this.isMobile
+                            ? this.baseFontSize - 8
+                            : this.baseFontSize + 8,
                         color: "#ffffff",
                         stroke: "#000000",
                         strokeThickness: 8,
