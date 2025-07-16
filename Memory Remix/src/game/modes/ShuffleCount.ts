@@ -23,9 +23,8 @@ export class ShuffleCount {
     }
 
     createCountdown() {
-        const { height } = this.scene.scale;
-        const titleY = getTitleY(height, this.isMobile);
-        const infoY = height * (this.isMobile ? 0.07 : 0.1); // ~7% or 10% from top
+        const titleY = getTitleY(this.scene.scale.height, this.isMobile);
+        const infoY = titleY + this.baseFontSize * (this.isMobile ? 2 : 2.5);
 
         this.scene.add
             .text(this.scene.scale.width / 2, titleY, "Remix Mode ", {

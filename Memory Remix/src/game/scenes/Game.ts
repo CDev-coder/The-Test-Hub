@@ -17,6 +17,7 @@ import {
     getBaseFontSize,
     getMatchedX,
     getMatchedY,
+    getTitleY,
 } from "../utils/ui_dimensions";
 
 export class Game extends Scene {
@@ -120,6 +121,7 @@ export class Game extends Scene {
 
     setGameMode() {
         this.turnIndicator = new TurnIndicator(this, this.isMobile);
+        const titleY = getTitleY(this.scale.height, this.isMobile);
         switch (this.gameMode) {
             case "Time":
                 this.timeAttackManager = new TimeAttackManager(
@@ -141,7 +143,7 @@ export class Game extends Scene {
                 break;
             case "Quick":
                 this.add
-                    .text(this.scale.width / 2, 30, "Quick Play Mode ", {
+                    .text(this.scale.width / 2, titleY, "Quick Play", {
                         fontFamily: "Orbitron",
                         fontSize: this.isMobile
                             ? this.baseFontSize + 10
@@ -173,7 +175,7 @@ export class Game extends Scene {
                 break;
             case "Marathon":
                 this.add
-                    .text(this.scale.width / 2, 30, "Marathon Mode ", {
+                    .text(this.scale.width / 2, titleY, "Marathon Mode ", {
                         fontFamily: "Orbitron",
                         fontSize: this.isMobile
                             ? this.baseFontSize + 10
@@ -204,7 +206,7 @@ export class Game extends Scene {
                 break;
             default:
                 this.add
-                    .text(this.scale.width / 2, 30, "Quick Play Mode ", {
+                    .text(this.scale.width / 2, titleY, "Quick Play Mode ", {
                         fontFamily: "Orbitron",
                         fontSize: this.isMobile
                             ? this.baseFontSize + 10
@@ -237,7 +239,7 @@ export class Game extends Scene {
                         fontFamily: "Share Tech Mono",
                         fontSize: this.isMobile
                             ? this.baseFontSize - 5
-                            : this.baseFontSize + 15,
+                            : this.baseFontSize + 5,
                         color: "#ffffff",
                         stroke: "#000000",
                         strokeThickness: 8,
@@ -261,7 +263,7 @@ export class Game extends Scene {
                         fontFamily: "Share Tech Mono",
                         fontSize: this.isMobile
                             ? this.baseFontSize - 5
-                            : this.baseFontSize + 15,
+                            : this.baseFontSize + 8,
                         color: "#ffffff",
                         stroke: "#000000",
                         strokeThickness: 8,
@@ -284,7 +286,7 @@ export class Game extends Scene {
                         fontFamily: "Share Tech Mono",
                         fontSize: this.isMobile
                             ? this.baseFontSize - 5
-                            : this.baseFontSize + 15,
+                            : this.baseFontSize + 8,
                         color: "#ffffff",
                         stroke: "#000000",
                         strokeThickness: 8,

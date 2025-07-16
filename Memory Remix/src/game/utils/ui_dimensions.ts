@@ -6,7 +6,7 @@ export const getTitleFontSize = (
     isMobile: boolean,
     baseFontSize: number
 ): number => {
-    return isMobile ? baseFontSize + 10 : baseFontSize + 35;
+    return isMobile ? baseFontSize + 12 : baseFontSize + 35;
 };
 
 export const getGameModeFontSize = (
@@ -40,9 +40,7 @@ export const getTimerFontSize = (
 /////TOP / Y position
 export function getTitleY(screenHeight: number, isMobile: boolean): number {
     const baseFontSize = getBaseFontSize(screenHeight);
-    return isMobile
-        ? baseFontSize * 1.5 // e.g. 2.5% * 1.5 = ~3.75%
-        : baseFontSize * 2; // e.g. 2.5% * 2 = ~5%
+    return isMobile ? baseFontSize + 2 : baseFontSize + 2;
 }
 export function getMatchedX(
     screenWidth: number,
@@ -55,11 +53,11 @@ export function getMatchedX(
         return isMobile ? baseFontSize * 3 : baseFontSize * 6;
     } else {
         return isMobile
-            ? screenWidth - baseFontSize * 3
-            : screenWidth - baseFontSize * 6;
+            ? screenWidth - (baseFontSize + baseFontSize * 2)
+            : screenWidth - (baseFontSize + baseFontSize * 5);
     }
 }
 export function getMatchedY(screenHeight: number, isMobile: boolean): number {
     const baseFontSize = getBaseFontSize(screenHeight);
-    return isMobile ? baseFontSize * 4.2 : baseFontSize * 4;
+    return isMobile ? baseFontSize * 4.2 : baseFontSize * 5;
 }

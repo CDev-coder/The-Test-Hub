@@ -1,6 +1,6 @@
 // src/managers/ScoreAttackManager.ts
 import { Scene } from "phaser";
-import { getBaseFontSize } from "../utils/ui_dimensions";
+import { getBaseFontSize, getTitleY } from "../utils/ui_dimensions";
 
 export class ScoreAttackManager {
     private scene: Scene;
@@ -33,22 +33,18 @@ export class ScoreAttackManager {
     }
 
     createScoreMode() {
+        const titleY = getTitleY(this.scene.scale.height, this.isMobile);
         this.scene.add
-            .text(
-                this.scene.scale.width / 2,
-                this.isMobile ? 15 : 30,
-                "Score Mode ",
-                {
-                    fontFamily: "Orbitron",
-                    fontSize: this.isMobile
-                        ? this.baseFontSize + 10
-                        : this.baseFontSize + 15,
-                    color: "#ffff00",
-                    stroke: "#000000",
-                    strokeThickness: 8,
-                    align: "center",
-                }
-            )
+            .text(this.scene.scale.width / 2, titleY, "Score Mode ", {
+                fontFamily: "Orbitron",
+                fontSize: this.isMobile
+                    ? this.baseFontSize + 10
+                    : this.baseFontSize + 15,
+                color: "#ffff00",
+                stroke: "#000000",
+                strokeThickness: 8,
+                align: "center",
+            })
             .setOrigin(0.5);
         if (this.playerCount == 1) {
             this.scoreText = this.scene.add

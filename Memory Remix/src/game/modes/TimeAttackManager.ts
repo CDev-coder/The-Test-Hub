@@ -1,6 +1,6 @@
 // src/managers/TimeAttackManager.ts
 import { Scene } from "phaser";
-import { getBaseFontSize } from "../utils/ui_dimensions";
+import { getBaseFontSize, getTitleY } from "../utils/ui_dimensions";
 
 export class TimeAttackManager {
     private scene: Scene;
@@ -51,27 +51,24 @@ export class TimeAttackManager {
     }
 
     createTimerText() {
+        const titleY = getTitleY(this.scene.scale.height, this.isMobile);
+        const timerY = titleY + this.baseFontSize * (this.isMobile ? 1.5 : 2);
         this.scene.add
-            .text(
-                this.scene.scale.width / 2,
-                this.isMobile ? 20 : 30,
-                "TIME ATTACK MODE",
-                {
-                    fontFamily: "Orbitron",
-                    fontSize: this.isMobile
-                        ? this.baseFontSize
-                        : this.baseFontSize + 15,
-                    color: "#ffff00",
-                    stroke: "#000000",
-                    strokeThickness: 8,
-                    align: "center",
-                }
-            )
+            .text(this.scene.scale.width / 2, titleY, "TIME ATTACK MODE", {
+                fontFamily: "Orbitron",
+                fontSize: this.isMobile
+                    ? this.baseFontSize
+                    : this.baseFontSize + 15,
+                color: "#ffff00",
+                stroke: "#000000",
+                strokeThickness: 8,
+                align: "center",
+            })
             .setOrigin(0.5);
         this.timerText = this.scene.add
             .text(
                 this.scene.scale.width / 2,
-                this.isMobile ? 50 : 70,
+                timerY,
                 `Time: ${this.formatTime(this.duration)}`,
                 {
                     fontFamily: "Orbitron",

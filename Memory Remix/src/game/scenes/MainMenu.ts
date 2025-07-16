@@ -51,7 +51,7 @@ export class MainMenu extends Scene {
         this.title = new TitleText(
             this,
             this.isMobile,
-            width / 2 - (this.isMobile ? 10 : 0),
+            width / 2 - (this.isMobile ? baseFontSize / 1.7 : 0),
             height / 6,
             "Memory Remix",
             {
