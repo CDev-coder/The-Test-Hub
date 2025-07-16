@@ -60,7 +60,7 @@ export class Preloader extends Scene {
         if (devSkipToGame) {
             this.time.delayedCall(500, () => {
                 this.scene.start("Game", {
-                    gameMode: "Quick",
+                    gameMode: "Time",
                     playerCount: 2,
                 });
             });

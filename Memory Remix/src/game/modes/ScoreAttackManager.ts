@@ -1,6 +1,6 @@
 // src/managers/ScoreAttackManager.ts
 import { Scene } from "phaser";
-import { getBaseFontSize, getTitleY } from "../utils/ui_dimensions";
+import { getBaseFontSize, getScoreX, getTitleY } from "../utils/ui_dimensions";
 
 export class ScoreAttackManager {
     private scene: Scene;
@@ -34,6 +34,7 @@ export class ScoreAttackManager {
 
     createScoreMode() {
         const titleY = getTitleY(this.scene.scale.height, this.isMobile);
+        const ScoreY = titleY + this.baseFontSize * (this.isMobile ? 1.5 : 2);
         this.scene.add
             .text(this.scene.scale.width / 2, titleY, "Score Mode ", {
                 fontFamily: "Orbitron",
@@ -50,7 +51,7 @@ export class ScoreAttackManager {
             this.scoreText = this.scene.add
                 .text(
                     this.scene.scale.width / 2,
-                    this.isMobile ? 48 : 66,
+                    ScoreY,
                     `Score: ${this.player1Score}`,
                     {
                         fontFamily: "Orbitron",
@@ -68,13 +69,18 @@ export class ScoreAttackManager {
         } else {
             this.player1ScoreText = this.scene.add
                 .text(
-                    this.isMobile ? 85 : 170,
-                    this.isMobile ? 50 : 100,
+                    getScoreX(
+                        this.scene.scale.width,
+                        this.scene.scale.height,
+                        this.isMobile,
+                        1
+                    ),
+                    ScoreY,
                     `P1 Score: ${this.player1Score}`,
                     {
                         fontFamily: "Share Tech Mono",
                         fontSize: this.isMobile
-                            ? this.baseFontSize
+                            ? this.baseFontSize - 1
                             : this.baseFontSize + 5,
                         color: "#ffffff",
                         stroke: "#000000",
@@ -86,15 +92,18 @@ export class ScoreAttackManager {
                 .setDepth(100);
             this.player2ScoreText = this.scene.add
                 .text(
-                    this.isMobile
-                        ? this.scene.scale.width - 85
-                        : this.scene.scale.width - 200,
-                    this.isMobile ? 50 : 100,
+                    getScoreX(
+                        this.scene.scale.width,
+                        this.scene.scale.height,
+                        this.isMobile,
+                        2
+                    ),
+                    ScoreY,
                     `P2 Score: 0`,
                     {
                         fontFamily: "Share Tech Mono",
                         fontSize: this.isMobile
-                            ? this.baseFontSize
+                            ? this.baseFontSize - 1
                             : this.baseFontSize + 5,
                         color: "#ffffff",
                         stroke: "#000000",

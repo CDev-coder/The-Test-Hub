@@ -1,6 +1,6 @@
 // src/managers/TimeAttackManager.ts
 import { Scene } from "phaser";
-import { getBaseFontSize, getTitleY } from "../utils/ui_dimensions";
+import { getBaseFontSize, getTimeX, getTitleY } from "../utils/ui_dimensions";
 
 export class TimeAttackManager {
     private scene: Scene;
@@ -88,8 +88,13 @@ export class TimeAttackManager {
             /////////PLAYER 1 TIME
             this.player1TimerText = this.scene.add
                 .text(
-                    this.isMobile ? 85 : 170,
-                    this.isMobile ? 100 : 100,
+                    getTimeX(
+                        this.scene.scale.width,
+                        this.scene.scale.height,
+                        this.isMobile,
+                        1
+                    ),
+                    timerY,
                     `P1 TIME: ${this.formatTime(0)}`,
                     {
                         fontFamily: "Share Tech Mono",
@@ -106,10 +111,13 @@ export class TimeAttackManager {
                 .setDepth(100);
             this.player2TimerText = this.scene.add
                 .text(
-                    this.isMobile
-                        ? this.scene.scale.width - 85
-                        : this.scene.scale.width - 200,
-                    this.isMobile ? 100 : 100,
+                    getTimeX(
+                        this.scene.scale.width,
+                        this.scene.scale.height,
+                        this.isMobile,
+                        2
+                    ),
+                    timerY,
                     `P2 TIME: ${this.formatTime(0)}`,
                     {
                         fontFamily: "Share Tech Mono",

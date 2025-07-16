@@ -37,11 +37,13 @@ export const getTimerFontSize = (
     return isMobile ? baseFontSize + 5 : baseFontSize + 15;
 };
 
-/////TOP / Y position
+/////POSITIONS
+
 export function getTitleY(screenHeight: number, isMobile: boolean): number {
     const baseFontSize = getBaseFontSize(screenHeight);
     return isMobile ? baseFontSize + 2 : baseFontSize + 2;
 }
+
 export function getMatchedX(
     screenWidth: number,
     screenHeight: number,
@@ -57,7 +59,47 @@ export function getMatchedX(
             : screenWidth - (baseFontSize + baseFontSize * 5);
     }
 }
+
 export function getMatchedY(screenHeight: number, isMobile: boolean): number {
     const baseFontSize = getBaseFontSize(screenHeight);
     return isMobile ? baseFontSize * 4.2 : baseFontSize * 5;
+}
+
+export function getScoreX(
+    screenWidth: number,
+    screenHeight: number,
+    isMobile: boolean,
+    player: 1 | 2
+): number {
+    const baseFontSize = getBaseFontSize(screenHeight);
+    if (player === 1) {
+        return isMobile ? baseFontSize * 3 : baseFontSize * 6;
+    } else {
+        return isMobile
+            ? screenWidth - (baseFontSize + baseFontSize * 2)
+            : screenWidth - (baseFontSize + baseFontSize * 5);
+    }
+}
+
+export function getTimeX(
+    screenWidth: number,
+    screenHeight: number,
+    isMobile: boolean,
+    player: 1 | 2
+): number {
+    const baseFontSize = getBaseFontSize(screenHeight);
+    if (player === 1) {
+        return isMobile ? baseFontSize * 3 : baseFontSize * 6.5;
+    } else {
+        return isMobile
+            ? screenWidth - (baseFontSize + baseFontSize * 2)
+            : screenWidth - (baseFontSize + baseFontSize * 5.5);
+    }
+}
+
+export function getScoreY(screenHeight: number, isMobile: boolean): number {
+    const baseFontSize = getBaseFontSize(screenHeight);
+    return isMobile
+        ? baseFontSize + baseFontSize * 3
+        : baseFontSize + baseFontSize * 4.5;
 }
