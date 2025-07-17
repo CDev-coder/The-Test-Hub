@@ -21,8 +21,8 @@ export class TimeAttackManager {
     public player2Time: string;
     public elapsedMs = 0; // live counter for the active player
     private pausedAt = 0;
-    player1Ms: number;
-    player2Ms: number;
+    public player1Ms: number;
+    public player2Ms: number;
 
     constructor(
         scene: Scene,
@@ -69,7 +69,7 @@ export class TimeAttackManager {
             .text(
                 this.scene.scale.width / 2,
                 timerY,
-                `Time: ${this.formatTime(this.duration)}`,
+                `${this.formatTime(this.duration)}`,
                 {
                     fontFamily: "Orbitron",
                     fontSize: this.isMobile
@@ -95,7 +95,7 @@ export class TimeAttackManager {
                         1
                     ),
                     timerY,
-                    `P1 TIME: ${this.formatTime(0)}`,
+                    `P1: ${this.formatTime(0)}`,
                     {
                         fontFamily: "Share Tech Mono",
                         fontSize: this.isMobile
@@ -118,7 +118,7 @@ export class TimeAttackManager {
                         2
                     ),
                     timerY,
-                    `P2 TIME: ${this.formatTime(0)}`,
+                    `P2: ${this.formatTime(0)}`,
                     {
                         fontFamily: "Share Tech Mono",
                         fontSize: this.isMobile
@@ -168,7 +168,7 @@ export class TimeAttackManager {
         this.elapsedMs = Math.min(elapsed, this.duration);
         this.lastTimerText = this.formatTime(this.elapsedMs);
 
-        this.timerText.setText(`Time: ${this.formatTime(remaining)}`);
+        this.timerText.setText(`${this.formatTime(remaining)}`);
 
         if (remaining <= this.duration / 3) {
             this.timerText.setColor("#ff0000");
@@ -205,7 +205,7 @@ export class TimeAttackManager {
     }
 
     switchPlayers(turn: number) {
-        this.player1TimerText?.setText(`P1 TIME: ${this.lastTimerText}`);
+        this.player1TimerText?.setText(`P1: ${this.lastTimerText}`);
         this.playerTurn = turn;
     }
 
@@ -219,11 +219,11 @@ export class TimeAttackManager {
 
     capturePlayerOneTime() {
         this.player1Ms = this.elapsedMs;
-        this.player1TimerText?.setText(`P1 TIME: ${this.lastTimerText}`);
+        this.player1TimerText?.setText(`P1: ${this.lastTimerText}`);
     }
     capturePlayerTwoTime() {
         this.player2Ms = this.elapsedMs;
-        this.player2TimerText?.setText(`P2 TIME: ${this.lastTimerText}`);
+        this.player2TimerText?.setText(`P2: ${this.lastTimerText}`);
     }
 
     getWinner(): "Player 1" | "Player 2" | "Draw" {
@@ -240,7 +240,7 @@ export class TimeAttackManager {
         this.active = false;
 
         if (this.timerText) {
-            this.timerText.setText(`Time: ${this.formatTime(this.duration)}`);
+            this.timerText.setText(`${this.formatTime(this.duration)}`);
             this.timerText.setColor("#ffffff");
             this.timerText.setScale(1);
         }

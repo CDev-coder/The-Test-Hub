@@ -1,5 +1,6 @@
 export const getBaseFontSize = (height: number): number => {
-    return height * 0.025; // 2.5% of screen height
+    const base = height * 0.025; // 2.5% of screen height
+    return base < 15 ? 15 : base;
 };
 
 export const getTitleFontSize = (

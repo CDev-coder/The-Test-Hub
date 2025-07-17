@@ -580,18 +580,30 @@ export class Game extends Scene {
         this.baseFontSize = getBaseFontSize(this.scale.height);
         this.deckManager.createCards();
         this.beginGame();
-        this.modal = new Modal(this, this.scale.width, this.scale.height);
+        this.modal = new Modal(
+            this,
+            this.isMobile,
+            this.scale.width,
+            this.scale.height
+        );
         this.setGameMode();
         this.setPlayerCountDisplay();
         ////////////Main Menu Button
         this.add
-            .text(this.scale.width / 2, this.scale.height - 25, "Main Menu", {
-                fontSize: this.isMobile ? "26px" : "38px",
-                fontFamily: "Share Tech Mono",
-                color: "#ffffff",
-                backgroundColor: "#333333",
-                padding: { x: 20, y: 10 },
-            })
+            .text(
+                this.scale.width / 2,
+                this.scale.height - (this.baseFontSize + 15),
+                "Main Menu",
+                {
+                    fontSize: this.isMobile
+                        ? this.baseFontSize + 5
+                        : this.baseFontSize + 10,
+                    fontFamily: "Share Tech Mono",
+                    color: "#ffffff",
+                    backgroundColor: "#333333",
+                    padding: { x: 20, y: 10 },
+                }
+            )
             .setOrigin(0.5)
             .setInteractive()
             .on("pointerup", () => {

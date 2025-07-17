@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import { getBaseFontSize } from "../utils/ui_dimensions";
 
 export class TitleText extends Phaser.GameObjects.Container {
     private originalText: string;
@@ -6,6 +7,7 @@ export class TitleText extends Phaser.GameObjects.Container {
     private originalStyle: Phaser.Types.GameObjects.Text.TextStyle;
     private glitchEvent?: Phaser.Time.TimerEvent;
     private isMobile: boolean;
+    public baseFontSize: number = 15;
     // private baseCharacterWidth?: number;
 
     constructor(
@@ -19,10 +21,12 @@ export class TitleText extends Phaser.GameObjects.Container {
         super(scene, x, y);
         this.originalText = text;
         this.isMobile = isMobile;
-
+        this.baseFontSize = getBaseFontSize(this.scene.scale.height);
         this.originalStyle = {
             fontFamily: "Orbitron",
-            fontSize: this.isMobile ? "32px" : "64px",
+            fontSize: this.isMobile
+                ? this.baseFontSize + 10
+                : this.baseFontSize + 30,
             color: "#ffffff",
             stroke: "#000000",
             strokeThickness: 8,
@@ -120,10 +124,15 @@ export class TitleText extends Phaser.GameObjects.Container {
                 Phaser.Math.Between(150, 255),
                 Phaser.Math.Between(150, 255)
             );
+
             const matchSize =
                 Phaser.Math.Between(
-                    this.isMobile ? 32 : 50,
-                    this.isMobile ? 50 : 70
+                    this.isMobile
+                        ? this.baseFontSize + 8
+                        : this.baseFontSize + 35,
+                    this.isMobile
+                        ? this.baseFontSize + 25
+                        : this.baseFontSize + 45
                 ) + "px";
 
             // Apply glitch to all characters
@@ -144,8 +153,12 @@ export class TitleText extends Phaser.GameObjects.Container {
                         ),
                         fontSize:
                             Phaser.Math.Between(
-                                this.isMobile ? 32 : 50,
-                                this.isMobile ? 50 : 78
+                                this.isMobile
+                                    ? this.baseFontSize + 10
+                                    : this.baseFontSize + 40,
+                                this.isMobile
+                                    ? this.baseFontSize + 20
+                                    : this.baseFontSize + 50
                             ) + "px",
                     });
                 }

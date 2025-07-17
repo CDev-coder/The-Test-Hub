@@ -45,7 +45,7 @@ export class MainMenu extends Scene {
         const bg = this.add.image(0, 0, "background").setOrigin(0, 0);
         bg.setDisplaySize(width, height);
 
-        this.modal = new Modal(this, width, height);
+        this.modal = new Modal(this, this.isMobile, width, height);
 
         // Title
         this.title = new TitleText(

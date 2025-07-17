@@ -1,15 +1,25 @@
 import Phaser from "phaser";
+import { getBaseFontSize } from "../utils/ui_dimensions";
 
 export class Modal {
-    scene: Phaser.Scene;
-    container: Phaser.GameObjects.Container;
-    modal_box: Phaser.GameObjects.Rectangle;
-    modal_text: Phaser.GameObjects.Text;
-    modal_nextButton: Phaser.GameObjects.Text;
-    modal_backButton: Phaser.GameObjects.Text;
+    private scene: Phaser.Scene;
+    private container: Phaser.GameObjects.Container;
+    private isMobile: boolean = false;
+    public modal_box: Phaser.GameObjects.Rectangle;
+    public modal_text: Phaser.GameObjects.Text;
+    public modal_nextButton: Phaser.GameObjects.Text;
+    public modal_backButton: Phaser.GameObjects.Text;
+    public baseFontSize: number = 15;
 
-    constructor(scene: Phaser.Scene, width: number, height: number) {
+    constructor(
+        scene: Phaser.Scene,
+        isMobile: boolean,
+        width: number,
+        height: number
+    ) {
         this.scene = scene;
+        this.isMobile = isMobile || this.scene.scale.width < 768;
+        this.baseFontSize = getBaseFontSize(this.scene.scale.height);
 
         // Background overlay (semi-transparent)
         const overlay = scene.add
@@ -30,11 +40,13 @@ export class Modal {
 
         // Rule Text
         this.modal_text = scene.add
-            .text(width / 2, height / 2 - 50, "", {
+            .text(width / 2, height / 2 - 60, "", {
                 fontFamily: "Share Tech Mono",
-                fontSize: "20px",
+                fontSize: this.isMobile
+                    ? this.baseFontSize
+                    : this.baseFontSize + 5,
                 color: "#000",
-                wordWrap: { width: popupWidth - 40 },
+                wordWrap: { width: popupWidth - this.baseFontSize },
                 align: "center",
             })
             .setOrigin(0.5);
@@ -43,7 +55,9 @@ export class Modal {
         this.modal_nextButton = scene.add
             .text(width / 2, height / 2 + 50, "Play", {
                 fontFamily: "Share Tech Mono",
-                fontSize: "24px",
+                fontSize: this.isMobile
+                    ? this.baseFontSize - 5
+                    : this.baseFontSize,
                 backgroundColor: "#4CAF50",
                 color: "#fff",
                 padding: { x: 20, y: 10 },
@@ -55,7 +69,9 @@ export class Modal {
         this.modal_backButton = scene.add
             .text(width / 2, height / 2, "Go back", {
                 fontFamily: "Share Tech Mono",
-                fontSize: "24px",
+                fontSize: this.isMobile
+                    ? this.baseFontSize - 5
+                    : this.baseFontSize,
                 backgroundColor: "#F44336",
                 color: "#fff",
                 padding: { x: 20, y: 10 },
@@ -93,17 +109,26 @@ export class Modal {
         // Calculate new size & positions
         const textBounds = this.modal_text.getBounds();
         const padding = 40;
-        const newPopupHeight = textBounds.height + 170;
+        const newPopupHeight = textBounds.height + padding * 2;
 
+        // Resize modal box
         this.modal_box.setSize(this.modal_box.width, newPopupHeight);
 
+        // Center modal box vertically
         const centerY = this.scene.scale.height / 2;
         this.modal_box.setY(centerY);
 
-        this.modal_text.setY(centerY - newPopupHeight / 2 + padding);
+        // Vertically center the text block inside the modal
+        this.modal_text.setY(
+            centerY - newPopupHeight / 2 + padding + textBounds.height / 2
+        );
 
-        this.modal_nextButton.setY(this.modal_text.y + textBounds.height + 20);
-        this.modal_backButton.setY(this.modal_nextButton.y + 50);
+        // Then space buttons below it
+        const spacing = this.baseFontSize * 2;
+        this.modal_nextButton.setY(
+            this.modal_text.y + textBounds.height / 2 + spacing
+        );
+        this.modal_backButton.setY(this.modal_nextButton.y + spacing);
 
         // Clear old listeners before adding new one for play button
         this.modal_nextButton.removeAllListeners();
@@ -128,7 +153,7 @@ export class Modal {
         // Calculate new size & positions
         const textBounds = this.modal_text.getBounds();
         const padding = 40;
-        const newPopupHeight = textBounds.height + 170;
+        const newPopupHeight = textBounds.height + padding * 2;
 
         this.modal_box.setSize(this.modal_box.width, newPopupHeight);
 
@@ -137,8 +162,10 @@ export class Modal {
 
         this.modal_text.setY(centerY - newPopupHeight / 2 + padding);
 
-        this.modal_nextButton.setY(this.modal_text.y + textBounds.height + 20);
-        this.modal_backButton.setY(this.modal_nextButton.y + 50);
+        this.modal_nextButton.setY(
+            this.modal_text.y + textBounds.height + padding / 2
+        );
+        this.modal_backButton.setY(this.modal_nextButton.y + padding);
 
         this.modal_nextButton.removeAllListeners();
         this.modal_nextButton.setInteractive().on("pointerup", () => {
