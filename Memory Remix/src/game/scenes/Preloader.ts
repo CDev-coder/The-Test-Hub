@@ -1,7 +1,7 @@
 import { Scene } from "phaser";
 
 export class Preloader extends Scene {
-    debugMode: boolean = true;
+    debugMode: boolean = false;
     constructor() {
         super("Preloader");
     }
