@@ -1,4 +1,5 @@
 import SideNav from "@/app/ui/dashboard/sidenav";
+export const experimental_ppr = true;
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   /// layout.tsx always sets up the page if detected. layout.tsx is like a wrapper so it prepares to hold whatever content in the page.tsx
